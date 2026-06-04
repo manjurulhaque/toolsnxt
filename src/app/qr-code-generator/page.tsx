@@ -112,7 +112,7 @@ export default function QrCodeGeneratorPage() {
       <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
+            Web Tools
           </Link>
           <Link
             href="/"
@@ -557,7 +557,7 @@ function applyFormatInfo(modules: Array<Array<boolean | null>>, reserved: boolea
 }
 
 function getFormatBits(mask: number) {
-  let data = (0b01 << 3) | mask
+  const data = (0b01 << 3) | mask
   let bits = data << 10
 
   for (let index = 14; index >= 10; index -= 1) {

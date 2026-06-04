@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { SegmentedControl, TextAreaField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
 
 type CaseMode =
   | "sentence"
@@ -35,7 +37,7 @@ export default function CaseConverterPage() {
 
   const outputText = useMemo(() => convertCase(inputText, mode), [inputText, mode])
   const wordCount = useMemo(() => getWords(inputText).length, [inputText])
-  const characterCount = inputText.length
+  const inputStats = useMemo(() => getTextStats(inputText), [inputText])
 
   async function copyOutput() {
     if (!outputText) {
@@ -44,7 +46,7 @@ export default function CaseConverterPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(outputText)
+      await copyToClipboard(outputText)
       setMessage("Converted text copied.")
     } catch {
       setMessage("Copy failed. Select the result and copy it manually.")
@@ -62,137 +64,73 @@ export default function CaseConverterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Text tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Case Converter</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Text tool" title="Case Converter">
             Paste text once, then reshape it for headings, code identifiers, filenames, constants,
             and quick formatting cleanup.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="case-input" className="mt-6 block text-sm font-medium">
-            Input text
-          </label>
-          <textarea
+        <div className="mt-6">
+          <TextAreaField
             id="case-input"
+            label="Input text"
             value={inputText}
-            onChange={(event) => {
-              setInputText(event.target.value)
+            onChange={(value) => {
+              setInputText(value)
               setMessage("Text updated.")
             }}
             rows={9}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
+            mono={false}
             placeholder="Type or paste text here..."
           />
+        </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={characterCount} />
-            <Stat label="Words" value={wordCount} />
-            <Stat label="Lines" value={inputText ? inputText.split(/\r\n|\r|\n/).length : 0} />
+            <SummaryTile label="Characters" value={inputStats.characters} />
+            <SummaryTile label="Words" value={wordCount} />
+            <SummaryTile label="Lines" value={inputStats.lines} />
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearText}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearText} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Conversion
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Output</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {caseModes.find((caseMode) => caseMode.key === mode)?.label}
-            </p>
+      <ToolPanel>
+          <PanelHeader eyebrow="Conversion" title="Output" badge={caseModes.find((caseMode) => caseMode.key === mode)?.label} />
+
+          <div className="mt-6">
+            <SegmentedControl value={mode} options={caseModes} onChange={setMode} columns="grid-cols-2 sm:grid-cols-3" />
           </div>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {caseModes.map((caseMode) => (
-              <button
-                key={caseMode.key}
-                type="button"
-                onClick={() => setMode(caseMode.key)}
-                className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                  mode === caseMode.key
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {caseMode.label}
-              </button>
-            ))}
+          <div className="mt-6">
+            <TextAreaField
+              id="case-output"
+              label="Converted text"
+              value={outputText}
+              readOnly
+              rows={9}
+              mono={false}
+              placeholder="Converted text will appear here..."
+            />
           </div>
-
-          <label htmlFor="case-output" className="mt-6 block text-sm font-medium">
-            Converted text
-          </label>
-          <textarea
-            id="case-output"
-            value={outputText}
-            readOnly
-            rows={9}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none"
-            placeholder="Converted text will appear here..."
-          />
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="leading-normal">
               {message}
-            </div>
-            <button
-              type="button"
-              onClick={copyOutput}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </InfoBox>
+            <ActionButton onClick={copyOutput}>
               Copy Result
-            </button>
+            </ActionButton>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 

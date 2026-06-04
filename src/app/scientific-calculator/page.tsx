@@ -101,7 +101,7 @@ export default function ScientificCalculatorPage() {
     }
   }
 
-  function useResult(value: string) {
+  function loadResult(value: string) {
     setExpression(value)
     setMessage("Result loaded.")
   }
@@ -148,7 +148,7 @@ export default function ScientificCalculatorPage() {
       <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
         <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
+            Web Tools
           </Link>
           <Link
             href="/"
@@ -292,7 +292,7 @@ export default function ScientificCalculatorPage() {
                   <button
                     key={`${item.expression}-${index}`}
                     type="button"
-                    onClick={() => useResult(item.result)}
+                    onClick={() => loadResult(item.result)}
                     className="w-full rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 text-left transition hover:bg-white"
                   >
                     <p className="truncate font-mono text-xs text-[var(--ink-700)]">{item.expression}</p>

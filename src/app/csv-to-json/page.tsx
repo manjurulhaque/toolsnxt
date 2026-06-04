@@ -1,7 +1,18 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { SegmentedControl, TextAreaField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  SummaryTile,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
 
 type OutputMode = "array" | "objects" | "min"
 
@@ -36,7 +47,7 @@ export default function CsvToJsonPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(result.output)
+      await copyToClipboard(result.output)
       setMessage("JSON copied.")
     } catch {
       setMessage("Copy failed. Select the JSON and copy it manually.")
@@ -49,13 +60,7 @@ export default function CsvToJsonPage() {
       return
     }
 
-    const blob = new Blob([result.output], { type: "application/json;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "data.json"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(result.output, "data.json", "application/json;charset=utf-8")
     setMessage("data.json downloaded.")
   }
 
@@ -73,171 +78,88 @@ export default function CsvToJsonPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Developer tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">CSV to JSON</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage columns="equal">
+      <ToolPanel>
+        <ToolIntro eyebrow="Developer tool" title="CSV to JSON">
             Convert pasted CSV into clean JSON objects or row arrays, with quoted fields and escaped
             quotes handled in the browser.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="csv-input" className="mt-6 block text-sm font-medium">
-            CSV input
-          </label>
-          <textarea
+          <div className="mt-6">
+            <TextAreaField
             id="csv-input"
+            label="CSV input"
             value={csvText}
-            onChange={(event) => {
-              setCsvText(event.target.value)
+            onChange={(value) => {
+              setCsvText(value)
               setMessage("CSV updated.")
             }}
             rows={16}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
             placeholder="name,email&#10;Ada,ada@example.com"
           />
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Rows" value={result.stats.rows} />
-            <Stat label="Columns" value={result.stats.columns} />
-            <Stat label="Cells" value={result.stats.cells} />
+            <SummaryTile label="Rows" value={result.stats.rows} />
+            <SummaryTile label="Columns" value={result.stats.columns} />
+            <SummaryTile label="Cells" value={result.stats.cells} />
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Conversion
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">JSON Output</h2>
-            </div>
-            <p
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
-                result.error ? "bg-red-50 text-red-700" : "bg-[var(--page-cream)] text-[var(--ink-700)]"
-              }`}
-            >
-              {result.error ? "Check CSV" : `${result.stats.records} records`}
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader
+            eyebrow="Conversion"
+            title="JSON Output"
+            badge={result.error ? "Check CSV" : `${result.stats.records} records`}
+          />
 
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            {outputModes.map((mode) => (
-              <button
-                key={mode.key}
-                type="button"
-                onClick={() => setOutputMode(mode.key)}
-                className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                  outputMode === mode.key
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {mode.label}
-              </button>
-            ))}
+          <div className="mt-6">
+            <SegmentedControl
+              value={outputMode}
+              options={outputModes}
+              onChange={setOutputMode}
+              columns="grid-cols-3"
+            />
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-              <input
-                type="checkbox"
-                checked={hasHeaders}
-                onChange={(event) => setHasHeaders(event.target.checked)}
-                className="h-4 w-4 accent-[var(--ink-900)]"
-              />
-              First row is header
-            </label>
-            <label className="flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-              <input
-                type="checkbox"
-                checked={trimValues}
-                onChange={(event) => setTrimValues(event.target.checked)}
-                className="h-4 w-4 accent-[var(--ink-900)]"
-              />
-              Trim values
-            </label>
+            <CheckboxOption label="First row is header" checked={hasHeaders} onChange={setHasHeaders} />
+            <CheckboxOption label="Trim values" checked={trimValues} onChange={setTrimValues} />
           </div>
 
-          <label htmlFor="json-output" className="mt-6 block text-sm font-medium">
-            Result
-          </label>
-          <textarea
+          <div className="mt-6">
+            <TextAreaField
             id="json-output"
+            label="Result"
             value={result.output}
             readOnly
             rows={14}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none"
             placeholder="Converted JSON will appear here..."
           />
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="leading-normal">
               {result.error ?? message}
-            </div>
-            <button
-              type="button"
-              onClick={copyJson}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </InfoBox>
+            <ActionButton onClick={copyJson} variant="secondary">
               Copy JSON
-            </button>
-            <button
-              type="button"
-              onClick={downloadJson}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={downloadJson}>
               Download
-            </button>
+            </ActionButton>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 

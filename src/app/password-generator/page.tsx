@@ -1,7 +1,16 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { NumberField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
 
 type Mode = "password" | "passphrase"
 
@@ -92,31 +101,12 @@ export default function PasswordGeneratorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Security tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Password Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Security tool" title="Password Generator">
             Create strong passwords or memorable passphrases locally. Nothing is uploaded or stored
             outside this page.
-          </p>
+        </ToolIntro>
 
           <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-1">
             {(["password", "passphrase"] as Mode[]).map((nextMode) => (
@@ -154,16 +144,23 @@ export default function PasswordGeneratorPage() {
               />
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <Option label="Lowercase" checked={useLowercase} onChange={setUseLowercase} />
-                <Option label="Uppercase" checked={useUppercase} onChange={setUseUppercase} />
-                <Option label="Numbers" checked={useNumbers} onChange={setUseNumbers} />
-                <Option label="Symbols" checked={useSymbols} onChange={setUseSymbols} />
-                <Option label="Avoid ambiguous" checked={avoidAmbiguous} onChange={setAvoidAmbiguous} />
+                <CheckboxOption label="Lowercase" checked={useLowercase} onChange={setUseLowercase} />
+                <CheckboxOption label="Uppercase" checked={useUppercase} onChange={setUseUppercase} />
+                <CheckboxOption label="Numbers" checked={useNumbers} onChange={setUseNumbers} />
+                <CheckboxOption label="Symbols" checked={useSymbols} onChange={setUseSymbols} />
+                <CheckboxOption label="Avoid ambiguous" checked={avoidAmbiguous} onChange={setAvoidAmbiguous} />
               </div>
             </>
           ) : (
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <NumberField id="word-count" label="Words" value={wordCount} onChange={setWordCount} />
+              <NumberField
+                id="word-count"
+                label="Words"
+                min="3"
+                max="10"
+                value={wordCount}
+                onChange={setWordCount}
+              />
               <label htmlFor="separator" className="block">
                 <span className="text-sm font-medium">Separator</span>
                 <input
@@ -177,32 +174,18 @@ export default function PasswordGeneratorPage() {
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={generateNext}
-            className="mt-6 w-full rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-          >
+          <ActionButton onClick={generateNext} className="mt-6 w-full">
             Generate
-          </button>
+          </ActionButton>
 
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-6 leading-normal">
             {message}
-          </div>
-        </div>
+          </InfoBox>
+      </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Output
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Generated Value</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {strength.label}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Output" title="Generated Value" badge={strength.label} />
 
             <div className="mt-6 rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
               <p className="break-all font-mono text-3xl font-semibold leading-tight text-[var(--ink-900)]">
@@ -215,32 +198,17 @@ export default function PasswordGeneratorPage() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => copyValue()}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-              >
+              <ActionButton onClick={() => copyValue()} variant="secondary">
                 Copy
-              </button>
-              <button
-                type="button"
-                onClick={generateNext}
-                className="rounded-full bg-[var(--accent-gold)] px-5 py-3 text-sm font-semibold text-[var(--ink-900)] transition hover:bg-[var(--accent-sand)]"
-              >
+              </ActionButton>
+              <ActionButton onClick={generateNext} variant="accent">
                 Regenerate
-              </button>
+              </ActionButton>
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Recent
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Session History</h2>
-              </div>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Recent" title="Session History" />
 
             {history.length === 0 ? (
               <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
@@ -261,66 +229,12 @@ export default function PasswordGeneratorPage() {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={clearHistory}
-              className="mt-5 rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearHistory} variant="secondary" className="mt-5">
               Clear History
-            </button>
-          </section>
+            </ActionButton>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
-  )
-}
-
-function Option({
-  label,
-  checked,
-  onChange,
-}: {
-  label: string
-  checked: boolean
-  onChange: (checked: boolean) => void
-}) {
-  return (
-    <label className="flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="h-4 w-4 accent-[var(--accent-rust)]"
-      />
-      {label}
-    </label>
-  )
-}
-
-function NumberField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        type="number"
-        min="3"
-        max="10"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-      />
-    </label>
+    </ToolPage>
   )
 }
 
