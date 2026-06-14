@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ChangeEvent, ReactNode } from "react"
 
 type NumberFieldProps = {
   id: string
@@ -9,6 +9,40 @@ type NumberFieldProps = {
   max?: string
   prefix?: ReactNode
   suffix?: ReactNode
+}
+
+type TextFieldProps = {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
+  mono?: boolean
+}
+
+export function TextField({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  mono = false,
+}: TextFieldProps) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="text-sm font-medium">{label}</span>
+      <input
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        spellCheck={!mono}
+        className={`mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)] ${
+          mono ? "font-mono" : ""
+        }`}
+      />
+    </label>
+  )
 }
 
 export function NumberField({
@@ -141,6 +175,57 @@ export function SegmentedControl<T extends string>({
         ))}
       </div>
     </div>
+  )
+}
+
+type FilePickerProps = {
+  label: string
+  description: string
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+  accept?: string
+}
+
+export function FilePicker({ label, description, onChange, accept }: FilePickerProps) {
+  return (
+    <label className="flex cursor-pointer flex-col items-center justify-center rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-4 py-5 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
+      <span className="text-sm font-semibold">{label}</span>
+      <span className="mt-1 text-xs text-[var(--ink-700)]/75">{description}</span>
+      <input type="file" accept={accept} className="sr-only" onChange={onChange} />
+    </label>
+  )
+}
+
+type SelectFieldProps<T extends string> = {
+  id: string
+  label: string
+  value: T
+  options: Array<{ value: T; label: string }>
+  onChange: (value: T) => void
+}
+
+export function SelectField<T extends string>({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: SelectFieldProps<T>) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="text-sm font-medium">{label}</span>
+      <select
+        id={id}
+        value={value}
+        onChange={(event) => onChange(event.target.value as T)}
+        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm font-semibold outline-none transition focus:border-[var(--accent-rust)]"
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 

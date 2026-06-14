@@ -111,9 +111,16 @@ type ActionButtonProps = {
   onClick?: () => void
   variant?: "primary" | "secondary" | "accent"
   className?: string
+  disabled?: boolean
 }
 
-export function ActionButton({ children, onClick, variant = "primary", className = "" }: ActionButtonProps) {
+export function ActionButton({
+  children,
+  onClick,
+  variant = "primary",
+  className = "",
+  disabled = false,
+}: ActionButtonProps) {
   const classes = {
     primary: "bg-[var(--ink-900)] text-white hover:bg-[var(--ink-800)]",
     secondary:
@@ -125,7 +132,8 @@ export function ActionButton({ children, onClick, variant = "primary", className
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full px-5 py-3 text-sm font-semibold transition ${classes[variant]} ${className}`}
+      disabled={disabled}
+      className={`rounded-full px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${classes[variant]} ${className}`}
     >
       {children}
     </button>

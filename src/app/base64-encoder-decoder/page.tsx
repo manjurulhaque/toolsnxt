@@ -1,12 +1,24 @@
 "use client"
 
-import Link from "next/link"
 import { ChangeEvent, useMemo, useState } from "react"
+import { FilePicker, SegmentedControl, TextAreaField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, downloadBlob, getTextStats } from "@/lib/browser-actions"
 
 type Mode = "encode" | "decode"
 type OutputMode = "plain" | "data-url"
 
 const sampleText = "Fast browser utilities"
+
+const modeOptions: Array<{ key: Mode; label: string }> = [
+  { key: "encode", label: "Encode" },
+  { key: "decode", label: "Decode" },
+]
+
+const outputOptions: Array<{ key: OutputMode; label: string }> = [
+  { key: "plain", label: "Plain" },
+  { key: "data-url", label: "Data URL" },
+]
 
 export default function Base64EncoderDecoderPage() {
   const [mode, setMode] = useState<Mode>("encode")
@@ -61,7 +73,7 @@ export default function Base64EncoderDecoderPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(result.output)
+      await copyToClipboard(result.output)
       setMessage("Result copied.")
     } catch {
       setMessage("Copy failed. Select the result and copy it manually.")
@@ -107,188 +119,115 @@ export default function Base64EncoderDecoderPage() {
     }
 
     const blob = new Blob([decoded], { type: fileType || "application/octet-stream" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = fileName ? `decoded-${fileName}` : "decoded-file"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadBlob(blob, fileName ? `decoded-${fileName}` : "decoded-file")
     setMessage("Decoded file downloaded.")
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Developer tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Base64 Encoder / Decoder</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Developer tool" title="Base64 Encoder / Decoder">
             Encode text, decode Base64, or turn a file into a Base64 string in your browser.
-          </p>
+        </ToolIntro>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-2">
-            {(["encode", "decode"] as Mode[]).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => {
-                  setMode(option)
-                  setOutputMode("plain")
-                  setMessage(`${option === "encode" ? "Encode" : "Decode"} mode selected.`)
-                }}
-                className={`rounded-full px-4 py-2 text-sm font-semibold capitalize transition ${
-                  mode === option
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "bg-white text-[var(--ink-800)] hover:bg-white/70"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+          <div className="mt-6">
+            <SegmentedControl
+              value={mode}
+              options={modeOptions}
+              onChange={(nextMode) => {
+                setMode(nextMode)
+                setOutputMode("plain")
+                setMessage(`${nextMode === "encode" ? "Encode" : "Decode"} mode selected.`)
+              }}
+            />
           </div>
 
-          <label htmlFor="base64-input" className="mt-6 block text-sm font-medium">
-            Input
-          </label>
-          <textarea
-            id="base64-input"
-            value={inputText}
-            onChange={(event) => handleTextChange(event.target.value)}
-            rows={12}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder={mode === "encode" ? "Paste text to encode..." : "Paste Base64 to decode..."}
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="base64-input"
+              label="Input"
+              value={inputText}
+              onChange={handleTextChange}
+              rows={12}
+              placeholder={mode === "encode" ? "Paste text to encode..." : "Paste Base64 to decode..."}
+            />
+          </div>
 
-          <label className="mt-4 flex cursor-pointer flex-col items-center justify-center rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-4 py-5 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose file</span>
-            <span className="mt-1 text-xs text-[var(--ink-700)]/75">
-              Convert file bytes into Base64 text
-            </span>
-            <input type="file" className="sr-only" onChange={handleFile} />
-          </label>
+          <div className="mt-4">
+            <FilePicker
+              label="Choose file"
+              description="Convert file bytes into Base64 text"
+              onChange={handleFile}
+            />
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={inputStats.characters} />
-            <Stat label="Lines" value={inputStats.lines} />
-            <Stat label="Bytes" value={inputStats.bytes} />
+            <SummaryTile label="Characters" value={inputStats.characters} />
+            <SummaryTile label="Lines" value={inputStats.lines} />
+            <SummaryTile label="Bytes" value={inputStats.bytes} />
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Transform
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Output</h2>
-            </div>
-            <p
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
-                result.error ? "bg-red-50 text-red-700" : "bg-[var(--page-cream)] text-[var(--ink-700)]"
-              }`}
-            >
-              {result.error ? "Check input" : `${outputStats.characters} chars`}
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader
+            eyebrow="Transform"
+            title="Output"
+            badge={result.error ? "Check input" : `${outputStats.characters} chars`}
+          />
 
           {mode === "encode" ? (
-            <div className="mt-6 grid grid-cols-2 gap-2 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-2">
-              {(["plain", "data-url"] as OutputMode[]).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => {
-                    setOutputMode(option)
-                    setMessage(`${option === "plain" ? "Plain Base64" : "Data URL"} output selected.`)
-                  }}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    outputMode === option
-                      ? "bg-[var(--ink-900)] text-white"
-                      : "bg-white text-[var(--ink-800)] hover:bg-white/70"
-                  }`}
-                >
-                  {option === "plain" ? "Plain" : "Data URL"}
-                </button>
-              ))}
+            <div className="mt-6">
+              <SegmentedControl
+                value={outputMode}
+                options={outputOptions}
+                onChange={(nextMode) => {
+                  setOutputMode(nextMode)
+                  setMessage(`${nextMode === "plain" ? "Plain Base64" : "Data URL"} output selected.`)
+                }}
+              />
             </div>
           ) : null}
 
-          <label htmlFor="base64-output" className="mt-6 block text-sm font-medium">
-            Result
-          </label>
-          <textarea
-            id="base64-output"
-            value={result.output}
-            readOnly
-            rows={12}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none"
-            placeholder="Transformed text will appear here..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="base64-output"
+              label="Result"
+              value={result.output}
+              readOnly
+              rows={12}
+              placeholder="Transformed text will appear here..."
+            />
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={copyOutput}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            <ActionButton onClick={copyOutput}>
               Copy Result
-            </button>
-            <button
-              type="button"
-              onClick={swapResultToInput}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={swapResultToInput} variant="secondary">
               Swap
-            </button>
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
 
-          <button
-            type="button"
+          <ActionButton
             onClick={downloadDecodedFile}
+            variant="secondary"
             disabled={mode !== "decode" || !inputText.trim()}
-            className="mt-3 w-full rounded-full border border-[var(--accent-rust)]/25 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent-rust)] transition hover:border-[var(--accent-rust)]/45 disabled:cursor-not-allowed disabled:opacity-45"
+            className="mt-3 w-full border-[var(--accent-rust)]/25 text-[var(--accent-rust)] hover:border-[var(--accent-rust)]/45"
           >
             Download Decoded Bytes
-          </button>
+          </ActionButton>
 
-          <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-5 leading-normal">
             {result.error ?? message}
-          </div>
-        </div>
-      </section>
-    </main>
+          </InfoBox>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -371,23 +310,4 @@ function fileToBase64(file: File) {
     reader.onerror = () => reject(reader.error ?? new Error("File reading failed"))
     reader.readAsDataURL(file)
   })
-}
-
-function getTextStats(value: string) {
-  const trimmedValue = value.trim()
-
-  return {
-    characters: value.length,
-    lines: trimmedValue ? value.split(/\r\n|\r|\n/).length : 0,
-    bytes: new Blob([value]).size,
-  }
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
-  )
 }

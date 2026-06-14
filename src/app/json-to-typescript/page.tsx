@@ -1,9 +1,24 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { SelectField, TextAreaField, TextField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 type TypeMode = "interface" | "type"
+
+const typeModeOptions: Array<{ value: TypeMode; label: string }> = [
+  { value: "interface", label: "interface" },
+  { value: "type", label: "type" },
+]
 
 const sampleJson = `{
   "id": "tool_123",
@@ -42,7 +57,7 @@ export default function JsonToTypeScriptPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(result.output)
+      await copyToClipboard(result.output)
       setMessage("TypeScript copied.")
     } catch {
       setMessage("Copy failed. Select the output and copy it manually.")
@@ -63,150 +78,98 @@ export default function JsonToTypeScriptPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Developer tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">JSON to TypeScript</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage columns="equal">
+      <ToolPanel>
+        <ToolIntro eyebrow="Developer tool" title="JSON to TypeScript">
             Infer TypeScript interfaces or type aliases from JSON, including nested objects, arrays,
             nullable values, and safe property names.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="json-types-input" className="mt-6 block text-sm font-medium">
-            JSON input
-          </label>
-          <textarea
-            id="json-types-input"
-            value={jsonText}
-            onChange={(event) => {
-              setJsonText(event.target.value)
-              setMessage("JSON updated.")
-            }}
-            rows={16}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder='{ "id": 1, "name": "Ada" }'
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="json-types-input"
+              label="JSON input"
+              value={jsonText}
+              onChange={(value) => {
+                setJsonText(value)
+                setMessage("JSON updated.")
+              }}
+              rows={16}
+              placeholder='{ "id": 1, "name": "Ada" }'
+            />
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Types
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">TypeScript Output</h2>
-            </div>
-            <p
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
-                result.error ? "bg-red-50 text-red-700" : "bg-[var(--page-cream)] text-[var(--ink-700)]"
-              }`}
-            >
-              {result.error ? "Invalid JSON" : `${result.typeCount} types`}
-            </p>
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <label htmlFor="root-name" className="block">
-              <span className="text-sm font-medium">Root type name</span>
-              <input
-                id="root-name"
-                value={rootName}
-                onChange={(event) => {
-                  setRootName(event.target.value)
-                  setMessage("Root type name updated.")
-                }}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-              />
-            </label>
-            <label htmlFor="type-mode" className="block">
-              <span className="text-sm font-medium">Declaration</span>
-              <select
-                id="type-mode"
-                value={typeMode}
-                onChange={(event) => {
-                  setTypeMode(event.target.value as TypeMode)
-                  setMessage("Declaration style updated.")
-                }}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-              >
-                <option value="interface">interface</option>
-                <option value="type">type</option>
-              </select>
-            </label>
-          </div>
-
-          <label className="mt-4 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-            <input
-              type="checkbox"
-              checked={readonlyFields}
-              onChange={(event) => {
-                setReadonlyFields(event.target.checked)
-                setMessage("Readonly setting updated.")
-              }}
-              className="h-4 w-4 accent-[var(--ink-900)]"
-            />
-            Use readonly properties
-          </label>
-
-          <textarea
-            value={result.output}
-            readOnly
-            rows={17}
-            spellCheck={false}
-            className="mt-6 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none"
-            placeholder="Generated TypeScript will appear here..."
+      <ToolPanel>
+          <PanelHeader
+            eyebrow="Types"
+            title="TypeScript Output"
+            badge={result.error ? "Invalid JSON" : `${result.typeCount} types`}
           />
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
-              {result.error ?? message}
-            </div>
-            <button
-              type="button"
-              onClick={copyTypes}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
-              Copy Types
-            </button>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            <TextField
+              id="root-name"
+              label="Root type name"
+              value={rootName}
+              onChange={(value) => {
+                setRootName(value)
+                setMessage("Root type name updated.")
+              }}
+            />
+            <SelectField
+              id="type-mode"
+              label="Declaration"
+              value={typeMode}
+              options={typeModeOptions}
+              onChange={(value) => {
+                setTypeMode(value)
+                setMessage("Declaration style updated.")
+              }}
+            />
           </div>
-        </div>
-      </section>
-    </main>
+
+          <div className="mt-4">
+            <CheckboxOption
+              label="Use readonly properties"
+              checked={readonlyFields}
+              onChange={(checked) => {
+                setReadonlyFields(checked)
+                setMessage("Readonly setting updated.")
+              }}
+            />
+          </div>
+
+          <div className="mt-6">
+            <TextAreaField
+              id="typescript-output"
+              label="Generated TypeScript"
+              value={result.output}
+              readOnly
+              rows={17}
+              placeholder="Generated TypeScript will appear here..."
+            />
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
+            <InfoBox className="leading-normal">
+              {result.error ?? message}
+            </InfoBox>
+            <ActionButton onClick={copyTypes}>
+              Copy Types
+            </ActionButton>
+          </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
