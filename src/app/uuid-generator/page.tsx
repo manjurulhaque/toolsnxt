@@ -11,6 +11,7 @@ import {
   ToolPage,
   ToolPanel,
 } from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
 
 const defaultCount = "10"
 
@@ -56,7 +57,7 @@ export default function UuidGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(uuids.join("\n"))
+      await copyToClipboard(uuids.join("\n"))
       setMessage("UUIDs copied.")
     } catch {
       setMessage("Copy failed. Select the UUIDs and copy them manually.")
@@ -69,13 +70,7 @@ export default function UuidGeneratorPage() {
       return
     }
 
-    const blob = new Blob([uuids.join("\n")], { type: "text/plain;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "uuids.txt"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(uuids.join("\n"), "uuids.txt")
     setMessage("uuids.txt downloaded.")
   }
 

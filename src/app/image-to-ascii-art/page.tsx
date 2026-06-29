@@ -1,7 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { ChangeEvent, useMemo, useState } from "react"
+import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
 
 type Tone = "standard" | "dense" | "blocks"
 
@@ -91,7 +92,7 @@ export default function ImageToAsciiArtPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(asciiArt)
+      await copyToClipboard(asciiArt)
       setMessage("ASCII art copied.")
     } catch {
       setMessage("Copy failed. Select the art and copy it manually.")
@@ -104,13 +105,7 @@ export default function ImageToAsciiArtPage() {
       return
     }
 
-    const blob = new Blob([asciiArt], { type: "text/plain;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "ascii-art.txt"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(asciiArt, "ascii-art.txt")
     setMessage("ASCII art downloaded.")
   }
 
@@ -125,31 +120,12 @@ export default function ImageToAsciiArtPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Image tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Image to ASCII Art</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="Image tool" title="Image to ASCII Art">
             Convert an image into copyable text art in your browser. Tune width, contrast, tone
             density, and inversion for cleaner output.
-          </p>
+          </ToolIntro>
 
           <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
             <span className="text-sm font-semibold">Choose image</span>
@@ -233,24 +209,14 @@ export default function ImageToAsciiArtPage() {
             </button>
           </div>
 
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-6">
             {message}
-          </div>
-        </div>
+          </InfoBox>
+        </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Preview
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Source Image</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {image ? image.name : "No file"}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Preview" title="Source Image" badge={image ? image.name : "No file"} />
 
             <div className="mt-6 flex min-h-[260px] items-center justify-center overflow-hidden rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
               {image ? (
@@ -262,20 +228,10 @@ export default function ImageToAsciiArtPage() {
                 </p>
               )}
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Output
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">ASCII Art</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {stats.lines} lines / {stats.characters} chars
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Output" title="ASCII Art" badge={`${stats.lines} lines / ${stats.characters} chars`} />
 
             <textarea
               value={asciiArt}
@@ -302,10 +258,9 @@ export default function ImageToAsciiArtPage() {
                 Download TXT
               </button>
             </div>
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
+    </ToolPage>
   )
 }
 

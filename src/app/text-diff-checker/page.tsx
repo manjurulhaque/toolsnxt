@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react"
 import { TextAreaField } from "@/components/form-controls"
-import { SiteHeader } from "@/components/site-header"
 import {
   ActionButton,
   CheckboxOption,
@@ -79,8 +78,7 @@ export default function TextDiffCheckerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <SiteHeader compact />
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
 
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
         <ToolPanel>

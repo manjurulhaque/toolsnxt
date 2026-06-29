@@ -1,7 +1,8 @@
 "use client"
 
-import Link from "next/link"
+import { NumberField } from "@/components/form-controls"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { ToolIntro, ToolPage, SummaryTile, ToolPanel } from "@/components/tool-page"
 
 type Phase = "work" | "rest"
 
@@ -149,31 +150,12 @@ export default function IntervalTimerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Time tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Interval Timer</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage gridClassName="lg:grid-cols-[0.95fr_1.05fr]">
+        <ToolPanel>
+          <ToolIntro eyebrow="Time tool" title="Interval Timer">
             Alternate work and rest intervals for training sessions, mobility routines, rehearsals,
             or repeated focus blocks.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {presets.map((preset) => (
@@ -222,13 +204,13 @@ export default function IntervalTimerPage() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Stat label="Work" value={formatTime(workSeconds)} />
-            <Stat label="Rest" value={formatTime(restSeconds)} />
-            <Stat label="Rounds" value={totalRounds} />
+            <SummaryTile label="Work" value={formatTime(workSeconds)} />
+            <SummaryTile label="Rest" value={formatTime(restSeconds)} />
+            <SummaryTile label="Rounds" value={totalRounds} />
           </div>
-        </div>
+        </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 text-center shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
+        <ToolPanel className="text-center">
           <div className="mx-auto flex max-w-md flex-col items-center">
             <div
               className="relative grid aspect-square w-full max-w-[22rem] place-items-center rounded-full"
@@ -279,14 +261,13 @@ export default function IntervalTimerPage() {
             </div>
 
             <div className="mt-5 grid w-full gap-3 sm:grid-cols-3">
-              <Stat label="Completed" value={completedRounds} />
-              <Stat label="Remaining" value={Math.max(0, totalRounds - completedRounds)} />
-              <Stat label="Status" value={isRunning ? "Running" : isComplete ? "Done" : "Ready"} />
+              <SummaryTile label="Completed" value={completedRounds} />
+              <SummaryTile label="Remaining" value={Math.max(0, totalRounds - completedRounds)} />
+              <SummaryTile label="Status" value={isRunning ? "Running" : isComplete ? "Done" : "Ready"} />
             </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -315,42 +296,6 @@ function DurationFields({
         <NumberField id={secondsId} label="Seconds" value={seconds} onChange={onSecondsChange} />
       </div>
     </fieldset>
-  )
-}
-
-function NumberField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        type="number"
-        min="0"
-        inputMode="numeric"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1rem] border border-[var(--ink-900)]/10 bg-white px-4 py-3 text-2xl font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-      />
-    </label>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-xl font-semibold tabular-nums">{value}</p>
-    </div>
   )
 }
 

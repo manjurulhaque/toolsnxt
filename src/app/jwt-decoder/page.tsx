@@ -6,6 +6,7 @@ import {
   ActionButton,
   InfoBox,
   PanelHeader,
+  PanelHeaderActions,
   SummaryTile,
   ToolIntro,
   ToolPage,
@@ -104,17 +105,12 @@ export default function JwtDecoderPage() {
 
         <div className="space-y-6">
           <ToolPanel>
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Claims
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Token Summary</h2>
-              </div>
-              <p className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${getStatusClass(timing.status)}`}>
-                {timing.label}
-              </p>
-            </div>
+            <PanelHeader
+              eyebrow="Claims"
+              title="Token Summary"
+              badge={timing.label}
+              badgeClassName={getStatusClass(timing.status)}
+            />
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <Claim label="Algorithm" value={getClaim(decoded.header, "alg")} />
@@ -129,24 +125,24 @@ export default function JwtDecoderPage() {
           </ToolPanel>
 
           <ToolPanel>
-            <div className="flex flex-wrap items-end justify-between gap-3">
+            <PanelHeaderActions>
               <PanelHeader eyebrow="Decoded JSON" title="Header" />
               <ActionButton onClick={() => copyValue(headerJson, "Header JSON")} className="px-4 py-2">
                 Copy
               </ActionButton>
-            </div>
+            </PanelHeaderActions>
             <pre className="mt-4 max-h-72 overflow-auto rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-4 text-sm leading-7">
               <code>{headerJson || "Header JSON will appear here."}</code>
             </pre>
           </ToolPanel>
 
           <ToolPanel>
-            <div className="flex flex-wrap items-end justify-between gap-3">
+            <PanelHeaderActions>
               <PanelHeader eyebrow="Decoded JSON" title="Payload" />
               <ActionButton onClick={() => copyValue(payloadJson, "Payload JSON")} className="px-4 py-2">
                 Copy
               </ActionButton>
-            </div>
+            </PanelHeaderActions>
             <pre className="mt-4 max-h-96 overflow-auto rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-4 text-sm leading-7">
               <code>{payloadJson || "Payload JSON will appear here."}</code>
             </pre>

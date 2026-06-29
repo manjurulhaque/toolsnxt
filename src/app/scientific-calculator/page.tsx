@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { PanelHeader, ToolIntro, ToolPage, InfoBox, ToolPanel } from "@/components/tool-page"
 
 type AngleMode = "deg" | "rad"
 
@@ -144,31 +144,12 @@ export default function ScientificCalculatorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Math tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Scientific Calculator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage gridClassName="lg:grid-cols-[0.95fr_1.05fr]">
+        <ToolPanel>
+          <ToolIntro eyebrow="Math tool" title="Scientific Calculator">
             Evaluate scientific expressions with trig, logarithms, powers, roots, constants,
             factorials, memory, and degree or radian mode.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-1">
             {(["deg", "rad"] as AngleMode[]).map((mode) => (
@@ -213,9 +194,9 @@ export default function ScientificCalculatorPage() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox>
               {message}
-            </div>
+          </InfoBox>
             <button
               type="button"
               onClick={calculate}
@@ -224,21 +205,11 @@ export default function ScientificCalculatorPage() {
               Calculate
             </button>
           </div>
-        </div>
+        </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Keypad
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Functions</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {angleMode.toUpperCase()}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Keypad" title="Functions" badge={angleMode.toUpperCase()} />
 
             <div className="mt-6 grid grid-cols-5 gap-2">
               {buttons.map((button) => (
@@ -267,20 +238,10 @@ export default function ScientificCalculatorPage() {
               <MemoryButton label="MR" onClick={memoryRecall} />
               <MemoryButton label="MC" onClick={memoryClear} />
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Tape
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">History</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                M = {formatResult(memory)}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Tape" title="History" badge={"M = {formatResult(memory)}"} />
 
             {history.length === 0 ? (
               <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
@@ -311,10 +272,9 @@ export default function ScientificCalculatorPage() {
             >
               Clear History
             </button>
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
+    </ToolPage>
   )
 }
 

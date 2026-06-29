@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import { PanelHeader, ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
 
 const fallbackTimeZones = [
   "UTC",
@@ -72,31 +72,12 @@ export default function TimezoneConverterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Time tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Timezone Converter</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage gridClassName="lg:grid-cols-[0.92fr_1.08fr]">
+        <ToolPanel>
+          <ToolIntro eyebrow="Time tool" title="Timezone Converter">
             Compare meeting times across cities with daylight saving handled by your browser&apos;s
             built-in time zone data.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 space-y-4">
             <label htmlFor="source-time" className="block">
@@ -130,25 +111,15 @@ export default function TimezoneConverterPage() {
               >
                 Use Current Time
               </button>
-              <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+              <InfoBox>
                 Difference: <span className="font-semibold text-[var(--ink-900)]">{difference}</span>
-              </div>
+              </InfoBox>
             </div>
           </div>
-        </div>
+        </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Result
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Converted Time</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {targetOffset}
-            </p>
-          </div>
+        <ToolPanel>
+          <PanelHeader eyebrow="Result" title="Converted Time" badge={targetOffset} />
 
           <div className="mt-6 rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
             <p className="text-sm text-[var(--ink-700)]">{formatZoneName(toZone)}</p>
@@ -188,9 +159,8 @@ export default function TimezoneConverterPage() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -223,15 +193,6 @@ function TimeZoneSelect({
         ))}
       </select>
     </label>
-  )
-}
-
-function SummaryTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 break-words text-base font-semibold">{value}</p>
-    </div>
   )
 }
 

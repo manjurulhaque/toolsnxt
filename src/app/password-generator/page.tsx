@@ -11,6 +11,7 @@ import {
   ToolPage,
   ToolPanel,
 } from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 type Mode = "password" | "passphrase"
 
@@ -88,7 +89,7 @@ export default function PasswordGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(value)
+      await copyToClipboard(value)
       setMessage("Copied to clipboard.")
     } catch {
       setMessage("Copy failed. Select the value and copy it manually.")

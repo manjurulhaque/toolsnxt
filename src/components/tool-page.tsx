@@ -1,22 +1,22 @@
 import type { ReactNode } from "react"
-import { SiteHeader } from "./site-header"
 
 type ToolPageProps = {
   children: ReactNode
   columns?: "balanced" | "equal" | "wide-output"
+  gridClassName?: string
 }
 
-export function ToolPage({ children, columns = "balanced" }: ToolPageProps) {
+export function ToolPage({ children, columns = "balanced", gridClassName }: ToolPageProps) {
   const gridColumns = {
     balanced: "lg:grid-cols-[0.9fr_1.1fr]",
     equal: "lg:grid-cols-2",
     "wide-output": "lg:grid-cols-[0.85fr_1.15fr]",
   }[columns]
+  const columnsClassName = gridClassName ?? gridColumns
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <SiteHeader compact />
-      <section className={`mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 ${gridColumns} lg:py-12`}>
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+      <section className={`mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 ${columnsClassName} lg:py-12`}>
         {children}
       </section>
     </main>
@@ -55,25 +55,53 @@ type PanelHeaderProps = {
   eyebrow: string
   title: string
   badge?: ReactNode
+  badgeClassName?: string
+  className?: string
+  titleClassName?: string
 }
 
-export function PanelHeader({ eyebrow, title, badge }: PanelHeaderProps) {
+export function PanelHeader({
+  eyebrow,
+  title,
+  badge,
+  badgeClassName = "",
+  className = "",
+  titleClassName = "",
+}: PanelHeaderProps) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-3">
+    <div className={`flex flex-wrap items-end justify-between gap-3 ${className}`}>
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
           {eyebrow}
         </p>
-        <h2 className="mt-2 text-2xl font-semibold">{title}</h2>
+        <h2 className={`mt-2 text-2xl font-semibold ${titleClassName}`}>{title}</h2>
       </div>
-      {badge ? <StatusPill>{badge}</StatusPill> : null}
+      {badge ? <StatusPill className={badgeClassName}>{badge}</StatusPill> : null}
     </div>
   )
 }
 
-export function StatusPill({ children }: { children: ReactNode }) {
+export function HeroIntro({ eyebrow, title, children }: ToolIntroProps) {
   return (
-    <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
+    <>
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
+        {eyebrow}
+      </p>
+      <h1 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">{title}</h1>
+      <p className="mt-4 text-sm leading-7 text-[var(--ink-700)] sm:text-base">{children}</p>
+    </>
+  )
+}
+
+export function PanelHeaderActions({ children }: { children: ReactNode }) {
+  return <div className="flex flex-wrap items-end justify-between gap-3">{children}</div>
+}
+
+export function StatusPill({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <p
+      className={`rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)] ${className}`}
+    >
       {children}
     </p>
   )

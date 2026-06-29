@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { PanelHeader, ToolIntro, ToolPage, SummaryTile, ToolPanel } from "@/components/tool-page"
 
 type Mode = "wake" | "bed"
 
@@ -28,31 +28,12 @@ export default function SleepTimeCalculatorPage() {
   const bestOption = options.find((option) => option.cycles === 5) ?? options[0]
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Sleep tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Sleep Time Calculator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="Sleep tool" title="Sleep Time Calculator">
             Plan sleep around 90-minute cycles. Choose when you want to wake up or when you want to
             go to bed, then compare practical timing options.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid grid-cols-2 gap-2 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-1">
             {(["wake", "bed"] as Mode[]).map((nextMode) => (
@@ -103,22 +84,10 @@ export default function SleepTimeCalculatorPage() {
             Most adults need about 7 to 9 hours of sleep. This is a planning aid, not medical
             advice.
           </div>
-        </div>
+        </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Result
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">
-                {mode === "wake" ? "Suggested Bedtimes" : "Suggested Wake Times"}
-              </h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              90 min cycles
-            </p>
-          </div>
+        <ToolPanel>
+          <PanelHeader eyebrow="Result" title={mode === "wake" ? "Suggested Bedtimes" : "Suggested Wake Times"} badge={"90 min cycles"} />
 
           <div className="mt-6 rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
             <p className="text-sm text-[var(--ink-700)]">
@@ -160,18 +129,8 @@ export default function SleepTimeCalculatorPage() {
               ))}
             </div>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function SummaryTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-xl font-semibold tabular-nums">{value}</p>
-    </div>
+        </ToolPanel>
+    </ToolPage>
   )
 }
 

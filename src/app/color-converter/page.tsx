@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { TextField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 type Color = {
   r: number
@@ -22,7 +24,7 @@ export default function ColorConverterPage() {
 
   async function copyValue(value: string, label: string) {
     try {
-      await navigator.clipboard.writeText(value)
+      await copyToClipboard(value)
       setMessage(`${label} copied.`)
     } catch {
       setMessage("Copy failed. Select a value and copy it manually.")
@@ -62,31 +64,12 @@ export default function ColorConverterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Design tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Color Converter</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Design tool" title="Color Converter">
             Convert colors between HEX, RGB, HSL, and CSS-friendly formats with a live swatch,
             editable channels, and quick copy buttons.
-          </p>
+        </ToolIntro>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-end">
             <label htmlFor="color-picker" className="block">
@@ -103,20 +86,17 @@ export default function ColorConverterPage() {
               />
             </label>
 
-            <label htmlFor="hex-input" className="block">
-              <span className="text-sm font-medium">HEX</span>
-              <input
+            <TextField
                 id="hex-input"
+                label="HEX"
                 value={hexInput}
-                onChange={(event) => {
-                  setHexInput(event.target.value)
+                onChange={(value) => {
+                  setHexInput(value)
                   setMessage("HEX updated.")
                 }}
-                spellCheck={false}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm outline-none transition focus:border-[var(--accent-rust)]"
+                mono
                 placeholder="#2563eb"
               />
-            </label>
           </div>
 
           <div className="mt-5 grid grid-cols-3 gap-3">
@@ -172,40 +152,22 @@ export default function ColorConverterPage() {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
-            <button
-              type="button"
-              onClick={randomize}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={randomize}>
               Randomize
-            </button>
+            </ActionButton>
           </div>
 
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-6 leading-normal">
             {result.error ?? message}
-          </div>
-        </div>
+          </InfoBox>
+      </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Preview
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Color Swatch</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {formats?.contrastLabel ?? "No color"}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Preview" title="Color Swatch" badge={formats?.contrastLabel ?? "No color"} />
 
             <div
               className="mt-6 flex min-h-[300px] items-end rounded-[1.5rem] border border-[var(--ink-900)]/10 p-6"
@@ -219,20 +181,10 @@ export default function ColorConverterPage() {
                 <p className="mt-1 text-sm opacity-80">{formats?.rgb ?? "Adjust the HEX value"}</p>
               </div>
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Formats
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Copy Values</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                CSS ready
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Formats" title="Copy Values" badge="CSS ready" />
 
             <div className="mt-6 grid gap-3">
               {formats
@@ -263,10 +215,9 @@ export default function ColorConverterPage() {
                 </div>
               ) : null}
             </div>
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
+    </ToolPage>
   )
 }
 

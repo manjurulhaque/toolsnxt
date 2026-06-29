@@ -1,10 +1,11 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
-type SiteHeaderProps = {
-  compact?: boolean
-}
+export function SiteHeader() {
+  const compact = usePathname() !== "/"
 
-export function SiteHeader({ compact = false }: SiteHeaderProps) {
   if (compact) {
     return (
       <header className="border-b border-[var(--ink-900)]/10 bg-white/70">

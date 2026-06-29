@@ -1,7 +1,7 @@
 "use client"
 
-import Link from "next/link"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
 
 type TimerMode = "focus" | "shortBreak" | "longBreak"
 
@@ -77,31 +77,12 @@ export default function PomodoroTimerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Focus tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Pomodoro Timer</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="Focus tool" title="Pomodoro Timer">
             Work in focused intervals, then step away for a short reset. Every fourth completed
             focus session leads into a longer break.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid grid-cols-3 gap-2 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-1">
             {(Object.keys(modes) as TimerMode[]).map((timerMode) => (
@@ -121,13 +102,13 @@ export default function PomodoroTimerPage() {
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <Stat label="Focus Done" value={completedFocus} />
-            <Stat label="Round" value={(completedFocus % 4) + 1} />
-            <Stat label="Next Long Break" value={4 - (completedFocus % 4)} />
+            <SummaryTile label="Focus Done" value={completedFocus} />
+            <SummaryTile label="Round" value={(completedFocus % 4) + 1} />
+            <SummaryTile label="Next Long Break" value={4 - (completedFocus % 4)} />
           </div>
-        </div>
+        </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 text-center shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
+        <ToolPanel className="text-center">
           <div className="mx-auto flex max-w-md flex-col items-center">
             <div
               className="relative grid aspect-square w-full max-w-[22rem] place-items-center rounded-full"
@@ -163,22 +144,12 @@ export default function PomodoroTimerPage() {
               </button>
             </div>
 
-            <p className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="mt-5">
               {isRunning ? "Timer is running." : "Ready when you are."}
-            </p>
+          </InfoBox>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+        </ToolPanel>
+    </ToolPage>
   )
 }
 
