@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ToolIntro, ToolPage, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { SITE_TITLE } from "@/lib/site"
 
 type Lap = {
   id: number
@@ -54,7 +55,7 @@ export default function StopwatchPage() {
     document.title = `${formatStopwatch(elapsedMs)} - Stopwatch`
 
     return () => {
-      document.title = "Web Tools | Fast Browser Utilities"
+      document.title = SITE_TITLE
     }
   }, [elapsedMs])
 

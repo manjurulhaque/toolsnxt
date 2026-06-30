@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { SITE_TITLE } from "@/lib/site"
 
 type TimerMode = "focus" | "shortBreak" | "longBreak"
 
@@ -67,7 +68,7 @@ export default function PomodoroTimerPage() {
     document.title = `${formatTime(secondsLeft)} - ${modes[mode].label}`
 
     return () => {
-      document.title = "Web Tools | Fast Browser Utilities"
+      document.title = SITE_TITLE
     }
   }, [mode, secondsLeft])
 

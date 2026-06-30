@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { TextAreaField } from "@/components/form-controls"
 import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
 
 const sampleMarkdown = `# Launch Notes
 
@@ -22,7 +23,7 @@ const tool = "Markdown Previewer"
 console.log(tool)
 \`\`\`
 
-Visit [Example](https://example.com) for a sample link.`
+Visit [${SITE_NAME}](${SITE_URL}) for a sample link.`
 
 export default function MarkdownPreviewerPage() {
   const [markdown, setMarkdown] = useState(sampleMarkdown)

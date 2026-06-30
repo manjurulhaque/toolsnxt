@@ -12,6 +12,7 @@ import {
   ToolPanel,
 } from "@/components/tool-page"
 import { copyToClipboard } from "@/lib/browser-actions"
+import { SITE_NAME } from "@/lib/site"
 
 type DiffRow = {
   type: "same" | "added" | "removed" | "changed"
@@ -20,14 +21,14 @@ type DiffRow = {
   index: number
 }
 
-const sampleLeft = `Web Tools
+const sampleLeft = `${SITE_NAME}
 
 Fast browser utilities for everyday work.
 - JSON Formatter
 - CSV to JSON
 - Regex Tester`
 
-const sampleRight = `Web Tools
+const sampleRight = `${SITE_NAME}
 
 Fast local browser utilities for everyday work.
 - JSON Formatter

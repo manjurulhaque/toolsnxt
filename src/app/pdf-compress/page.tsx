@@ -3,6 +3,7 @@
 import { PDFDocument, ParseSpeeds } from "pdf-lib"
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, SummaryTile, ToolPage, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME } from "@/lib/site"
 
 type LoadedPdf = {
   file: File
@@ -95,7 +96,7 @@ export default function PdfCompressPage() {
       if (mode === "smallest") {
         stripDocumentInfo(pdf)
       } else {
-        pdf.setProducer("Web Tools")
+        pdf.setProducer(SITE_NAME)
         pdf.setModificationDate(new Date())
       }
 
@@ -251,7 +252,7 @@ function stripDocumentInfo(pdf: PDFDocument) {
   pdf.setSubject("")
   pdf.setKeywords([])
   pdf.setCreator("")
-  pdf.setProducer("Web Tools")
+  pdf.setProducer(SITE_NAME)
   pdf.setCreationDate(new Date(0))
   pdf.setModificationDate(new Date())
 }

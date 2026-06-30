@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { PanelHeader, ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
+import { SITE_URL } from "@/lib/site"
 
 type Preset = "public" | "block-all" | "admin-private"
 
@@ -13,8 +14,8 @@ export default function RobotsTxtGeneratorPage() {
   const [userAgent, setUserAgent] = useState("*")
   const [allowText, setAllowText] = useState(sampleAllow)
   const [disallowText, setDisallowText] = useState(sampleDisallow)
-  const [sitemapUrl, setSitemapUrl] = useState("https://example.com/sitemap.xml")
-  const [hostUrl, setHostUrl] = useState("https://example.com")
+  const [sitemapUrl, setSitemapUrl] = useState(`${SITE_URL}/sitemap.xml`)
+  const [hostUrl, setHostUrl] = useState(SITE_URL)
   const [crawlDelay, setCrawlDelay] = useState("")
   const [message, setMessage] = useState("Add crawler rules to generate robots.txt.")
 
@@ -143,14 +144,14 @@ export default function RobotsTxtGeneratorPage() {
               label="Sitemap URL"
               value={sitemapUrl}
               onChange={setSitemapUrl}
-              placeholder="https://example.com/sitemap.xml"
+              placeholder={`${SITE_URL}/sitemap.xml`}
             />
             <TextInput
               id="host-url"
               label="Host"
               value={hostUrl}
               onChange={setHostUrl}
-              placeholder="https://example.com"
+              placeholder={SITE_URL}
             />
           </div>
 

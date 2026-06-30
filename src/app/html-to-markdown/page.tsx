@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 import { TextAreaField } from "@/components/form-controls"
 import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
+import { SITE_URL } from "@/lib/site"
 
 const sampleHtml = `<article>
   <h1>Launch Notes</h1>
@@ -14,7 +15,7 @@ const sampleHtml = `<article>
     <li>Handles <em>inline emphasis</em> and code snippets.</li>
   </ul>
   <blockquote>Paste HTML, copy Markdown, keep moving.</blockquote>
-  <p><a href="https://example.com">Read the docs</a></p>
+  <p><a href="${SITE_URL}">Read the docs</a></p>
 </article>`
 
 export default function HtmlToMarkdownPage() {
