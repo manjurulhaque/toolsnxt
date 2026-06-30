@@ -4,10 +4,11 @@ import { NumberField } from "@/components/form-controls"
 import { useMemo, useState } from "react"
 import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
+import { SITE_URL } from "@/lib/site"
 
 const presets = [
-  { label: "Product", value: "WT-2026-001" },
-  { label: "URL", value: "https://example.com/order/12345" },
+  { label: "Product", value: "M-2026-001" },
+  { label: "URL", value: `${SITE_URL}/order/12345` },
   { label: "Asset", value: "ASSET-LAPTOP-0482" },
   { label: "Ticket", value: "TICKET-9F7A-2026" },
 ]
@@ -123,7 +124,7 @@ const code128Patterns = [
 ]
 
 export default function BarcodeGeneratorPage() {
-  const [value, setValue] = useState("WT-2026-001")
+  const [value, setValue] = useState("M-2026-001")
   const [foreground, setForeground] = useState("#212529")
   const [background, setBackground] = useState("#ffffff")
   const [moduleWidth, setModuleWidth] = useState("2")
@@ -221,7 +222,7 @@ export default function BarcodeGeneratorPage() {
               setMessage("Barcode value updated.")
             }}
             className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="WT-2026-001"
+            placeholder="M-2026-001"
           />
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">

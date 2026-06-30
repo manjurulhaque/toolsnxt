@@ -48,9 +48,6 @@ export default function HomePage() {
                   <p className="mt-3 flex-1 text-sm leading-7 text-[var(--ink-700)]/78">
                     {tool.description}
                   </p>
-                  <span className="mt-5 text-sm font-semibold text-[var(--ink-900)] transition group-hover:text-[var(--accent-rust)]">
-                    Open tool
-                  </span>
                 </div>
               </Link>
             ))}

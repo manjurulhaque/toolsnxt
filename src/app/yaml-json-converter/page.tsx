@@ -14,6 +14,7 @@ import {
   ToolPanel,
 } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile, getTextStats } from "@/lib/browser-actions"
+import { SITE_NAME } from "@/lib/site"
 
 type Mode = "yaml-to-json" | "json-to-yaml"
 type JsonIndent = "2" | "4" | "tab" | "min"
@@ -30,7 +31,7 @@ const jsonIndentOptions: Array<{ key: JsonIndent; label: string }> = [
   { key: "min", label: "Minify" },
 ]
 
-const sampleYaml = `project: Web Tools
+const sampleYaml = `project: ${SITE_NAME}
 local: true
 tools:
   - name: YAML JSON Converter
@@ -124,7 +125,7 @@ export default function YamlJsonConverterPage() {
                 setMessage("Input updated.")
               }}
               rows={16}
-              placeholder={mode === "yaml-to-json" ? "name: Web Tools" : '{ "name": "Web Tools" }'}
+              placeholder={mode === "yaml-to-json" ? `name: ${SITE_NAME}` : `{ "name": "${SITE_NAME}" }`}
             />
           </div>
 

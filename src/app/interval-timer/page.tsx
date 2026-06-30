@@ -3,6 +3,7 @@
 import { NumberField } from "@/components/form-controls"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { ToolIntro, ToolPage, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { SITE_TITLE } from "@/lib/site"
 
 type Phase = "work" | "rest"
 
@@ -88,7 +89,7 @@ export default function IntervalTimerPage() {
     document.title = `${formatTime(secondsLeft)} - Interval Timer`
 
     return () => {
-      document.title = "Web Tools | Fast Browser Utilities"
+      document.title = SITE_TITLE
     }
   }, [secondsLeft])
 

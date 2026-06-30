@@ -4,10 +4,11 @@ import { useMemo, useState } from "react"
 import { SegmentedControl, TextAreaField } from "@/components/form-controls"
 import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
+import { SITE_URL } from "@/lib/site"
 
 type TransformMode = "encode" | "decode" | "component" | "base64-encode" | "base64-decode"
 
-const sampleText = "https://example.com/search?q=web tools&category=developer notes"
+const sampleText = `${SITE_URL}/search?q=web tools&category=developer notes`
 const transformModes: Array<{ key: TransformMode; label: string }> = [
   { key: "encode", label: "Encode URL" },
   { key: "decode", label: "Decode URL" },

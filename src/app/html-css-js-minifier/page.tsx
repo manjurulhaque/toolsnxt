@@ -6,6 +6,7 @@ import { minify as minifyJs } from "terser"
 import { SegmentedControl, TextAreaField } from "@/components/form-controls"
 import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile, getTextStats } from "@/lib/browser-actions"
+import { SITE_NAME } from "@/lib/site"
 
 type Mode = "html" | "css" | "js"
 
@@ -18,7 +19,7 @@ type MinifyResult = {
 const samples: Record<Mode, string> = {
   html: `<main class="page">
   <section>
-    <h1>Web Tools</h1>
+    <h1>${SITE_NAME}</h1>
     <p>Fast browser utilities for everyday work.</p>
     <script>
       const label = "Minify me";
@@ -41,7 +42,7 @@ const samples: Record<Mode, string> = {
   console.log("Hello, " + displayName + "!");
 }
 
-greetUser("Web Tools");`,
+greetUser("${SITE_NAME}");`,
 }
 
 const modeOptions: Array<{ key: Mode; label: string }> = [

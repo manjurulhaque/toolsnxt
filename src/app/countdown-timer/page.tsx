@@ -3,6 +3,7 @@
 import { NumberField } from "@/components/form-controls"
 import { useEffect, useMemo, useState } from "react"
 import { ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { SITE_TITLE } from "@/lib/site"
 
 type Preset = {
   label: string
@@ -64,7 +65,7 @@ export default function CountdownTimerPage() {
     document.title = `${formatTime(secondsLeft)} - Countdown Timer`
 
     return () => {
-      document.title = "Web Tools | Fast Browser Utilities"
+      document.title = SITE_TITLE
     }
   }, [secondsLeft])
 

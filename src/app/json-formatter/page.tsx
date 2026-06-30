@@ -13,11 +13,12 @@ import {
   ToolPanel,
 } from "@/components/tool-page"
 import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
+import { SITE_NAME } from "@/lib/site"
 
 type IndentMode = "2" | "4" | "tab" | "min"
 
 const sampleJson = `{
-  "project": "Web Tools",
+  "project": "${SITE_NAME}",
   "local": true,
   "tools": [
     {

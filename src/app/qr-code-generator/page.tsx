@@ -4,6 +4,7 @@ import { NumberField } from "@/components/form-controls"
 import { useMemo, useState } from "react"
 import { PanelHeader, ToolIntro, ToolPage, InfoBox, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
 
 type QrPreset = "url" | "text" | "email" | "phone" | "wifi"
 
@@ -39,8 +40,8 @@ const alignmentPositions: Record<number, number[]> = {
 }
 
 const presets: Array<{ key: QrPreset; label: string; value: string }> = [
-  { key: "url", label: "URL", value: "https://example.com" },
-  { key: "text", label: "Text", value: "Hello from Quotations Archive" },
+  { key: "url", label: "URL", value: SITE_URL },
+  { key: "text", label: "Text", value: `Hello from ${SITE_NAME}` },
   { key: "email", label: "Email", value: "mailto:hello@example.com?subject=Hello" },
   { key: "phone", label: "Phone", value: "tel:+15551234567" },
   { key: "wifi", label: "Wi-Fi", value: "WIFI:T:WPA;S:NetworkName;P:password123;;" },
@@ -49,7 +50,7 @@ const presets: Array<{ key: QrPreset; label: string; value: string }> = [
 const encoder = new TextEncoder()
 
 export default function QrCodeGeneratorPage() {
-  const [content, setContent] = useState("https://example.com")
+  const [content, setContent] = useState(SITE_URL)
   const [foreground, setForeground] = useState("#212529")
   const [background, setBackground] = useState("#ffffff")
   const [quietZone, setQuietZone] = useState("4")
@@ -136,7 +137,7 @@ export default function QrCodeGeneratorPage() {
             }}
             rows={7}
             className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="https://example.com"
+            placeholder={SITE_URL}
           />
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">

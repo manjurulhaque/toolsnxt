@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { PanelHeader, ToolIntro, ToolPage, InfoBox, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
+import { SITE_URL } from "@/lib/site"
 
 type ChangeFrequency = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never"
 
@@ -19,7 +20,7 @@ const changeFrequencies: ChangeFrequency[] = [
 ]
 
 export default function XmlSitemapGeneratorPage() {
-  const [baseUrl, setBaseUrl] = useState("https://example.com")
+  const [baseUrl, setBaseUrl] = useState(SITE_URL)
   const [pathsText, setPathsText] = useState(samplePaths)
   const [changeFrequency, setChangeFrequency] = useState<ChangeFrequency>("weekly")
   const [priority, setPriority] = useState("0.8")
@@ -69,7 +70,7 @@ export default function XmlSitemapGeneratorPage() {
   }
 
   function loadSample() {
-    setBaseUrl("https://example.com")
+    setBaseUrl(SITE_URL)
     setPathsText(samplePaths)
     setChangeFrequency("weekly")
     setPriority("0.8")
@@ -97,7 +98,7 @@ export default function XmlSitemapGeneratorPage() {
               setBaseUrl(event.target.value)
               setMessage("Base URL updated.")
             }}
-            placeholder="https://example.com"
+            placeholder={SITE_URL}
             className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
           />
 
@@ -113,7 +114,7 @@ export default function XmlSitemapGeneratorPage() {
             }}
             rows={10}
             className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder={"/\n/pricing\nhttps://example.com/contact"}
+            placeholder={`/\n/pricing\n${SITE_URL}/contact`}
           />
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">

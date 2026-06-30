@@ -13,8 +13,9 @@ import {
   ToolPanel,
 } from "@/components/tool-page"
 import { copyToClipboard } from "@/lib/browser-actions"
+import { SITE_NAME } from "@/lib/site"
 
-const sampleText = `Web Tools keeps small browser utilities close at hand.
+const sampleText = `${SITE_NAME} keeps small browser utilities close at hand.
 
 Paste text here to count words, characters, sentences, paragraphs, and reading time. The keyword table helps spot repeated terms quickly.`
 

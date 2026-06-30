@@ -3,15 +3,16 @@
 import { useMemo, useState } from "react"
 import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { copyToClipboard } from "@/lib/browser-actions"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
 
 type TwitterCard = "summary" | "summary_large_image"
 
 const sample = {
-  title: "Web Tools - Fast Browser Utilities",
+  title: `${SITE_NAME} - Fast Browser Utilities`,
   description: "A compact collection of practical calculators, converters, and generators.",
-  url: "https://example.com/tools",
-  siteName: "Web Tools",
-  imageUrl: "https://example.com/og-image.png",
+  url: `${SITE_URL}/tools`,
+  siteName: SITE_NAME,
+  imageUrl: `${SITE_URL}/og-image.png`,
   robots: "index, follow",
 }
 
@@ -167,7 +168,7 @@ export default function MetaTagGeneratorPage() {
             <PanelHeader eyebrow="Preview" title="Search Result" badge={`${stats.titleLength}/${stats.descriptionLength}`} />
 
             <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
-              <p className="break-all text-xs text-[var(--ink-700)]">{url || "https://example.com/page"}</p>
+              <p className="break-all text-xs text-[var(--ink-700)]">{url || `${SITE_URL}/page`}</p>
               <h3 className="mt-2 text-xl font-semibold text-blue-700">
                 {title || "Page title preview"}
               </h3>
