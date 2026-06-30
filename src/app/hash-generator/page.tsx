@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { FilePicker, TextAreaField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
 
 type HashAlgorithm = "MD5" | "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512"
 
@@ -64,7 +66,7 @@ export default function HashGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(value)
+      await copyToClipboard(value)
       setMessage(`${label} copied.`)
     } catch {
       setMessage("Copy failed. Select the hash and copy it manually.")
@@ -93,104 +95,56 @@ export default function HashGeneratorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Security tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Hash Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Security tool" title="Hash Generator">
             Generate MD5 and SHA hashes from text or file contents in your browser for checksums,
             test data, and quick integrity checks.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="hash-input" className="mt-6 block text-sm font-medium">
-            Input text
-          </label>
-          <textarea
-            id="hash-input"
-            value={inputText}
-            onChange={(event) => {
-              setInputText(event.target.value)
-              setMessage("Input updated.")
-            }}
-            rows={13}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="Type or paste text to hash..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="hash-input"
+              label="Input text"
+              value={inputText}
+              onChange={(value) => {
+                setInputText(value)
+                setMessage("Input updated.")
+              }}
+              rows={13}
+              placeholder="Type or paste text to hash..."
+            />
+          </div>
 
-          <label
-            htmlFor="hash-file"
-            className="mt-4 block rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/16 bg-[var(--page-cream)] px-4 py-4 text-sm font-medium text-[var(--ink-700)] transition hover:border-[var(--accent-rust)]/45"
-          >
-            Choose a text file
-            <input
-              id="hash-file"
-              type="file"
-              className="mt-3 block w-full text-sm"
+          <div className="mt-4">
+            <FilePicker
+              label="Choose a text file"
+              description="Hash the file's text contents locally"
               onChange={(event) => void handleFile(event.target.files?.[0])}
             />
-          </label>
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={stats.characters} />
-            <Stat label="Lines" value={stats.lines} />
-            <Stat label="Bytes" value={stats.bytes} />
+            <SummaryTile label="Characters" value={stats.characters} />
+            <SummaryTile label="Lines" value={stats.lines} />
+            <SummaryTile label="Bytes" value={stats.bytes} />
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
-            <button
-              type="button"
-              onClick={() => void generateHashes()}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={() => void generateHashes()}>
               Generate
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Output
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Generated Hashes</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {selectedAlgorithms.length} visible
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader eyebrow="Output" title="Generated Hashes" badge={`${selectedAlgorithms.length} visible`} />
 
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {algorithms.map((algorithm) => (
@@ -229,21 +183,11 @@ export default function HashGeneratorPage() {
               ))}
           </div>
 
-          <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-5 leading-normal">
             {message}
-          </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+          </InfoBox>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -264,16 +208,6 @@ async function createWebCryptoHash(value: string, algorithm: Exclude<HashAlgorit
   return Array.from(new Uint8Array(digest))
     .map((byte) => byte.toString(16).padStart(2, "0"))
     .join("")
-}
-
-function getTextStats(value: string) {
-  const trimmedValue = value.trim()
-
-  return {
-    characters: value.length,
-    lines: trimmedValue ? value.split(/\r\n|\r|\n/).length : 0,
-    bytes: new Blob([value]).size,
-  }
 }
 
 function md5(value: string) {

@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
+import { NumberField } from "@/components/form-controls"
 import { useMemo, useState } from "react"
+import { PanelHeader, ToolIntro, ToolPage, InfoBox, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
 
 type QrPreset = "url" | "text" | "email" | "phone" | "wifi"
 
@@ -79,7 +81,7 @@ export default function QrCodeGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(svgMarkup)
+      await copyToClipboard(svgMarkup)
       setMessage("SVG markup copied.")
     } catch {
       setMessage("Copy failed. Select the SVG markup and copy it manually.")
@@ -92,13 +94,7 @@ export default function QrCodeGeneratorPage() {
       return
     }
 
-    const blob = new Blob([svgMarkup], { type: "image/svg+xml;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "qr-code.svg"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(svgMarkup, "qr-code.svg", "image/svg+xml;charset=utf-8")
     setMessage("QR SVG downloaded.")
   }
 
@@ -108,31 +104,12 @@ export default function QrCodeGeneratorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Utility tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">QR Code Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="Utility tool" title="QR Code Generator">
             Create a scannable QR code for links, text, email, phone numbers, or Wi-Fi credentials.
             The SVG is generated locally in your browser.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-5">
             {presets.map((preset) => (
@@ -172,24 +149,14 @@ export default function QrCodeGeneratorPage() {
             <NumberField id="module-size" label="Module size" value={moduleSize} onChange={setModuleSize} />
           </div>
 
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-6">
             {qrResult.error || message}
-          </div>
-        </div>
+          </InfoBox>
+        </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Output
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">QR Preview</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {qrResult.qr ? `v${qrResult.qr.version} / ${qrResult.qr.size}x${qrResult.qr.size}` : "No code"}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Output" title="QR Preview" badge={qrResult.qr ? `v${qrResult.qr.version} / ${qrResult.qr.size}x${qrResult.qr.size}` : "No code"} />
 
             <div className="mt-6 flex min-h-[320px] items-center justify-center rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-6">
               {svgMarkup ? (
@@ -220,17 +187,10 @@ export default function QrCodeGeneratorPage() {
                 Download SVG
               </button>
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Markup
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">SVG Source</h2>
-              </div>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Markup" title="SVG Source" />
 
             <textarea
               value={svgMarkup}
@@ -240,10 +200,9 @@ export default function QrCodeGeneratorPage() {
               aria-label="QR code SVG markup"
               placeholder="SVG markup will appear here..."
             />
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
+    </ToolPage>
   )
 }
 
@@ -275,33 +234,6 @@ function ColorField({
           className="min-w-0 flex-1 bg-transparent px-3 py-3 font-mono text-sm outline-none"
         />
       </div>
-    </label>
-  )
-}
-
-function NumberField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        type="number"
-        min="0"
-        inputMode="numeric"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-      />
     </label>
   )
 }
@@ -557,7 +489,7 @@ function applyFormatInfo(modules: Array<Array<boolean | null>>, reserved: boolea
 }
 
 function getFormatBits(mask: number) {
-  let data = (0b01 << 3) | mask
+  const data = (0b01 << 3) | mask
   let bits = data << 10
 
   for (let index = 14; index >= 10; index -= 1) {

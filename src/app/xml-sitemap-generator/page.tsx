@@ -1,7 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { PanelHeader, ToolIntro, ToolPage, InfoBox, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
 
 type ChangeFrequency = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never"
 
@@ -45,7 +46,7 @@ export default function XmlSitemapGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(sitemapXml)
+      await copyToClipboard(sitemapXml)
       setMessage("Sitemap XML copied.")
     } catch {
       setMessage("Copy failed. Select the XML and copy it manually.")
@@ -58,13 +59,7 @@ export default function XmlSitemapGeneratorPage() {
       return
     }
 
-    const blob = new Blob([sitemapXml], { type: "application/xml;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "sitemap.xml"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(sitemapXml, "sitemap.xml", "application/xml;charset=utf-8")
     setMessage("sitemap.xml downloaded.")
   }
 
@@ -84,31 +79,12 @@ export default function XmlSitemapGeneratorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            SEO tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">XML Sitemap Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="SEO tool" title="XML Sitemap Generator">
             Build a valid sitemap.xml from page paths or full URLs. Add metadata once, then copy or
             download the generated XML.
-          </p>
+          </ToolIntro>
 
           <label htmlFor="base-url" className="mt-6 block text-sm font-medium">
             Base URL
@@ -156,20 +132,10 @@ export default function XmlSitemapGeneratorPage() {
               Load Sample
             </button>
           </div>
-        </div>
+        </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Output
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Generated XML</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {urls.length} URLs
-            </p>
-          </div>
+        <ToolPanel>
+          <PanelHeader eyebrow="Output" title="Generated XML" badge={"{urls.length} URLs"} />
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <label htmlFor="change-frequency" className="block">
@@ -236,9 +202,9 @@ export default function XmlSitemapGeneratorPage() {
           />
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox>
               {message}
-            </div>
+          </InfoBox>
             <button
               type="button"
               onClick={copySitemap}
@@ -254,9 +220,8 @@ export default function XmlSitemapGeneratorPage() {
               Download
             </button>
           </div>
-        </div>
-      </section>
-    </main>
+        </ToolPanel>
+    </ToolPage>
   )
 }
 

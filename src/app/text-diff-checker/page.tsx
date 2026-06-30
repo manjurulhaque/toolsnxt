@@ -1,7 +1,17 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { TextAreaField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  SummaryTile,
+  ToolIntro,
+  ToolPanel,
+} from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 type DiffRow = {
   type: "same" | "added" | "removed" | "changed"
@@ -46,7 +56,7 @@ export default function TextDiffCheckerPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(patchText)
+      await copyToClipboard(patchText)
       setMessage("Diff copied.")
     } catch {
       setMessage("Copy failed. Select the diff and copy it manually.")
@@ -68,41 +78,24 @@ export default function TextDiffCheckerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
 
       <section className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
+        <ToolPanel>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Text tool
-              </p>
-              <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Text Diff Checker</h1>
-              <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+              <ToolIntro eyebrow="Text tool" title="Text Diff Checker">
                 Compare two text blocks locally, inspect added, removed, and changed lines, then
                 copy a compact plain-text diff.
-              </p>
+              </ToolIntro>
             </div>
             <div className="grid grid-cols-3 gap-3 lg:min-w-96">
-              <Stat label="Added" value={summary.added} />
-              <Stat label="Removed" value={summary.removed} />
-              <Stat label="Changed" value={summary.changed} />
+              <SummaryTile label="Added" value={summary.added} />
+              <SummaryTile label="Removed" value={summary.removed} />
+              <SummaryTile label="Changed" value={summary.changed} />
             </div>
           </div>
-        </div>
+        </ToolPanel>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
           <EditorPanel
@@ -125,66 +118,36 @@ export default function TextDiffCheckerPage() {
           />
         </div>
 
-        <div className="mt-6 rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Comparison
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Diff Output</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {summary.same} unchanged
-            </p>
-          </div>
+        <ToolPanel className="mt-6">
+          <PanelHeader eyebrow="Comparison" title="Diff Output" badge={`${summary.same} unchanged`} />
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[auto_auto_1fr_auto_auto_auto] sm:items-center">
-            <label className="flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-              <input
-                type="checkbox"
-                checked={ignoreWhitespace}
-                onChange={(event) => {
-                  setIgnoreWhitespace(event.target.checked)
+            <CheckboxOption
+              label="Ignore whitespace"
+              checked={ignoreWhitespace}
+              onChange={(checked) => {
+                setIgnoreWhitespace(checked)
                   setMessage("Whitespace setting updated.")
-                }}
-                className="h-4 w-4 accent-[var(--ink-900)]"
-              />
-              Ignore whitespace
-            </label>
-            <label className="flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-              <input
-                type="checkbox"
-                checked={ignoreCase}
-                onChange={(event) => {
-                  setIgnoreCase(event.target.checked)
+              }}
+            />
+            <CheckboxOption
+              label="Ignore case"
+              checked={ignoreCase}
+              onChange={(checked) => {
+                setIgnoreCase(checked)
                   setMessage("Case setting updated.")
-                }}
-                className="h-4 w-4 accent-[var(--ink-900)]"
-              />
-              Ignore case
-            </label>
+              }}
+            />
             <div className="hidden sm:block" />
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
-            <button
-              type="button"
-              onClick={copyDiff}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={copyDiff}>
               Copy Diff
-            </button>
+            </ActionButton>
           </div>
 
           <div className="mt-6 overflow-hidden rounded-[1.2rem] border border-[var(--ink-900)]/10">
@@ -203,10 +166,10 @@ export default function TextDiffCheckerPage() {
             </div>
           </div>
 
-          <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-5 leading-normal">
             {message}
-          </div>
-        </div>
+          </InfoBox>
+        </ToolPanel>
       </section>
     </main>
   )
@@ -224,20 +187,16 @@ function EditorPanel({
   onChange: (value: string) => void
 }) {
   return (
-    <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-      <label htmlFor={id} className="block text-sm font-medium">
-        {label}
-      </label>
-      <textarea
+    <ToolPanel>
+      <TextAreaField
         id={id}
+        label={label}
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={onChange}
         rows={15}
-        spellCheck={false}
-        className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
         placeholder="Paste text here..."
       />
-    </section>
+    </ToolPanel>
   )
 }
 
@@ -260,15 +219,6 @@ function DiffLine({ row }: { row: DiffRow }) {
       <pre className="min-w-0 whitespace-pre-wrap break-words border-l border-[var(--ink-900)]/8 px-3 py-3 font-mono text-sm">
         {row.right || " "}
       </pre>
-    </div>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
     </div>
   )
 }

@@ -1,7 +1,16 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { DateField } from "@/components/form-controls"
+import {
+  ActionButton,
+  InfoBox,
+  PanelHeader,
+  SummaryTile,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
 
 type DateParts = {
   year: number
@@ -31,31 +40,12 @@ export default function AgeCalculatorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Quotations Archive
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Date tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Age Calculator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Date tool" title="Age Calculator">
             Calculate exact age in years, months, and days, then see the next birthday countdown
             and total time lived.
-          </p>
+        </ToolIntro>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2">
             <DateField
@@ -73,36 +63,22 @@ export default function AgeCalculatorPage() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={useToday}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            <ActionButton onClick={useToday}>
               Use Today
-            </button>
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            </ActionButton>
+            <InfoBox className="leading-normal">
               {result ? "Ready" : "Choose valid dates"}
-            </div>
+            </InfoBox>
           </div>
 
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm leading-6 text-[var(--ink-700)]">
+          <InfoBox className="mt-6">
             Leap years and month lengths are handled using calendar dates, so February and long
             months stay accurate.
-          </div>
-        </div>
+          </InfoBox>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Result
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Exact Age</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              Calendar age
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader eyebrow="Result" title="Exact Age" badge="Calendar age" />
 
           <div className="mt-6 rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
             <p className="text-sm text-[var(--ink-700)]">Age</p>
@@ -137,43 +113,8 @@ export default function AgeCalculatorPage() {
               />
             </div>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function DateField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        type="date"
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-lg font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-      />
-    </label>
-  )
-}
-
-function SummaryTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
-    </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 

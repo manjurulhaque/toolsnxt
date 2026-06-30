@@ -1,7 +1,18 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { TextAreaField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  SummaryTile,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 const sampleText = `Web Tools keeps small browser utilities close at hand.
 
@@ -24,7 +35,7 @@ export default function WordCharacterCounterPage() {
     ].join("\n")
 
     try {
-      await navigator.clipboard.writeText(summary)
+      await copyToClipboard(summary)
       setMessage("Summary copied.")
     } catch {
       setMessage("Copy failed. Select the stats and copy them manually.")
@@ -43,125 +54,72 @@ export default function WordCharacterCounterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Text tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Word / Character Counter</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Text tool" title="Word / Character Counter">
             Count words, characters, lines, sentences, paragraphs, reading time, and repeated
             keywords from pasted text.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="counter-input" className="mt-6 block text-sm font-medium">
-            Text input
-          </label>
-          <textarea
-            id="counter-input"
-            value={text}
-            onChange={(event) => {
-              setText(event.target.value)
-              setMessage("Text updated.")
-            }}
-            rows={17}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="Type or paste text here..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="counter-input"
+              label="Text input"
+              value={text}
+              onChange={(value) => {
+                setText(value)
+                setMessage("Text updated.")
+              }}
+              rows={17}
+              mono={false}
+              placeholder="Type or paste text here..."
+            />
+          </div>
 
-          <label className="mt-4 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-            <input
-              type="checkbox"
+          <div className="mt-4">
+            <CheckboxOption
+              label="Exclude spaces from character count"
               checked={excludeSpaces}
-              onChange={(event) => {
-                setExcludeSpaces(event.target.checked)
+              onChange={(checked) => {
+                setExcludeSpaces(checked)
                 setMessage("Character counting updated.")
               }}
-              className="h-4 w-4 accent-[var(--ink-900)]"
             />
-            Exclude spaces from character count
-          </label>
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <button
-              type="button"
-              onClick={clearText}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearText} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
-            <button
-              type="button"
-              onClick={copySummary}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={copySummary}>
               Copy Stats
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Counts
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Text Stats</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {stats.readingTime} min read
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Counts" title="Text Stats" badge={`${stats.readingTime} min read`} />
 
             <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <Stat label="Words" value={stats.words} />
-              <Stat label="Characters" value={stats.characters} />
-              <Stat label="No Spaces" value={stats.charactersNoSpaces} />
-              <Stat label="Sentences" value={stats.sentences} />
-              <Stat label="Paragraphs" value={stats.paragraphs} />
-              <Stat label="Lines" value={stats.lines} />
+              <SummaryTile label="Words" value={stats.words} />
+              <SummaryTile label="Characters" value={stats.characters} />
+              <SummaryTile label="No Spaces" value={stats.charactersNoSpaces} />
+              <SummaryTile label="Sentences" value={stats.sentences} />
+              <SummaryTile label="Paragraphs" value={stats.paragraphs} />
+              <SummaryTile label="Lines" value={stats.lines} />
             </div>
 
-            <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="mt-5 leading-normal">
               {message}
-            </div>
-          </section>
+            </InfoBox>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Density
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Top Keywords</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                Top 10
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Density" title="Top Keywords" badge="Top 10" />
 
             <div className="mt-6 grid gap-2">
               {stats.keywords.map((keyword) => (
@@ -180,19 +138,9 @@ export default function WordCharacterCounterPage() {
                 </div>
               ) : null}
             </div>
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+    </ToolPage>
   )
 }
 

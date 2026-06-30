@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { TextAreaField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
 
 const sampleMarkdown = `# Launch Notes
 
@@ -36,7 +38,7 @@ export default function MarkdownPreviewerPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(markdown)
+      await copyToClipboard(markdown)
       setMessage("Markdown copied.")
     } catch {
       setMessage("Copy failed. Select the Markdown and copy it manually.")
@@ -50,7 +52,7 @@ export default function MarkdownPreviewerPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(html)
+      await copyToClipboard(html)
       setMessage("HTML copied.")
     } catch {
       setMessage("Copy failed. Select the HTML and copy it manually.")
@@ -68,134 +70,75 @@ export default function MarkdownPreviewerPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Text tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Markdown Previewer</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage columns="equal">
+      <ToolPanel>
+        <ToolIntro eyebrow="Text tool" title="Markdown Previewer">
             Draft Markdown and inspect the rendered HTML instantly, with source stats and quick
             copy actions for notes, docs, and README snippets.
-          </p>
+        </ToolIntro>
 
-          <label htmlFor="markdown-input" className="mt-6 block text-sm font-medium">
-            Markdown input
-          </label>
-          <textarea
-            id="markdown-input"
-            value={markdown}
-            onChange={(event) => {
-              setMarkdown(event.target.value)
-              setMessage("Markdown updated.")
-            }}
-            rows={18}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="# Heading&#10;&#10;Write Markdown here..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="markdown-input"
+              label="Markdown input"
+              value={markdown}
+              onChange={(value) => {
+                setMarkdown(value)
+                setMessage("Markdown updated.")
+              }}
+              rows={18}
+              placeholder="# Heading&#10;&#10;Write Markdown here..."
+            />
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={stats.characters} />
-            <Stat label="Words" value={stats.words} />
-            <Stat label="Lines" value={stats.lines} />
+            <SummaryTile label="Characters" value={stats.characters} />
+            <SummaryTile label="Words" value={stats.words} />
+            <SummaryTile label="Lines" value={stats.lines} />
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Preview
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Rendered Output</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {stats.blocks} blocks
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader eyebrow="Preview" title="Rendered Output" badge={`${stats.blocks} blocks`} />
 
           <div
             className="mt-6 min-h-[30rem] overflow-auto rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-5 py-4 text-sm leading-7 text-[var(--ink-800)] [&_a]:font-semibold [&_a]:text-[var(--accent-rust)] [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--accent-rust)]/45 [&_blockquote]:pl-4 [&_blockquote]:text-[var(--ink-700)] [&_code]:rounded-md [&_code]:bg-white [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mb-4 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-xl [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-[var(--ink-900)]/10 [&_li]:ml-5 [&_ol]:list-decimal [&_p]:mb-4 [&_pre]:mb-4 [&_pre]:overflow-auto [&_pre]:rounded-[1rem] [&_pre]:bg-white [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_ul]:list-disc"
             dangerouslySetInnerHTML={{ __html: html || "<p>Preview will appear here...</p>" }}
           />
 
-          <label htmlFor="html-output" className="mt-6 block text-sm font-medium">
-            Generated HTML
-          </label>
-          <textarea
-            id="html-output"
-            value={html}
-            readOnly
-            rows={7}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-xs leading-6 outline-none"
-            placeholder="Generated HTML will appear here..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="html-output"
+              label="Generated HTML"
+              value={html}
+              readOnly
+              rows={7}
+              placeholder="Generated HTML will appear here..."
+            />
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="leading-normal">
               {message}
-            </div>
-            <button
-              type="button"
-              onClick={copyMarkdown}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </InfoBox>
+            <ActionButton onClick={copyMarkdown} variant="secondary">
               Copy MD
-            </button>
-            <button
-              type="button"
-              onClick={copyHtml}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={copyHtml}>
               Copy HTML
-            </button>
+            </ActionButton>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -339,11 +282,11 @@ function escapeHtml(value: string) {
 
 function getMarkdownStats(value: string) {
   const trimmedValue = value.trim()
+  const textStats = getTextStats(value)
 
   return {
-    characters: value.length,
+    ...textStats,
     words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
-    lines: trimmedValue ? value.split(/\r\n|\r|\n/).length : 0,
     blocks: trimmedValue ? trimmedValue.split(/\n\s*\n/).length : 0,
   }
 }

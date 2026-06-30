@@ -1,7 +1,8 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard } from "@/lib/browser-actions"
 
 type TwitterCard = "summary" | "summary_large_image"
 
@@ -46,7 +47,7 @@ export default function MetaTagGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(tags)
+      await copyToClipboard(tags)
       setMessage("Meta tags copied.")
     } catch {
       setMessage("Copy failed. Select the tags and copy them manually.")
@@ -76,31 +77,12 @@ export default function MetaTagGeneratorPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            SEO tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Meta Tag Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+        <ToolPanel>
+          <ToolIntro eyebrow="SEO tool" title="Meta Tag Generator">
             Generate page title, description, robots, canonical, Open Graph, and Twitter card tags
             with live search and social previews.
-          </p>
+          </ToolIntro>
 
           <div className="mt-6 grid gap-4">
             <TextInput id="meta-title" label="Title" value={title} onChange={setTitle} />
@@ -178,21 +160,11 @@ export default function MetaTagGeneratorPage() {
               Load Sample
             </button>
           </div>
-        </div>
+        </ToolPanel>
 
         <div className="space-y-6">
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Preview
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Search Result</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {stats.titleLength}/{stats.descriptionLength}
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Preview" title="Search Result" badge={`${stats.titleLength}/${stats.descriptionLength}`} />
 
             <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
               <p className="break-all text-xs text-[var(--ink-700)]">{url || "https://example.com/page"}</p>
@@ -219,20 +191,10 @@ export default function MetaTagGeneratorPage() {
                 {description || "Social description preview will appear here."}
               </p>
             </div>
-          </section>
+          </ToolPanel>
 
-          <section className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                  Markup
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold">Generated Tags</h2>
-              </div>
-              <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                {tags.split("\n").filter(Boolean).length} tags
-              </p>
-            </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Markup" title="Generated Tags" badge={`${tags.split("\n").filter(Boolean).length} tags`} />
 
             <textarea
               value={tags}
@@ -244,9 +206,9 @@ export default function MetaTagGeneratorPage() {
             />
 
             <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-              <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+              <InfoBox>
                 {message}
-              </div>
+          </InfoBox>
               <button
                 type="button"
                 onClick={copyTags}
@@ -255,10 +217,9 @@ export default function MetaTagGeneratorPage() {
                 Copy Tags
               </button>
             </div>
-          </section>
+          </ToolPanel>
         </div>
-      </section>
-    </main>
+    </ToolPage>
   )
 }
 

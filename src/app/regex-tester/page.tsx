@@ -1,7 +1,9 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { TextAreaField } from "@/components/form-controls"
+import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+import { copyToClipboard, getTextStats as getBasicTextStats } from "@/lib/browser-actions"
 
 type RegexFlag = "g" | "i" | "m" | "s" | "u" | "y"
 
@@ -35,7 +37,7 @@ export default function RegexTesterPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(result.matches.map((match) => match.value).join("\n"))
+      await copyToClipboard(result.matches.map((match) => match.value).join("\n"))
       setMessage("Matches copied.")
     } catch {
       setMessage("Copy failed. Select the matches and copy them manually.")
@@ -65,31 +67,12 @@ export default function RegexTesterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Developer tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Regex Tester</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage>
+      <ToolPanel>
+        <ToolIntro eyebrow="Developer tool" title="Regex Tester">
             Test JavaScript regular expressions against sample text, inspect capture groups, and
             copy every match without sending your text anywhere.
-          </p>
+        </ToolIntro>
 
           <label htmlFor="regex-pattern" className="mt-6 block text-sm font-medium">
             Pattern
@@ -127,62 +110,42 @@ export default function RegexTesterPage() {
             ))}
           </div>
 
-          <label htmlFor="regex-text" className="mt-6 block text-sm font-medium">
-            Test text
-          </label>
-          <textarea
-            id="regex-text"
-            value={testText}
-            onChange={(event) => {
-              setTestText(event.target.value)
-              setMessage("Text updated.")
-            }}
-            rows={13}
-            spellCheck={false}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="Paste text to test..."
-          />
+          <div className="mt-6">
+            <TextAreaField
+              id="regex-text"
+              label="Test text"
+              value={testText}
+              onChange={(value) => {
+                setTestText(value)
+                setMessage("Text updated.")
+              }}
+              rows={13}
+              placeholder="Paste text to test..."
+            />
+          </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={stats.characters} />
-            <Stat label="Words" value={stats.words} />
-            <Stat label="Lines" value={stats.lines} />
+            <SummaryTile label="Characters" value={stats.characters} />
+            <SummaryTile label="Words" value={stats.words} />
+            <SummaryTile label="Lines" value={stats.lines} />
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={clearAll} variant="secondary">
               Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            </ActionButton>
+            <ActionButton onClick={loadSample} variant="secondary">
               Load Sample
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Matches
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Results</h2>
-            </div>
-            <p
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] ${
-                result.error ? "bg-red-50 text-red-700" : "bg-[var(--page-cream)] text-[var(--ink-700)]"
-              }`}
-            >
-              {result.error ? "Invalid regex" : `${result.matches.length} matches`}
-            </p>
-          </div>
+      <ToolPanel>
+          <PanelHeader
+            eyebrow="Matches"
+            title="Results"
+            badge={result.error ? "Invalid regex" : `${result.matches.length} matches`}
+          />
 
           <div className="mt-6 min-h-[13rem] whitespace-pre-wrap break-words rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 text-[var(--ink-800)]">
             {result.error ? (
@@ -244,29 +207,15 @@ export default function RegexTesterPage() {
           </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+            <InfoBox className="leading-normal">
               {message}
-            </div>
-            <button
-              type="button"
-              onClick={copyMatches}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </InfoBox>
+            <ActionButton onClick={copyMatches}>
               Copy Matches
-            </button>
+            </ActionButton>
           </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -316,10 +265,10 @@ function testRegex(pattern: string, flags: string, text: string) {
 
 function getTextStats(value: string) {
   const trimmedValue = value.trim()
+  const basicStats = getBasicTextStats(value)
 
   return {
-    characters: value.length,
+    ...basicStats,
     words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
-    lines: trimmedValue ? value.split(/\r\n|\r|\n/).length : 0,
   }
 }

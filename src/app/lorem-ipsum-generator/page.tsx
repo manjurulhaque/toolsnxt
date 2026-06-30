@@ -1,7 +1,18 @@
 "use client"
 
-import Link from "next/link"
 import { useMemo, useState } from "react"
+import { NumberField, SegmentedControl, SelectField, TextAreaField } from "@/components/form-controls"
+import {
+  ActionButton,
+  CheckboxOption,
+  InfoBox,
+  PanelHeader,
+  SummaryTile,
+  ToolIntro,
+  ToolPage,
+  ToolPanel,
+} from "@/components/tool-page"
+import { copyToClipboard, downloadTextFile, getTextStats as getBasicTextStats } from "@/lib/browser-actions"
 
 type OutputMode = "paragraphs" | "sentences" | "words"
 type WordSet = "classic" | "product" | "editorial"
@@ -93,6 +104,18 @@ const wordSets: Record<WordSet, string[]> = {
   ],
 }
 
+const modeOptions: Array<{ key: OutputMode; label: string }> = [
+  { key: "paragraphs", label: "Paragraphs" },
+  { key: "sentences", label: "Sentences" },
+  { key: "words", label: "Words" },
+]
+
+const wordSetOptions: Array<{ value: WordSet; label: string }> = [
+  { value: "classic", label: "Classic lorem" },
+  { value: "product", label: "Product UI" },
+  { value: "editorial", label: "Editorial" },
+]
+
 export default function LoremIpsumGeneratorPage() {
   const [mode, setMode] = useState<OutputMode>("paragraphs")
   const [wordSet, setWordSet] = useState<WordSet>("classic")
@@ -113,7 +136,7 @@ export default function LoremIpsumGeneratorPage() {
     }
 
     try {
-      await navigator.clipboard.writeText(output)
+      await copyToClipboard(output)
       setMessage("Placeholder text copied.")
     } catch {
       setMessage("Copy failed. Select the text and copy it manually.")
@@ -126,169 +149,104 @@ export default function LoremIpsumGeneratorPage() {
       return
     }
 
-    const blob = new Blob([output], { type: "text/plain;charset=utf-8" })
-    const downloadUrl = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = downloadUrl
-    link.download = "lorem-ipsum.txt"
-    link.click()
-    URL.revokeObjectURL(downloadUrl)
+    downloadTextFile(output, "lorem-ipsum.txt")
     setMessage("lorem-ipsum.txt downloaded.")
   }
 
   return (
-    <main className="min-h-screen bg-[var(--page-cream)] text-[var(--ink-900)]">
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            Web Tools
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-
-      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:py-12">
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-            Text tool
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">Lorem Ipsum Generator</h1>
-          <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">
+    <ToolPage columns="wide-output">
+      <ToolPanel>
+        <ToolIntro eyebrow="Text tool" title="Lorem Ipsum Generator">
             Create placeholder words, sentences, or paragraphs for UI mockups, content tests, and
             design reviews.
-          </p>
+        </ToolIntro>
 
-          <div className="mt-6 grid grid-cols-3 gap-2">
-            {(["paragraphs", "sentences", "words"] as OutputMode[]).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => {
-                  setMode(option)
-                  setMessage(`${capitalize(option)} mode selected.`)
-                }}
-                className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                  mode === option
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {capitalize(option)}
-              </button>
-            ))}
+          <div className="mt-6">
+            <SegmentedControl
+              value={mode}
+              options={modeOptions}
+              onChange={(nextMode) => {
+                setMode(nextMode)
+                setMessage(`${capitalize(nextMode)} mode selected.`)
+              }}
+              columns="grid-cols-3"
+            />
           </div>
 
-          <label htmlFor="lorem-count" className="mt-6 block text-sm font-medium">
-            Quantity
-          </label>
-          <input
-            id="lorem-count"
-            type="number"
-            min="1"
-            max={mode === "words" ? "500" : "50"}
-            value={count}
-            onChange={(event) => {
-              setCount(event.target.value)
-              setMessage("Quantity updated.")
-            }}
-            className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-2xl font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-          />
+          <div className="mt-6">
+            <NumberField
+              id="lorem-count"
+              label="Quantity"
+              min="1"
+              max={mode === "words" ? "500" : "50"}
+              value={count}
+              onChange={(value) => {
+                setCount(value)
+                setMessage("Quantity updated.")
+              }}
+            />
+          </div>
 
-          <label htmlFor="word-set" className="mt-5 block text-sm font-medium">
-            Word set
-          </label>
-          <select
-            id="word-set"
-            value={wordSet}
-            onChange={(event) => {
-              setWordSet(event.target.value as WordSet)
+          <div className="mt-5">
+            <SelectField
+              id="word-set"
+              label="Word set"
+              value={wordSet}
+              options={wordSetOptions}
+              onChange={(value) => {
+                setWordSet(value)
               setMessage("Word set updated.")
-            }}
-            className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-          >
-            <option value="classic">Classic lorem</option>
-            <option value="product">Product UI</option>
-            <option value="editorial">Editorial</option>
-          </select>
+              }}
+            />
+          </div>
 
-          <label className="mt-5 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium text-[var(--ink-800)]">
-            <input
-              type="checkbox"
+          <div className="mt-5">
+            <CheckboxOption
+              label="Start with lorem ipsum"
               checked={startWithLorem}
-              onChange={(event) => {
-                setStartWithLorem(event.target.checked)
+              onChange={(checked) => {
+                setStartWithLorem(checked)
                 setMessage("Opening phrase updated.")
               }}
-              className="h-4 w-4 accent-[var(--ink-900)]"
             />
-            Start with lorem ipsum
-          </label>
+          </div>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={copyOutput}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
+            <ActionButton onClick={copyOutput} variant="secondary">
               Copy Text
-            </button>
-            <button
-              type="button"
-              onClick={downloadOutput}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
+            </ActionButton>
+            <ActionButton onClick={downloadOutput}>
               Download
-            </button>
+            </ActionButton>
           </div>
-        </div>
+      </ToolPanel>
 
-        <div className="rounded-[1.75rem] border border-[var(--ink-900)]/10 bg-white p-6 shadow-[0_18px_50px_rgba(33,37,41,0.08)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-                Output
-              </p>
-              <h2 className="mt-2 text-2xl font-semibold">Generated Text</h2>
-            </div>
-            <p className="rounded-full bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-              {stats.words} words
-            </p>
+      <ToolPanel>
+          <PanelHeader eyebrow="Output" title="Generated Text" badge={`${stats.words} words`} />
+
+          <div className="mt-6">
+            <TextAreaField
+              id="lorem-output"
+              label="Generated text"
+              value={output}
+              readOnly
+              rows={20}
+              mono={false}
+              placeholder="Generated placeholder text will appear here..."
+            />
           </div>
-
-          <textarea
-            value={output}
-            readOnly
-            rows={20}
-            className="mt-6 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none"
-            placeholder="Generated placeholder text will appear here..."
-          />
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Stat label="Characters" value={stats.characters} />
-            <Stat label="Sentences" value={stats.sentences} />
-            <Stat label="Paragraphs" value={stats.paragraphs} />
+            <SummaryTile label="Characters" value={stats.characters} />
+            <SummaryTile label="Sentences" value={stats.sentences} />
+            <SummaryTile label="Paragraphs" value={stats.paragraphs} />
           </div>
 
-          <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm text-[var(--ink-700)]">
+          <InfoBox className="mt-5 leading-normal">
             {message}
-          </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value}</p>
-    </div>
+          </InfoBox>
+      </ToolPanel>
+    </ToolPage>
   )
 }
 
@@ -355,9 +313,10 @@ function clampCount(value: string, mode: OutputMode) {
 
 function getTextStats(value: string) {
   const trimmedValue = value.trim()
+  const basicStats = getBasicTextStats(value)
 
   return {
-    characters: value.length,
+    ...basicStats,
     words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
     sentences: (value.match(/[.!?]/g) ?? []).length,
     paragraphs: trimmedValue ? trimmedValue.split(/\n\s*\n/).length : 0,
