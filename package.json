@@ -20,6 +20,7 @@
     "pdfjs-dist": "^5.7.284",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "svgo": "^4.0.1",
     "terser": "^5.47.1"
   },
   "devDependencies": {
