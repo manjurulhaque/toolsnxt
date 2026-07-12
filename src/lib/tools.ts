@@ -85,6 +85,12 @@ export const tools: Tool[] = [
     description: "Convert HEX colors into RGB, HSL, alpha formats, and CSS variables.",
   },
   {
+    title: "SVG Optimizer / Viewer",
+    href: "/svg-optimizer",
+    category: "Design",
+    description: "Optimize SVG markup, preview it, and copy compact SVG or data URI output.",
+  },
+  {
     title: "Password Generator",
     href: "/password-generator",
     category: "Security",
@@ -239,6 +245,12 @@ export const tools: Tool[] = [
     href: "/body-weight-calculator",
     category: "Health",
     description: "Estimate adult ideal body weight from height using common formulas.",
+  },
+  {
+    title: "Creatinine Clearance Calculator",
+    href: "/creatinine-clearance-calculator",
+    category: "Health",
+    description: "Estimate adult creatinine clearance with the Cockcroft-Gault equation.",
   },
   {
     title: "Case Converter",
