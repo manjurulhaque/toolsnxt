@@ -321,3 +321,8 @@ export const tools: Tool[] = [
 ]
 
 export const toolCategories = Array.from(new Set(tools.map((tool) => tool.category)))
+
+export const toolsByCategory = toolCategories.map((category) => ({
+  category,
+  tools: tools.filter((tool) => tool.category === category),
+}))
