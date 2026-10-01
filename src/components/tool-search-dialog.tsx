@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toolCategories, tools } from "@/lib/tools"
+import { useToolPreferences } from "@/lib/user-preferences"
 
 type ToolSearchDialogProps = {
   isOpen: boolean
@@ -16,6 +17,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
+  const { favorites, isFavorite, toggleFavorite } = useToolPreferences()
 
   // Focus search input on mount
   useEffect(() => {
@@ -49,9 +51,12 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
 
   const filteredTools = useMemo(() => {
     const q = query.trim().toLowerCase()
-    return tools.filter((tool) => {
+    const base = tools.filter((tool) => {
       const matchesCategory =
-        activeCategory === "All" || tool.category.toLowerCase() === activeCategory.toLowerCase()
+        activeCategory === "All" ||
+        (activeCategory === "Favorites"
+          ? favorites.includes(tool.href)
+          : tool.category.toLowerCase() === activeCategory.toLowerCase())
       if (!matchesCategory) return false
 
       if (!q) return true
@@ -61,7 +66,17 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
         tool.category.toLowerCase().includes(q)
       )
     })
-  }, [query, activeCategory])
+
+    // On initial view without search, pin favorites to top
+    if (!q && activeCategory === "All" && favorites.length > 0) {
+      return [
+        ...base.filter((t) => favorites.includes(t.href)),
+        ...base.filter((t) => !favorites.includes(t.href)),
+      ]
+    }
+
+    return base
+  }, [query, activeCategory, favorites])
 
   const safeHighlightedIndex =
     filteredTools.length > 0 ? Math.min(highlightedIndex, filteredTools.length - 1) : 0
@@ -183,6 +198,22 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
           >
             All ({tools.length})
           </button>
+
+          {favorites.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => handleCategoryChange("Favorites")}
+              className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
+                activeCategory === "Favorites"
+                  ? "bg-[var(--accent-rust)] text-white shadow-sm"
+                  : "border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/20 text-[var(--ink-900)] hover:border-[var(--accent-gold)]"
+              }`}
+            >
+              <span>★</span>
+              <span>Favorites ({favorites.length})</span>
+            </button>
+          ) : null}
+
           {toolCategories.map((category) => {
             const count = tools.filter((t) => t.category === category).length
             const isSelected = activeCategory === category
@@ -228,6 +259,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
             <div className="space-y-1">
               {filteredTools.map((tool, index) => {
                 const isHighlighted = index === safeHighlightedIndex
+                const favorited = isFavorite(tool.href)
                 return (
                   <button
                     key={tool.href}
@@ -249,13 +281,37 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                         <span className="rounded-full border border-[var(--ink-900)]/10 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--ink-700)]">
                           {tool.category}
                         </span>
+                        {favorited ? (
+                          <span
+                            className="text-xs text-[var(--accent-rust)]"
+                            title="Favorited tool"
+                          >
+                            ★
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-1 line-clamp-1 text-xs text-[var(--ink-700)]">
                         {tool.description}
                       </p>
                     </div>
 
-                    <div className="flex shrink-0 items-center self-center text-xs text-[var(--ink-700)]">
+                    <div className="flex shrink-0 items-center gap-2 self-center text-xs text-[var(--ink-700)]">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavorite(tool.href)
+                        }}
+                        className={`rounded-full p-1 transition ${
+                          favorited
+                            ? "text-[var(--accent-rust)] opacity-100"
+                            : "text-[var(--ink-700)]/30 opacity-0 group-hover:opacity-100 hover:text-[var(--ink-900)]"
+                        }`}
+                        title={favorited ? "Remove from favorites" : "Add to favorites"}
+                      >
+                        <span className="text-sm">{favorited ? "★" : "☆"}</span>
+                      </button>
+
                       {isHighlighted ? (
                         <span className="flex items-center gap-1 rounded bg-white px-2 py-1 font-mono text-[10px] font-semibold text-[var(--accent-rust)] shadow-sm">
                           Open <span className="text-xs">↵</span>

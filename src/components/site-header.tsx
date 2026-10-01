@@ -5,11 +5,23 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SiteBrand } from "@/components/site-brand"
 import { ToolSearchDialog } from "@/components/tool-search-dialog"
+import { useToolPreferences } from "@/lib/user-preferences"
+import { tools } from "@/lib/tools"
 
 export function SiteHeader() {
   const pathname = usePathname()
   const compact = pathname !== "/"
   const [searchOpen, setSearchOpen] = useState(false)
+  const { isFavorite, toggleFavorite, recordRecent } = useToolPreferences()
+
+  const isToolPage = tools.some((t) => t.href === pathname)
+
+  // Record tool page visit in recents
+  useEffect(() => {
+    if (isToolPage && pathname) {
+      recordRecent(pathname)
+    }
+  }, [isToolPage, pathname, recordRecent])
 
   // Global keyboard shortcut to open search (Cmd+K / Ctrl+K and /)
   useEffect(() => {
@@ -62,6 +74,31 @@ export function SiteHeader() {
           </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            {isToolPage ? (
+              <button
+                type="button"
+                onClick={() => toggleFavorite(pathname)}
+                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 ${
+                  isFavorite(pathname)
+                    ? "border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--ink-900)] shadow-xs"
+                    : "border-[var(--ink-900)]/10 bg-white text-[var(--ink-700)] hover:border-[var(--ink-900)]/30 hover:text-[var(--ink-900)]"
+                }`}
+                title={isFavorite(pathname) ? "Remove from favorites" : "Add to favorites"}
+                aria-label={isFavorite(pathname) ? "Remove from favorites" : "Add to favorites"}
+              >
+                <span
+                  className={`text-sm ${
+                    isFavorite(pathname) ? "text-[var(--accent-rust)]" : "text-[var(--ink-700)]/60"
+                  }`}
+                >
+                  ★
+                </span>
+                <span className="hidden sm:inline">
+                  {isFavorite(pathname) ? "Favorited" : "Favorite"}
+                </span>
+              </button>
+            ) : null}
+
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
