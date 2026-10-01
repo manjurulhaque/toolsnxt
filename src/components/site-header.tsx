@@ -1,37 +1,110 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SiteBrand } from "@/components/site-brand"
+import { ToolSearchDialog } from "@/components/tool-search-dialog"
 
 export function SiteHeader() {
-  const compact = usePathname() !== "/"
+  const pathname = usePathname()
+  const compact = pathname !== "/"
+  const [searchOpen, setSearchOpen] = useState(false)
 
-  if (compact) {
-    return (
-      <header className="border-b border-[var(--ink-900)]/10 bg-white/70">
-        <nav className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
-          <Link href="/" className="text-sm font-semibold uppercase tracking-[0.18em]">
-            <SiteBrand compact />
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-[var(--ink-900)]/10 bg-white px-4 py-2 text-sm font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-          >
-            Home
-          </Link>
-        </nav>
-      </header>
-    )
-  }
+  // Global keyboard shortcut to open search (Cmd+K / Ctrl+K and /)
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault()
+        setSearchOpen((prev) => !prev)
+        return
+      }
+
+      // Open on "/" when not focused in an input/textarea
+      if (e.key === "/" && !searchOpen) {
+        const target = e.target as HTMLElement | null
+        const isInputField =
+          target?.tagName === "INPUT" ||
+          target?.tagName === "TEXTAREA" ||
+          target?.isContentEditable
+        if (!isInputField) {
+          e.preventDefault()
+          setSearchOpen(true)
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [searchOpen])
 
   return (
-    <header className="border-b border-[var(--ink-900)]/10 bg-[var(--page-cream)]/90 backdrop-blur-xl">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-12">
-        <Link href="/" className="flex min-w-0 items-center gap-3">
-          <SiteBrand />
-        </Link>
-      </nav>
-    </header>
+    <>
+      <header
+        className={`border-b border-[var(--ink-900)]/10 ${
+          compact ? "bg-white/80 backdrop-blur-md" : "bg-[var(--page-cream)]/90 backdrop-blur-xl"
+        }`}
+      >
+        <nav
+          className={`mx-auto flex items-center justify-between gap-4 px-5 py-3.5 sm:px-8 ${
+            compact ? "max-w-6xl" : "max-w-7xl lg:px-12"
+          }`}
+        >
+          <Link
+            href="/"
+            className={
+              compact
+                ? "text-sm font-semibold uppercase tracking-[0.18em]"
+                : "flex min-w-0 items-center gap-3"
+            }
+          >
+            <SiteBrand compact={compact} />
+          </Link>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-2 rounded-full border border-[var(--ink-900)]/10 bg-white px-3 py-1.5 text-xs font-medium text-[var(--ink-800)] shadow-xs transition hover:border-[var(--ink-900)]/30 hover:bg-[var(--page-cream)]/50 sm:px-4 sm:py-2 sm:text-sm"
+              aria-label="Search tools"
+              title="Search tools (⌘K)"
+            >
+              <svg
+                className="h-3.5 w-3.5 text-[var(--ink-700)] sm:h-4 sm:w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <span className="hidden sm:inline">
+                {compact ? "Search tools..." : "Quick search 52 tools..."}
+              </span>
+              <span className="sm:hidden">Search</span>
+              <kbd className="hidden rounded bg-[var(--page-cream)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--ink-700)] sm:inline">
+                ⌘K
+              </kbd>
+            </button>
+
+            {compact ? (
+              <Link
+                href="/"
+                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-3.5 py-1.5 text-xs font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 hover:bg-[var(--page-cream)]/50 sm:px-4 sm:py-2 sm:text-sm"
+              >
+                All Tools
+              </Link>
+            ) : null}
+          </div>
+        </nav>
+      </header>
+
+      <ToolSearchDialog isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+    </>
   )
 }
