@@ -1,301 +1,58 @@
-"use client"
-
-import { useMemo, useState } from "react"
-import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard } from "@/lib/browser-actions"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { MetaTagGeneratorTool } from "./meta-tag-generator-tool"
 
-type TwitterCard = "summary" | "summary_large_image"
+const pagePath = "/meta-tag-generator"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Meta Tag Generator | SEO, Open Graph & Twitter Tags"
+const pageDescription = "Generate title, description, robots, canonical, Open Graph, and Twitter card meta tags online. Preview search and social cards, then copy the HTML markup."
 
-const sample = {
-  title: `${SITE_NAME} - Fast Browser Utilities`,
-  description: "A compact collection of practical calculators, converters, and generators.",
-  url: `${SITE_URL}/tools`,
-  siteName: SITE_NAME,
-  imageUrl: `${SITE_URL}/og-image.png`,
-  robots: "index, follow",
-}
+const faqs = [
+  ["What is a meta tag generator?", "A meta tag generator creates HTML head markup from the page details you provide, making it easier to prepare common search and social metadata."],
+  ["Which tags does this tool generate?", "It generates a title element, description, robots, canonical link, Open Graph website tags, and Twitter card title, description, image, and card-type tags."],
+  ["What is a canonical URL?", "A canonical link identifies the preferred URL for a page. Search engines can use it as a signal when similar or duplicate URLs exist."],
+  ["What does the robots setting do?", "The selected robots value is written into a meta robots tag. This tool offers index and noindex, plus follow and nofollow combinations; ensure the setting matches your publishing intent."],
+  ["What are Open Graph tags?", "Open Graph properties provide information such as a title, description, URL, image, and type for platforms that use the Open Graph protocol when a page is shared."],
+  ["What are Twitter card tags?", "The generated Twitter tags describe a summary or large-image card, along with the supplied title, description, and image URL."],
+  ["Does the tool validate my URLs?", "No. It inserts entered URL values after HTML escaping. Confirm that canonical and image URLs are complete, publicly reachable URLs before publishing."],
+  ["Are title and description length counts requirements?", "No. The displayed counts are character counts for quick review, not guaranteed search-result limits. Search services can choose how to present a title or snippet."],
+  ["Will the preview match Google or every social platform?", "No. The previews are illustrative. Search engines and social platforms control their own rendering and may use different available page data."],
+  ["Does this tool publish tags to my website?", "No. It only produces markup. Add the copied tags to the head of the relevant page through your site framework or publishing system."],
+  ["Are my page details uploaded to a server?", "The generator runs in the browser and does not intentionally upload the values entered into this workspace."],
+  ["Does it work on mobile devices?", "Yes. The generator uses standard browser fields, buttons, previews, and a selectable output area."],
+  ["Is the Meta Tag Generator free?", "Yes. It is a free browser-based helper for preparing the documented metadata tags."],
+]
+
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: pageTitle, description: pageDescription, url: pageUrl, isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL }, about: ["Meta tags", "Search metadata", "Open Graph protocol", "Twitter Cards"] },
+  { "@context": "https://schema.org", "@type": "WebApplication", name: "Meta Tag Generator", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, featureList: ["Title and description tags", "Robots meta tag", "Canonical link", "Open Graph website tags", "Twitter summary and large-image card tags", "Search and social previews", "Copy generated markup", "Clear and sample controls"] },
+  { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Meta Tag Generator", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Meta Tag Generator", item: pageUrl }] },
+  { "@context": "https://schema.org", "@type": "HowTo", name: "How to generate meta tags", description: "Enter page details, inspect the local previews, and copy the generated markup into the page head.", step: [{ "@type": "HowToStep", name: "Enter page details", text: "Provide a title, description, canonical URL, site name, robots setting, and optional social image URL." }, { "@type": "HowToStep", name: "Choose card type", text: "Choose the provided Twitter summary or large-image card option." }, { "@type": "HowToStep", name: "Review and copy", text: "Review the local previews and copy the generated tags before adding them to the page head." }] },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([question, answer]) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })) },
+]
+
+export const metadata: Metadata = { title: pageTitle, description: pageDescription, alternates: { canonical: pagePath }, openGraph: { title: pageTitle, description: pageDescription, url: pageUrl, siteName: SITE_NAME, type: "website" }, twitter: { card: "summary", title: pageTitle, description: pageDescription } }
 
 export default function MetaTagGeneratorPage() {
-  const [title, setTitle] = useState(sample.title)
-  const [description, setDescription] = useState(sample.description)
-  const [url, setUrl] = useState(sample.url)
-  const [siteName, setSiteName] = useState(sample.siteName)
-  const [imageUrl, setImageUrl] = useState(sample.imageUrl)
-  const [robots, setRobots] = useState(sample.robots)
-  const [twitterCard, setTwitterCard] = useState<TwitterCard>("summary_large_image")
-  const [message, setMessage] = useState("Fill in page details to generate SEO and social tags.")
-
-  const tags = useMemo(
-    () =>
-      generateMetaTags({
-        title,
-        description,
-        url,
-        siteName,
-        imageUrl,
-        robots,
-        twitterCard,
-      }),
-    [description, imageUrl, robots, siteName, title, twitterCard, url],
-  )
-  const stats = useMemo(() => getMetaStats(title, description), [description, title])
-
-  async function copyTags() {
-    if (!tags.trim()) {
-      setMessage("Add page details before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(tags)
-      setMessage("Meta tags copied.")
-    } catch {
-      setMessage("Copy failed. Select the tags and copy them manually.")
-    }
-  }
-
-  function clearAll() {
-    setTitle("")
-    setDescription("")
-    setUrl("")
-    setSiteName("")
-    setImageUrl("")
-    setRobots("index, follow")
-    setTwitterCard("summary_large_image")
-    setMessage("Workspace cleared.")
-  }
-
-  function loadSample() {
-    setTitle(sample.title)
-    setDescription(sample.description)
-    setUrl(sample.url)
-    setSiteName(sample.siteName)
-    setImageUrl(sample.imageUrl)
-    setRobots(sample.robots)
-    setTwitterCard("summary_large_image")
-    setMessage("Sample metadata loaded.")
-  }
-
-  return (
-    <ToolPage>
-        <ToolPanel>
-          <ToolIntro eyebrow="SEO tool" title="Meta Tag Generator">
-            Generate page title, description, robots, canonical, Open Graph, and Twitter card tags
-            with live search and social previews.
-          </ToolIntro>
-
-          <div className="mt-6 grid gap-4">
-            <TextInput id="meta-title" label="Title" value={title} onChange={setTitle} />
-            <label htmlFor="meta-description" className="block">
-              <span className="text-sm font-medium">Description</span>
-              <textarea
-                id="meta-description"
-                value={description}
-                onChange={(event) => {
-                  setDescription(event.target.value)
-                  setMessage("Description updated.")
-                }}
-                rows={4}
-                className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none transition focus:border-[var(--accent-rust)]"
-                placeholder="Describe the page..."
-              />
-            </label>
-            <TextInput id="meta-url" label="Canonical URL" value={url} onChange={setUrl} />
-            <div className="grid gap-4 sm:grid-cols-2">
-              <TextInput id="meta-site" label="Site name" value={siteName} onChange={setSiteName} />
-              <label htmlFor="meta-robots" className="block">
-                <span className="text-sm font-medium">Robots</span>
-                <select
-                  id="meta-robots"
-                  value={robots}
-                  onChange={(event) => {
-                    setRobots(event.target.value)
-                    setMessage("Robots setting updated.")
-                  }}
-                  className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-                >
-                  <option value="index, follow">index, follow</option>
-                  <option value="noindex, follow">noindex, follow</option>
-                  <option value="index, nofollow">index, nofollow</option>
-                  <option value="noindex, nofollow">noindex, nofollow</option>
-                </select>
-              </label>
-            </div>
-            <TextInput id="meta-image" label="Social image URL" value={imageUrl} onChange={setImageUrl} />
-          </div>
-
-          <div className="mt-5 grid grid-cols-2 gap-2">
-            {(["summary_large_image", "summary"] as TwitterCard[]).map((card) => (
-              <button
-                key={card}
-                type="button"
-                onClick={() => {
-                  setTwitterCard(card)
-                  setMessage("Twitter card updated.")
-                }}
-                className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                  twitterCard === card
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {card === "summary_large_image" ? "Large image" : "Summary"}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearAll}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Load Sample
-            </button>
-          </div>
-        </ToolPanel>
-
-        <div className="space-y-6">
-          <ToolPanel>
-            <PanelHeader eyebrow="Preview" title="Search Result" badge={`${stats.titleLength}/${stats.descriptionLength}`} />
-
-            <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
-              <p className="break-all text-xs text-[var(--ink-700)]">{url || `${SITE_URL}/page`}</p>
-              <h3 className="mt-2 text-xl font-semibold text-blue-700">
-                {title || "Page title preview"}
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
-                {description || "Meta description preview will appear here."}
-              </p>
-            </div>
-
-            <div className="mt-5 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-              <div className="aspect-[1.91/1] rounded-[1rem] border border-[var(--ink-900)]/10 bg-white">
-                {imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={imageUrl} alt="" className="h-full w-full rounded-[1rem] object-cover" />
-                ) : null}
-              </div>
-              <p className="mt-3 text-xs uppercase tracking-[0.16em] text-[var(--ink-700)]">
-                {siteName || "Site name"}
-              </p>
-              <h3 className="mt-1 text-lg font-semibold">{title || "Social title preview"}</h3>
-              <p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">
-                {description || "Social description preview will appear here."}
-              </p>
-            </div>
-          </ToolPanel>
-
-          <ToolPanel>
-            <PanelHeader eyebrow="Markup" title="Generated Tags" badge={`${tags.split("\n").filter(Boolean).length} tags`} />
-
-            <textarea
-              value={tags}
-              readOnly
-              rows={14}
-              spellCheck={false}
-              className="mt-6 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-xs leading-6 outline-none"
-              placeholder="Generated meta tags will appear here..."
-            />
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-              <InfoBox>
-                {message}
-          </InfoBox>
-              <button
-                type="button"
-                onClick={copyTags}
-                className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-              >
-                Copy Tags
-              </button>
-            </div>
-          </ToolPanel>
-        </div>
-    </ToolPage>
-  )
-}
-
-function TextInput({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-      />
-    </label>
-  )
-}
-
-function generateMetaTags({
-  title,
-  description,
-  url,
-  siteName,
-  imageUrl,
-  robots,
-  twitterCard,
-}: {
-  title: string
-  description: string
-  url: string
-  siteName: string
-  imageUrl: string
-  robots: string
-  twitterCard: TwitterCard
-}) {
-  const tags = [
-    title ? `<title>${escapeHtml(title)}</title>` : "",
-    description ? `<meta name="description" content="${escapeHtml(description)}">` : "",
-    robots ? `<meta name="robots" content="${escapeHtml(robots)}">` : "",
-    url ? `<link rel="canonical" href="${escapeHtml(url)}">` : "",
-    title ? `<meta property="og:title" content="${escapeHtml(title)}">` : "",
-    description ? `<meta property="og:description" content="${escapeHtml(description)}">` : "",
-    url ? `<meta property="og:url" content="${escapeHtml(url)}">` : "",
-    siteName ? `<meta property="og:site_name" content="${escapeHtml(siteName)}">` : "",
-    imageUrl ? `<meta property="og:image" content="${escapeHtml(imageUrl)}">` : "",
-    `<meta property="og:type" content="website">`,
-    `<meta name="twitter:card" content="${twitterCard}">`,
-    title ? `<meta name="twitter:title" content="${escapeHtml(title)}">` : "",
-    description ? `<meta name="twitter:description" content="${escapeHtml(description)}">` : "",
-    imageUrl ? `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">` : "",
-  ]
-
-  return tags.filter(Boolean).join("\n")
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-}
-
-function getMetaStats(title: string, description: string) {
-  return {
-    titleLength: title.length,
-    descriptionLength: description.length,
-  }
+  return <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+    <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12"><MetaTagGeneratorTool /></section>
+    <section className="mx-auto max-w-6xl space-y-6 px-5 pb-14 sm:px-8">
+      <ToolPanel><PanelHeader eyebrow="Overview" title="What Is a Meta Tag Generator?" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>A meta tag generator prepares common HTML metadata for a page from a few details: a title, summary, canonical URL, indexing directive, site name, and social image. Developers, content teams, site owners, and students can use the resulting markup while building or updating a page.</p><p>Metadata helps machines understand page information, but it does not guarantee a particular ranking, search snippet, or social-card appearance. This tool produces the documented tags and local previews; publish the markup through the page&apos;s head and verify it in the platforms relevant to your site.</p></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Generated Markup" title="What the Generator Includes" /><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[720px] border-collapse text-left text-sm"><thead><tr className="border-b border-[var(--ink-900)]/10"><th className="py-3 pr-4 font-semibold">Markup</th><th className="py-3 pr-4 font-semibold">Source field</th><th className="py-3 font-semibold">Purpose</th></tr></thead><tbody className="text-[var(--ink-700)]">{[["title", "Title", "Document title"], ["meta description", "Description", "Page summary metadata"], ["meta robots", "Robots", "Selected indexing and link-following directive"], ["link canonical", "Canonical URL", "Preferred page URL signal"], ["og:title, og:description, og:url", "Title, description, URL", "Open Graph page information"], ["og:site_name, og:image, og:type", "Site name, image URL", "Open Graph site, image, and website type"], ["twitter:card, title, description, image", "Card option and supplied fields", "Twitter card metadata"]].map(([tag, field, purpose]) => <tr key={tag} className="border-b border-[var(--ink-900)]/8"><td className="py-3 pr-4 font-mono font-semibold text-[var(--ink-900)]">{tag}</td><td className="py-3 pr-4">{field}</td><td className="py-3">{purpose}</td></tr>)}</tbody></table></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Method" title="How Meta Tag Generation Works" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>Enter the fields and choose one of the two available Twitter card types. The tool HTML-escapes title, description, URL, site-name, image-URL, and robots values before inserting them into the generated markup. It always emits <code>og:type</code> as <code>website</code>.</p><p>The search and social cards are local visual aids created from the same entered values. They do not fetch page content, validate URLs, inspect existing metadata, generate images, test crawlability, or publish tags automatically.</p></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Workflow" title="How to Use the Meta Tag Generator" /><ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Enter a page title and concise description.</li><li>Add the canonical URL, site name, robots directive, and a social image URL when available.</li><li>Choose Summary or Large image for the generated Twitter card tag.</li><li>Review the local search and social previews, plus the character counts.</li><li>Copy the tags and add them to the page&apos;s HTML head through the relevant publishing workflow.</li><li>Check the deployed page with the search and social tools used by your organization.</li></ol></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Examples" title="Common Uses" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["New landing page", "Prepare a title, description, canonical URL, and sharing metadata before a marketing page is published."], ["Documentation page", "Create a consistent title and description for a technical guide, then review the copied head markup."], ["Article update", "Draft refreshed social title, summary, and image metadata when revising a page for sharing."], ["Site migration", "Prepare canonical markup for a page after confirming its intended preferred URL."], ["Learning HTML metadata", "Compare a short set of fields with the resulting title, meta, and link elements."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
+      <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Advantages" title="Benefits" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Creates a compact, copyable set of common page and sharing tags.</li><li>Keeps title, description, canonical, Open Graph, and Twitter fields together.</li><li>Provides local previews and character counts for review.</li><li>Escapes key entered values before markup is generated.</li><li>Runs in the browser without installing another application.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Boundaries" title="Limitations" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>The tool does not verify URL availability, image dimensions, crawlability, or deployed metadata.</li><li>Search engines and social platforms decide whether and how to display titles, descriptions, and card images.</li><li>It offers only the four listed robots combinations, two Twitter card values, and <code>website</code> Open Graph type.</li><li>It does not generate structured data, alternate-language links, favicons, or content-specific Open Graph types.</li><li>Copied markup must still be integrated and tested in the target site.</li></ul></ToolPanel></div>
+      <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Guidance" title="Tips for Better Metadata" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Describe the actual page clearly and keep the title and summary useful for readers.</li><li>Use the preferred, absolute canonical URL that you intend to publish.</li><li>Use a publicly accessible absolute image URL when adding an Open Graph or Twitter image.</li><li>Choose robots directives deliberately; do not use noindex just to hide a page temporarily without understanding the effect.</li><li>Review the deployed markup and retest after template or CMS changes.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Avoid" title="Common Mistakes" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Assuming a local preview guarantees a search or social result layout.</li><li>Using a relative, staging, mistyped, or inaccessible canonical or image URL.</li><li>Publishing a noindex directive unintentionally.</li><li>Giving duplicate or unrelated pages the same canonical URL without a considered consolidation plan.</li><li>Forgetting that generated tags must be added to the document head before they have any effect.</li></ul></ToolPanel></div>
+      <ToolPanel><PanelHeader eyebrow="Questions" title="FAQ" /><div className="mt-6 grid gap-4">{faqs.map(([question, answer]) => <details key={question} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><summary className="cursor-pointer font-semibold">{question}</summary><p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{answer}</p></details>)}</div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="More Tools" title="Related Tools" /><nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">{[["Robots.txt Generator", "/robots-txt-generator"], ["XML Sitemap Generator", "/xml-sitemap-generator"], ["HTML, CSS & JavaScript Minifier", "/html-css-js-minifier"], ["HTML to Markdown", "/html-to-markdown"], ["JSON Formatter", "/json-formatter"], ["URL Encoder / Decoder", "/url-encoder-decoder"]].map(([label, href]) => <Link key={href} href={href} className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40">{label}</Link>)}</nav></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Terms" title="Glossary" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Meta tag", "Markup in a document head that communicates information about the page."], ["Title element", "The document title used by browsers and often considered by search engines."], ["Meta description", "A short page-description value supplied as metadata."], ["Canonical URL", "The preferred URL declared for a page."], ["Robots meta tag", "A page-level directive that can express indexing and link-following preferences to crawlers."], ["Open Graph", "A protocol for expressing page information for social graphs."], ["Twitter card", "Metadata that can describe a summary or large-image card for X."], ["Social image", "An image URL supplied for a social-card property."], ["HTML escaping", "Replacing certain characters with entities so their text is safely placed in an HTML attribute or element."], ["Index", "A robots directive that permits a crawler to index a page."], ["Noindex", "A robots directive that asks a crawler not to index a page."], ["Preview", "An illustrative local representation rather than a platform-guaranteed result."]].map(([term, definition]) => <div key={term}><h3 className="font-semibold">{term}</h3><p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p></div>)}</div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/meta" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: The meta element</a></li><li><a href="https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag" className="font-semibold underline" rel="noopener noreferrer" target="_blank">Google Search Central: Robots meta tags</a></li><li><a href="https://ogp.me/" className="font-semibold underline" rel="noopener noreferrer" target="_blank">The Open Graph protocol</a></li><li><a href="https://docs.x.com/overview" className="font-semibold underline" rel="noopener noreferrer" target="_blank">X Developer Platform documentation</a></li></ul></ToolPanel>
+      <InfoBox>Educational disclaimer: This tool prepares common HTML metadata from the values entered into its fields. It is intended for development, content, and learning workflows. It does not guarantee indexing, ranking, crawler behavior, social-card rendering, accessibility, or legal and policy compliance; review deployed pages and platform requirements before publication.</InfoBox>
+    </section>
+  </main>
 }

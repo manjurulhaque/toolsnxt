@@ -1,334 +1,549 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { UnitTool } from "./unit-tool"
 
-import { useMemo, useState } from "react"
-import { PanelHeader, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
+const pagePath = "/unit-converter"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Unit Converter | Metric, Imperial, Temperature, Volume and Speed"
+const pageDescription =
+  "Convert length, weight, temperature, volume, area, and speed units online with side-by-side results and scientific notation for very large or small values."
 
-type CategoryKey = "length" | "mass" | "temperature" | "volume" | "area" | "speed"
+const faqs = [
+  {
+    question: "What is a unit converter?",
+    answer:
+      "A unit converter changes a value from one measurement unit to another within the same category, such as meters to feet or Celsius to Fahrenheit.",
+  },
+  {
+    question: "How does this unit converter work?",
+    answer:
+      "For most categories it converts through a base unit. Temperature uses formulas because Celsius, Fahrenheit, and Kelvin do not share a simple zero point.",
+  },
+  {
+    question: "What is the metric system?",
+    answer:
+      "The metric system is a decimal measurement system. The modern international form is the SI, used widely in science, engineering, and commerce.",
+  },
+  {
+    question: "What is the imperial system?",
+    answer:
+      "Imperial and U.S. customary units include units such as inch, foot, yard, mile, ounce, pound, pint, and gallon.",
+  },
+  {
+    question: "Which units are supported?",
+    answer:
+      "This page supports length, weight, temperature, volume, area, and speed units listed in the converter.",
+  },
+  {
+    question: "How accurate are the conversions?",
+    answer:
+      "The converter uses the constants implemented in the page and formats results for display. Critical work should be independently verified.",
+  },
+  {
+    question: "How are temperature conversions calculated?",
+    answer:
+      "Temperature is converted through Celsius using formulas for Fahrenheit and Kelvin instead of fixed multipliers.",
+  },
+  {
+    question: "Why are some values rounded?",
+    answer:
+      "Display formatting limits ordinary decimal output to a maximum number of fractional digits.",
+  },
+  {
+    question: "Can I convert engineering units?",
+    answer:
+      "You can convert the supported engineering-adjacent units for length, mass, area, volume, temperature, and speed.",
+  },
+  {
+    question: "Can I convert scientific units?",
+    answer:
+      "The converter includes SI-related units such as meter, kilogram, gram, liter, square meter, meter per second, and kelvin.",
+  },
+  {
+    question: "Does the converter support SI units?",
+    answer:
+      "Yes, for the implemented categories. It includes meters, kilograms or grams, kelvin, square meters, cubic meters, and meters per second.",
+  },
+  {
+    question: "What is scientific notation?",
+    answer:
+      "Scientific notation writes very large or small values with powers of 10, such as 1.23e+6.",
+  },
+  {
+    question: "Why is my result different from another calculator?",
+    answer:
+      "Differences can come from rounding, unit definitions, display precision, or selecting a different unit such as U.S. gallon versus another gallon type.",
+  },
+  {
+    question: "Can I convert very large numbers?",
+    answer:
+      "Yes, if the browser can represent the number as a finite JavaScript number. Very large or tiny results may be shown in scientific notation.",
+  },
+  {
+    question: "Is this converter free?",
+    answer:
+      "Yes. This unit conversion calculator is a free browser tool.",
+  },
+  {
+    question: "Does it work on mobile devices?",
+    answer:
+      "Yes. The page is responsive and uses standard form controls for mobile and desktop browsers.",
+  },
+]
 
-type LinearUnit = {
-  key: string
-  label: string
-  symbol: string
-  toBase: number
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    about: ["Unit Converter", "Metric Converter", "Measurement Converter", "Conversion Calculator"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Unit Converter",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Unit Converter",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Unit Converter",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to convert units online",
+    description: "Convert values between supported measurement units.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Select a category",
+        text: "Choose length, weight, temperature, volume, area, or speed.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Enter a value",
+        text: "Type the source measurement value.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Choose units",
+        text: "Select the From and To units.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Review result",
+        text: "Read the converted value and the side-by-side unit list.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Swap if needed",
+        text: "Use Swap to reverse the selected units.",
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
+]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
 }
-
-type TemperatureUnit = {
-  key: "celsius" | "fahrenheit" | "kelvin"
-  label: string
-  symbol: string
-}
-
-type Unit = LinearUnit | TemperatureUnit
-
-type Category = {
-  label: string
-  baseLabel: string
-  units: Unit[]
-}
-
-const categories: Record<CategoryKey, Category> = {
-  length: {
-    label: "Length",
-    baseLabel: "meters",
-    units: [
-      { key: "millimeter", label: "Millimeter", symbol: "mm", toBase: 0.001 },
-      { key: "centimeter", label: "Centimeter", symbol: "cm", toBase: 0.01 },
-      { key: "meter", label: "Meter", symbol: "m", toBase: 1 },
-      { key: "kilometer", label: "Kilometer", symbol: "km", toBase: 1000 },
-      { key: "inch", label: "Inch", symbol: "in", toBase: 0.0254 },
-      { key: "foot", label: "Foot", symbol: "ft", toBase: 0.3048 },
-      { key: "yard", label: "Yard", symbol: "yd", toBase: 0.9144 },
-      { key: "mile", label: "Mile", symbol: "mi", toBase: 1609.344 },
-    ],
-  },
-  mass: {
-    label: "Weight",
-    baseLabel: "grams",
-    units: [
-      { key: "milligram", label: "Milligram", symbol: "mg", toBase: 0.001 },
-      { key: "gram", label: "Gram", symbol: "g", toBase: 1 },
-      { key: "kilogram", label: "Kilogram", symbol: "kg", toBase: 1000 },
-      { key: "ounce", label: "Ounce", symbol: "oz", toBase: 28.349523125 },
-      { key: "pound", label: "Pound", symbol: "lb", toBase: 453.59237 },
-      { key: "stone", label: "Stone", symbol: "st", toBase: 6350.29318 },
-    ],
-  },
-  temperature: {
-    label: "Temperature",
-    baseLabel: "celsius",
-    units: [
-      { key: "celsius", label: "Celsius", symbol: "C" },
-      { key: "fahrenheit", label: "Fahrenheit", symbol: "F" },
-      { key: "kelvin", label: "Kelvin", symbol: "K" },
-    ],
-  },
-  volume: {
-    label: "Volume",
-    baseLabel: "liters",
-    units: [
-      { key: "milliliter", label: "Milliliter", symbol: "ml", toBase: 0.001 },
-      { key: "liter", label: "Liter", symbol: "L", toBase: 1 },
-      { key: "cubic-meter", label: "Cubic Meter", symbol: "m3", toBase: 1000 },
-      { key: "teaspoon", label: "Teaspoon", symbol: "tsp", toBase: 0.00492892159 },
-      { key: "tablespoon", label: "Tablespoon", symbol: "tbsp", toBase: 0.0147867648 },
-      { key: "cup", label: "Cup", symbol: "cup", toBase: 0.2365882365 },
-      { key: "pint", label: "Pint", symbol: "pt", toBase: 0.473176473 },
-      { key: "gallon", label: "Gallon", symbol: "gal", toBase: 3.785411784 },
-    ],
-  },
-  area: {
-    label: "Area",
-    baseLabel: "square meters",
-    units: [
-      { key: "square-meter", label: "Square Meter", symbol: "m2", toBase: 1 },
-      { key: "square-kilometer", label: "Square Kilometer", symbol: "km2", toBase: 1_000_000 },
-      { key: "square-foot", label: "Square Foot", symbol: "ft2", toBase: 0.09290304 },
-      { key: "square-yard", label: "Square Yard", symbol: "yd2", toBase: 0.83612736 },
-      { key: "acre", label: "Acre", symbol: "ac", toBase: 4046.8564224 },
-      { key: "hectare", label: "Hectare", symbol: "ha", toBase: 10000 },
-    ],
-  },
-  speed: {
-    label: "Speed",
-    baseLabel: "meters per second",
-    units: [
-      { key: "meter-second", label: "Meter per Second", symbol: "m/s", toBase: 1 },
-      { key: "kilometer-hour", label: "Kilometer per Hour", symbol: "km/h", toBase: 0.2777777778 },
-      { key: "mile-hour", label: "Mile per Hour", symbol: "mph", toBase: 0.44704 },
-      { key: "foot-second", label: "Foot per Second", symbol: "ft/s", toBase: 0.3048 },
-      { key: "knot", label: "Knot", symbol: "kn", toBase: 0.5144444444 },
-    ],
-  },
-}
-
-const categoryKeys = Object.keys(categories) as CategoryKey[]
 
 export default function UnitConverterPage() {
-  const [categoryKey, setCategoryKey] = useState<CategoryKey>("length")
-  const [fromUnitKey, setFromUnitKey] = useState(categories.length.units[2].key)
-  const [toUnitKey, setToUnitKey] = useState(categories.length.units[5].key)
-  const [inputValue, setInputValue] = useState("1")
-
-  const category = categories[categoryKey]
-  const fromUnit = category.units.find((unit) => unit.key === fromUnitKey) ?? category.units[0]
-  const toUnit = category.units.find((unit) => unit.key === toUnitKey) ?? category.units[1] ?? category.units[0]
-  const numericValue = Number(inputValue)
-  const hasValidInput = inputValue.trim() !== "" && Number.isFinite(numericValue)
-
-  const convertedValue = useMemo(() => {
-    if (!hasValidInput) {
-      return null
-    }
-
-    return convertValue(numericValue, fromUnit, toUnit, categoryKey)
-  }, [categoryKey, fromUnit, hasValidInput, numericValue, toUnit])
-
-  const comparisonRows = useMemo(() => {
-    if (!hasValidInput) {
-      return []
-    }
-
-    return category.units.map((unit) => ({
-      unit,
-      value: convertValue(numericValue, fromUnit, unit, categoryKey),
-    }))
-  }, [category.units, categoryKey, fromUnit, hasValidInput, numericValue])
-
-  function selectCategory(nextCategoryKey: CategoryKey) {
-    const nextCategory = categories[nextCategoryKey]
-    setCategoryKey(nextCategoryKey)
-    setFromUnitKey(nextCategory.units[0].key)
-    setToUnitKey(nextCategory.units[1]?.key ?? nextCategory.units[0].key)
-  }
-
-  function swapUnits() {
-    setFromUnitKey(toUnit.key)
-    setToUnitKey(fromUnit.key)
-  }
-
   return (
-    <ToolPage gridClassName="lg:grid-cols-[0.95fr_1.05fr]">
-        <ToolPanel>
-          <ToolIntro eyebrow="Everyday tool" title="Unit Converter">
-            Convert common measurements across length, weight, temperature, volume, area, and speed
-            with quick side-by-side results.
-          </ToolIntro>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:py-12">
+          <UnitTool />
+        </section>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {categoryKeys.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => selectCategory(key)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                  categoryKey === key
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {categories[key].label}
-              </button>
-            ))}
-          </div>
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
+          <ToolPanel>
+            <PanelHeader eyebrow="Guide" title="What Is a Unit Converter?" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                A unit converter changes a measurement from one unit to another while preserving
+                the same physical quantity. Unit conversion matters in education, engineering,
+                science, construction, manufacturing, healthcare, travel, cooking, and everyday
+                planning because people often work across metric and imperial systems.
+              </p>
+              <p>
+                Standardized units reduce ambiguity. The metric system, including SI units, is
+                decimal-based and widely used internationally, while imperial and U.S. customary
+                units remain common in some everyday and industry contexts.
+              </p>
+            </div>
+          </ToolPanel>
 
-          <div className="mt-6 space-y-4">
-            <label htmlFor="converter-value" className="block text-sm font-medium">
-              Value
-            </label>
-            <input
-              id="converter-value"
-              type="number"
-              inputMode="decimal"
-              value={inputValue}
-              onChange={(event) => setInputValue(event.target.value)}
-              className="w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-2xl font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-            />
-          </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Method" title="How the Unit Converter Works" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Category selection", "Choose length, weight, temperature, volume, area, or speed."],
+                ["From and To units", "Select the source and destination units from the active category."],
+                ["Instant result", "The result updates as the value or selected units change."],
+                ["Swap units", "Swap reverses the current From and To selections."],
+                ["Comparison list", "The result panel also shows the entered value converted to every unit in the category."],
+                ["Scientific notation", "Very large or very small values may be displayed with exponential notation."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-end">
-            <UnitSelect
-              id="from-unit"
-              label="From"
-              units={category.units}
-              value={fromUnit.key}
-              onChange={setFromUnitKey}
-            />
-            <button
-              type="button"
-              onClick={swapUnits}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Swap
-            </button>
-            <UnitSelect
-              id="to-unit"
-              label="To"
-              units={category.units}
-              value={toUnit.key}
-              onChange={setToUnitKey}
-            />
-          </div>
-        </ToolPanel>
+          <ToolPanel>
+            <PanelHeader eyebrow="Categories" title="Supported Unit Categories" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Length", "Millimeter, centimeter, meter, kilometer, inch, foot, yard, mile."],
+                ["Weight", "Milligram, gram, kilogram, ounce, pound, stone."],
+                ["Temperature", "Celsius, Fahrenheit, kelvin."],
+                ["Volume", "Milliliter, liter, cubic meter, teaspoon, tablespoon, cup, pint, gallon."],
+                ["Area", "Square meter, square kilometer, square foot, square yard, acre, hectare."],
+                ["Speed", "Meter per second, kilometer per hour, mile per hour, foot per second, knot."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
 
-        <ToolPanel>
-          <PanelHeader eyebrow="Result" title="{category.label} Conversion" badge={"Base: {category.baseLabel}"} />
+          <ToolPanel>
+            <PanelHeader eyebrow="Accuracy" title="Conversion Accuracy" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                Most categories use fixed conversion factors to and from a base unit for that
+                category. Temperature conversions use formulas because the scales have different
+                zero points. Display precision is controlled by the page formatter: ordinary
+                numbers show up to 8 fractional digits, while very large or very small results use
+                scientific notation.
+              </p>
+              <InfoBox>
+                For critical engineering, scientific, medical, legal, or commercial work, verify
+                the result against the applicable standard, specification, or professional workflow.
+              </InfoBox>
+            </div>
+          </ToolPanel>
 
-          <div className="mt-6 rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
-            <p className="text-sm text-[var(--ink-700)]">
-              {formatInput(inputValue)} {fromUnit.symbol} equals
-            </p>
-            <p className="mt-3 break-words text-4xl font-semibold tabular-nums text-[var(--ink-900)] sm:text-5xl">
-              {convertedValue == null ? "Enter a number" : formatNumber(convertedValue)}
-            </p>
-            <p className="mt-2 text-sm font-medium text-[var(--ink-700)]">{toUnit.label}</p>
-          </div>
+          <ToolPanel>
+            <PanelHeader eyebrow="Examples" title="Common Conversion Examples" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Length", "10 kilometers to miles."],
+                ["Weight", "5 kilograms to pounds."],
+                ["Temperature", "25 C to F."],
+                ["Volume", "2 liters to gallons."],
+                ["Speed", "100 km/h to mph."],
+                ["Area", "1 acre to square meters."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
 
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--ink-700)]">
-              All {category.label} Units
-            </h3>
-            <div className="mt-3 grid gap-2">
-              {comparisonRows.map((row) => (
-                <div
-                  key={row.unit.key}
-                  className={`flex items-center justify-between gap-4 rounded-[1.1rem] border px-4 py-3 text-sm ${
-                    row.unit.key === toUnit.key
-                      ? "border-[var(--accent-rust)]/35 bg-[var(--accent-rust)]/8"
-                      : "border-[var(--ink-900)]/8 bg-white"
-                  }`}
+          <ToolPanel>
+            <PanelHeader eyebrow="Use" title="How to Use the Unit Converter" />
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Select a measurement category.</li>
+              <li>Enter the value you want to convert.</li>
+              <li>Choose the source unit in the From selector.</li>
+              <li>Choose the destination unit in the To selector.</li>
+              <li>View the converted result and all matching units.</li>
+              <li>Use Swap when you need to reverse the conversion direction.</li>
+            </ol>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Results" title="Understanding the Results" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Converted value", "The main result shows the entered value converted into the selected To unit."],
+                ["Selected units", "The From and To selectors define the conversion direction."],
+                ["All units list", "Every unit in the active category is shown for quick comparison."],
+                ["Rounded values", "Displayed decimal values may be rounded by the formatter."],
+                ["Scientific notation", "Extremely large or small results may appear in e notation."],
+                ["Invalid input", "If the input is empty or not finite, the result asks for a number."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Applications" title="Common Uses" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Engineering and physics", "Check length, area, volume, speed, mass, and temperature values."],
+                ["Construction and manufacturing", "Move between metric and imperial measurements used in plans, materials, and specifications."],
+                ["Education", "Practice metric, imperial, temperature, area, and speed conversions."],
+                ["Cooking and travel", "Convert cups, pints, gallons, liters, miles, kilometers, and temperatures."],
+                ["Healthcare and science", "Convert supported mass, volume, and temperature values for general learning."],
+                ["International trade", "Compare measurements across systems when reviewing product dimensions or quantities."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Practical Notes" title="Benefits, Limits, Tips and Common Mistakes" />
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold">Benefits</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Fast conversions across multiple measurement systems.</li>
+                  <li>Reduces manual calculation errors.</li>
+                  <li>Useful for students, professionals, and everyday tasks.</li>
+                  <li>Shows side-by-side values across the whole category.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Limitations</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Only the implemented categories and units are supported.</li>
+                  <li>Displayed values may be rounded.</li>
+                  <li>Very large or small values may use scientific notation.</li>
+                  <li>Critical calculations should be independently verified.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tips for Accurate Results</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Select the correct measurement category first.</li>
+                  <li>Verify source and destination units before using the result.</li>
+                  <li>Check decimal placement carefully.</li>
+                  <li>Use enough precision for the task at hand.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Common Mistakes</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Selecting the wrong category.</li>
+                  <li>Confusing weight and mass terminology.</li>
+                  <li>Mixing metric and imperial unit abbreviations.</li>
+                  <li>Confusing Celsius, Fahrenheit, and kelvin.</li>
+                </ul>
+              </div>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
                 >
-                  <span className="font-medium">{row.unit.label}</span>
-                  <span className="text-right font-semibold tabular-nums text-[var(--ink-800)]">
-                    {formatNumber(row.value)} {row.unit.symbol}
-                  </span>
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="More Tools" title="Related Tools" />
+            <div className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/scientific-calculator"
+              >
+                Scientific Calculator
+              </Link>
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/percentage-calculator"
+              >
+                Percentage Calculator
+              </Link>
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/bmi-calculator"
+              >
+                BMI Calculator
+              </Link>
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/age-calculator"
+              >
+                Age Calculator
+              </Link>
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/timezone-converter"
+              >
+                Timezone Converter
+              </Link>
+              <Link
+                className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                href="/loan-calculator"
+              >
+                Loan Calculator
+              </Link>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Glossary" title="Measurement Terms" />
+            <dl className="mt-6 grid gap-4 text-sm leading-7 text-[var(--ink-700)] md:grid-cols-2">
+              {[
+                ["Unit", "A defined quantity used to express a measurement."],
+                ["SI Unit", "A unit from the International System of Units."],
+                ["Metric System", "A decimal measurement system used internationally."],
+                ["Imperial System", "A measurement system using units such as inch, foot, yard, and mile."],
+                ["Conversion Factor", "A number used to convert from one unit to another."],
+                ["Base Unit", "A reference unit used as the foundation for conversions in a category."],
+                ["Derived Unit", "A unit formed from other units, such as square meters or meters per second."],
+                ["Scientific Notation", "A compact way to display very large or very small numbers."],
+                ["Precision", "How many digits are shown or used in a result."],
+                ["Accuracy", "How close a value is to the intended or accepted value."],
+                ["Temperature Scale", "A system for expressing temperature, such as Celsius, Fahrenheit, or kelvin."],
+                ["Measurement", "The process of assigning a number and unit to a quantity."],
+              ].map(([term, definition]) => (
+                <div key={term}>
+                  <dt className="font-semibold text-[var(--ink-900)]">{term}</dt>
+                  <dd>{definition}</dd>
                 </div>
               ))}
-              {!hasValidInput ? (
-                <div className="rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-5 text-sm text-[var(--ink-700)]">
-                  Enter a number to see every matching unit.
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </ToolPanel>
-    </ToolPage>
+            </dl>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Sources" title="References" />
+            <ul className="mt-6 space-y-3 text-sm leading-7 text-[var(--ink-700)]">
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.nist.gov/pml/owm/metric-si/si-units"
+                >
+                  NIST. SI Units.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.nist.gov/pml/owm/metric-si/unit-conversion"
+                >
+                  NIST. Unit Conversion.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.bipm.org/en/measurement-units"
+                >
+                  International Bureau of Weights and Measures. The International System of Units.
+                </a>
+              </li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
+            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
+              This converter performs calculations using the conversion factors implemented in this
+              page. Results are intended for educational, informational, and general-purpose use.
+              Independently verify critical engineering, scientific, medical, legal, or commercial
+              calculations. This tool does not replace professional engineering, scientific,
+              metrology, or regulatory standards.
+            </p>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
   )
-}
-
-function UnitSelect({
-  id,
-  label,
-  units,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  units: Unit[]
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <select
-        id={id}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm font-semibold outline-none transition focus:border-[var(--accent-rust)]"
-      >
-        {units.map((unit) => (
-          <option key={unit.key} value={unit.key}>
-            {unit.label} ({unit.symbol})
-          </option>
-        ))}
-      </select>
-    </label>
-  )
-}
-
-function convertValue(value: number, fromUnit: Unit, toUnit: Unit, categoryKey: CategoryKey) {
-  if (categoryKey === "temperature") {
-    return celsiusToTemperature(temperatureToCelsius(value, fromUnit.key), toUnit.key)
-  }
-
-  return (value * (fromUnit as LinearUnit).toBase) / (toUnit as LinearUnit).toBase
-}
-
-function temperatureToCelsius(value: number, unitKey: Unit["key"]) {
-  if (unitKey === "fahrenheit") {
-    return (value - 32) * (5 / 9)
-  }
-
-  if (unitKey === "kelvin") {
-    return value - 273.15
-  }
-
-  return value
-}
-
-function celsiusToTemperature(value: number, unitKey: Unit["key"]) {
-  if (unitKey === "fahrenheit") {
-    return value * (9 / 5) + 32
-  }
-
-  if (unitKey === "kelvin") {
-    return value + 273.15
-  }
-
-  return value
-}
-
-function formatNumber(value: number) {
-  if (Math.abs(value) >= 1_000_000 || (Math.abs(value) > 0 && Math.abs(value) < 0.0001)) {
-    return value.toExponential(6)
-  }
-
-  return new Intl.NumberFormat(undefined, {
-    maximumFractionDigits: 8,
-  }).format(value)
-}
-
-function formatInput(value: string) {
-  return value.trim() === "" ? "0" : value
 }

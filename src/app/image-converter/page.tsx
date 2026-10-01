@@ -1,409 +1,599 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { ImageConverterTool } from "./image-converter-tool"
 
-import { ChangeEvent, useMemo, useState } from "react"
-import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+const pagePath = "/image-converter"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Image Converter | Convert JPG, PNG and WebP Online"
+const pageDescription =
+  "Convert images online to PNG, JPG, or WebP in your browser. Batch convert browser-readable images with previews, quality control, max-width resizing, and downloads."
 
-type OutputFormat = "image/png" | "image/jpeg" | "image/webp"
-
-type ImageItem = {
-  id: string
-  file: File
-  url: string
-}
-
-type ConvertedImage = {
-  id: string
-  fileName: string
-  url: string
-  size: number
-}
-
-const formatOptions: Array<{ label: string; value: OutputFormat; extension: string }> = [
-  { label: "PNG", value: "image/png", extension: "png" },
-  { label: "JPG", value: "image/jpeg", extension: "jpg" },
-  { label: "WebP", value: "image/webp", extension: "webp" },
+const faqs = [
+  {
+    question: "What is an Image Converter?",
+    answer:
+      "An Image Converter changes an image from one file format to another, such as PNG, JPG, or WebP.",
+  },
+  {
+    question: "How does this Image Converter work?",
+    answer:
+      "It loads selected image files in the browser, draws them to a canvas, exports the canvas in the selected output format, and creates download links.",
+  },
+  {
+    question: "Which output image formats are supported?",
+    answer:
+      "This converter outputs PNG, JPG, and WebP. It does not output AVIF, TIFF, BMP, ICO, HEIC, SVG, or GIF.",
+  },
+  {
+    question: "Which input image formats are supported?",
+    answer:
+      "The file picker accepts image files, and conversion depends on your browser's ability to decode the selected image through browser image APIs.",
+  },
+  {
+    question: "Can I convert JPG to PNG?",
+    answer:
+      "Yes. Select JPG or JPEG images, choose PNG as the output format, and convert.",
+  },
+  {
+    question: "Can I convert PNG to JPG?",
+    answer:
+      "Yes. Choose JPG as the output format. Transparent areas are drawn against a white background before JPEG export.",
+  },
+  {
+    question: "Can I convert PNG to WebP?",
+    answer:
+      "Yes. Choose WebP as the output format and convert the selected PNG file.",
+  },
+  {
+    question: "Can I convert WebP to PNG or JPG?",
+    answer:
+      "Yes, if your browser can decode the selected WebP file. Choose PNG or JPG as the output format.",
+  },
+  {
+    question: "What is WebP?",
+    answer:
+      "WebP is a web image format that supports lossy and lossless compression, transparency, and animation in the format itself.",
+  },
+  {
+    question: "What is AVIF?",
+    answer:
+      "AVIF is a modern image format, but this page does not provide AVIF as an output option.",
+  },
+  {
+    question: "Which format should I choose?",
+    answer:
+      "Use JPG for photos and broad compatibility, PNG for lossless graphics or transparency, and WebP for web-friendly compression where supported.",
+  },
+  {
+    question: "Does image quality change?",
+    answer:
+      "Quality can change when exporting to JPG or WebP and when using the max-width resizing option. PNG output ignores the quality slider.",
+  },
+  {
+    question: "Can I preserve transparency?",
+    answer:
+      "PNG and WebP outputs can preserve transparency through canvas export, but JPG does not support transparency and uses a white background in this implementation.",
+  },
+  {
+    question: "Can I convert multiple images?",
+    answer:
+      "Yes. You can select multiple images, convert them as a batch, then download each image or use Download All.",
+  },
+  {
+    question: "Is the converter free?",
+    answer: "Yes. This is a free browser-based image converter.",
+  },
+  {
+    question: "Does it work on mobile devices?",
+    answer:
+      "Yes. It uses standard browser file input, previews, buttons, and download behavior that work in modern browsers.",
+  },
+  {
+    question: "Is my data uploaded to a server?",
+    answer:
+      "The conversion runs locally in your browser. The selected images are not intentionally uploaded by this tool.",
+  },
+  {
+    question: "Does it preserve metadata?",
+    answer:
+      "No metadata-preservation feature is implemented. Canvas export commonly creates a new image file from pixel data.",
+  },
+  {
+    question: "Which image format is best for websites?",
+    answer:
+      "WebP is often useful for web delivery where supported; JPG is widely compatible for photos, and PNG is useful for sharp graphics or transparency.",
+  },
 ]
 
-export default function ImageConverterPage() {
-  const [images, setImages] = useState<ImageItem[]>([])
-  const [convertedImages, setConvertedImages] = useState<ConvertedImage[]>([])
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>("image/webp")
-  const [quality, setQuality] = useState(0.88)
-  const [maxWidth, setMaxWidth] = useState("")
-  const [isConverting, setIsConverting] = useState(false)
-  const [message, setMessage] = useState("Choose images, pick a format, then convert them locally.")
-
-  const selectedSize = useMemo(
-    () => images.reduce((sum, image) => sum + image.file.size, 0),
-    [images],
-  )
-
-  const convertedSize = useMemo(
-    () => convertedImages.reduce((sum, image) => sum + image.size, 0),
-    [convertedImages],
-  )
-
-  function handleFiles(event: ChangeEvent<HTMLInputElement>) {
-    const selectedFiles = Array.from(event.target.files ?? []).filter((file) =>
-      file.type.startsWith("image/"),
-    )
-
-    if (selectedFiles.length === 0) {
-      setMessage("Choose at least one image file.")
-      return
-    }
-
-    const nextImages = selectedFiles.map((file) => ({
-      id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
-      file,
-      url: URL.createObjectURL(file),
-    }))
-
-    setImages((currentImages) => [...currentImages, ...nextImages])
-    clearConvertedImages()
-    setMessage(`${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} added.`)
-    event.target.value = ""
-  }
-
-  function removeImage(id: string) {
-    setImages((currentImages) => {
-      const image = currentImages.find((item) => item.id === id)
-      if (image) {
-        URL.revokeObjectURL(image.url)
-      }
-
-      return currentImages.filter((item) => item.id !== id)
-    })
-    clearConvertedImages()
-  }
-
-  function clearImages() {
-    images.forEach((image) => URL.revokeObjectURL(image.url))
-    setImages([])
-    clearConvertedImages()
-    setMessage("Selection cleared.")
-  }
-
-  function clearConvertedImages() {
-    setConvertedImages((currentImages) => {
-      currentImages.forEach((image) => URL.revokeObjectURL(image.url))
-      return []
-    })
-  }
-
-  async function convertImages() {
-    if (images.length === 0) {
-      setMessage("Add images before converting.")
-      return
-    }
-
-    setIsConverting(true)
-    setMessage("Converting images...")
-    clearConvertedImages()
-
-    try {
-      const widthLimit = Number(maxWidth)
-      const normalizedWidthLimit = Number.isFinite(widthLimit) && widthLimit > 0 ? widthLimit : null
-      const selectedFormat = formatOptions.find((format) => format.value === outputFormat) ?? formatOptions[0]
-      const nextConvertedImages = await Promise.all(
-        images.map((image) =>
-          convertImage(image.file, selectedFormat.value, selectedFormat.extension, quality, normalizedWidthLimit),
-        ),
-      )
-
-      setConvertedImages(nextConvertedImages)
-      setMessage(`${nextConvertedImages.length} image${nextConvertedImages.length === 1 ? "" : "s"} converted.`)
-    } catch (error) {
-      console.error("Image conversion failed", error)
-      setMessage("Something went wrong while converting. Try a different image file.")
-    } finally {
-      setIsConverting(false)
-    }
-  }
-
-  function downloadImage(image: ConvertedImage) {
-    const link = document.createElement("a")
-    link.href = image.url
-    link.download = image.fileName
-    link.click()
-  }
-
-  function downloadAll() {
-    convertedImages.forEach((image) => downloadImage(image))
-  }
-
-  return (
-    <ToolPage gridClassName="lg:grid-cols-[0.88fr_1.12fr]">
-        <ToolPanel>
-          <ToolIntro eyebrow="Local tool" title="Image Converter">
-            Convert images to PNG, JPG, or WebP in your browser. Files stay on this device, with
-            optional quality and width controls.
-          </ToolIntro>
-
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose images</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              JPG, PNG, WebP, GIF, BMP, and other browser-readable images
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="sr-only"
-              onChange={handleFiles}
-            />
-          </label>
-
-          <div className="mt-6">
-            <label htmlFor="format" className="block text-sm font-medium">
-              Output format
-            </label>
-            <select
-              id="format"
-              value={outputFormat}
-              onChange={(event) => {
-                setOutputFormat(event.target.value as OutputFormat)
-                clearConvertedImages()
-              }}
-              className="mt-2 w-full rounded-2xl border border-[var(--ink-900)]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            >
-              {formatOptions.map((format) => (
-                <option key={format.value} value={format.value}>
-                  {format.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <label htmlFor="quality" className="block text-sm font-medium">
-              Quality: {Math.round(quality * 100)}%
-            </label>
-            <input
-              id="quality"
-              type="range"
-              min="0.45"
-              max="1"
-              step="0.01"
-              value={quality}
-              disabled={outputFormat === "image/png"}
-              onChange={(event) => setQuality(Number(event.target.value))}
-              className="w-full accent-[var(--accent-rust)] disabled:opacity-40"
-            />
-            {outputFormat === "image/png" ? (
-              <p className="text-xs text-[var(--ink-700)]/72">PNG output ignores quality because it is lossless.</p>
-            ) : null}
-          </div>
-
-          <div className="mt-6">
-            <label htmlFor="max-width" className="block text-sm font-medium">
-              Max width
-            </label>
-            <input
-              id="max-width"
-              type="number"
-              min="1"
-              inputMode="numeric"
-              value={maxWidth}
-              onChange={(event) => {
-                setMaxWidth(event.target.value)
-                clearConvertedImages()
-              }}
-              placeholder="Keep original"
-              className="mt-2 w-full rounded-2xl border border-[var(--ink-900)]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            />
-          </div>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={convertImages}
-              disabled={images.length === 0 || isConverting}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              {isConverting ? "Converting..." : "Convert Images"}
-            </button>
-            <button
-              type="button"
-              onClick={clearImages}
-              disabled={images.length === 0 || isConverting}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              Clear
-            </button>
-          </div>
-
-          <InfoBox className="mt-6">
-            {message}
-          </InfoBox>
-        </ToolPanel>
-
-        <div className="space-y-6">
-          <ToolPanel>
-            <PanelHeader eyebrow="Input" title="Selected Images" badge={`${images.length} files / ${formatBytes(selectedSize)}`} />
-
-            {images.length === 0 ? (
-              <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
-                Your selected images will appear here before conversion.
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {images.map((image) => (
-                  <ImageCard
-                    key={image.id}
-                    imageUrl={image.url}
-                    title={image.file.name}
-                    subtitle={formatBytes(image.file.size)}
-                    actionLabel="Remove"
-                    onAction={() => removeImage(image.id)}
-                    disabled={isConverting}
-                  />
-                ))}
-              </div>
-            )}
-          </ToolPanel>
-
-          <ToolPanel>
-            <PanelHeader eyebrow="Output" title="Converted Images" badge={`${convertedImages.length} files / ${formatBytes(convertedSize)}`} />
-
-            {convertedImages.length > 1 ? (
-              <button
-                type="button"
-                onClick={downloadAll}
-                className="mt-5 rounded-full bg-[var(--accent-gold)] px-5 py-3 text-sm font-semibold text-[var(--ink-900)] transition hover:bg-[var(--accent-sand)]"
-              >
-                Download All
-              </button>
-            ) : null}
-
-            {convertedImages.length === 0 ? (
-              <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
-                Converted files will appear here with download buttons.
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {convertedImages.map((image) => (
-                  <ImageCard
-                    key={image.id}
-                    imageUrl={image.url}
-                    title={image.fileName}
-                    subtitle={formatBytes(image.size)}
-                    actionLabel="Download"
-                    onAction={() => downloadImage(image)}
-                  />
-                ))}
-              </div>
-            )}
-          </ToolPanel>
-        </div>
-    </ToolPage>
-  )
-}
-
-function ImageCard({
-  imageUrl,
-  title,
-  subtitle,
-  actionLabel,
-  onAction,
-  disabled = false,
-}: {
-  imageUrl: string
-  title: string
-  subtitle: string
-  actionLabel: string
-  onAction: () => void
-  disabled?: boolean
-}) {
-  return (
-    <article className="overflow-hidden rounded-[1.4rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)]">
-      <div className="aspect-[4/3] bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageUrl} alt={title} className="h-full w-full object-contain" />
-      </div>
-      <div className="space-y-3 p-4">
-        <div>
-          <p className="truncate text-sm font-semibold">{title}</p>
-          <p className="mt-1 text-xs text-[var(--ink-700)]/75">{subtitle}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onAction}
-          disabled={disabled}
-          className="w-full rounded-full border border-[var(--ink-900)]/10 bg-white px-3 py-2 text-xs font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 disabled:opacity-40"
-        >
-          {actionLabel}
-        </button>
-      </div>
-    </article>
-  )
-}
-
-async function convertImage(
-  file: File,
-  outputFormat: OutputFormat,
-  extension: string,
-  quality: number,
-  maxWidth: number | null,
-): Promise<ConvertedImage> {
-  const bitmap = await createImageBitmap(file)
-  const scale = maxWidth && bitmap.width > maxWidth ? maxWidth / bitmap.width : 1
-  const width = Math.max(1, Math.round(bitmap.width * scale))
-  const height = Math.max(1, Math.round(bitmap.height * scale))
-  const canvas = document.createElement("canvas")
-  canvas.width = width
-  canvas.height = height
-
-  const context = canvas.getContext("2d")
-  if (!context) {
-    throw new Error("Canvas is unavailable")
-  }
-
-  if (outputFormat === "image/jpeg") {
-    context.fillStyle = "#ffffff"
-    context.fillRect(0, 0, width, height)
-  }
-
-  context.drawImage(bitmap, 0, 0, width, height)
-  bitmap.close()
-
-  const blob = await canvasToBlob(canvas, outputFormat, quality)
-  return {
-    id: `${file.name}-${Date.now()}-${crypto.randomUUID()}`,
-    fileName: `${stripExtension(file.name)}.${extension}`,
-    url: URL.createObjectURL(blob),
-    size: blob.size,
-  }
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, type: OutputFormat, quality: number) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob)
-          return
-        }
-
-        reject(new Error("Browser could not create an image file"))
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    about: ["Image Converter", "JPG Converter", "PNG Converter", "WebP Converter"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Image Converter",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Image Converter",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
       },
-      type,
-      type === "image/png" ? undefined : quality,
-    )
-  })
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Image Converter",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to convert images online",
+    description: "Convert browser-readable images to PNG, JPG, or WebP.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Choose images",
+        text: "Select one or more image files from your device.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Select output format",
+        text: "Choose PNG, JPG, or WebP.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Adjust settings",
+        text: "Set quality for JPG or WebP and optionally enter a maximum width.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Convert",
+        text: "Click Convert Images to create converted files.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Download",
+        text: "Download individual images or use Download All after batch conversion.",
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
+]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
 }
 
-function formatBytes(bytes: number) {
-  if (bytes === 0) {
-    return "0 B"
-  }
+export default function ImageConverterPage() {
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.88fr_1.12fr] lg:py-12">
+          <ImageConverterTool />
+        </section>
 
-  const units = ["B", "KB", "MB", "GB"]
-  const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-  const value = bytes / 1024 ** unitIndex
-  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`
-}
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
+          <ToolPanel>
+            <PanelHeader eyebrow="Guide" title="What Is an Image Converter?" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                An Image Converter changes image files into another supported format. Different
+                formats exist because photos, screenshots, graphics, web assets, and print files
+                have different needs for compression, transparency, compatibility, and file size.
+              </p>
+              <p>
+                This online image converter is useful for web development, graphic design,
+                photography, printing, social media, e-commerce, mobile apps, email attachments,
+                and digital publishing. It converts selected files locally in your browser to PNG,
+                JPG, or WebP.
+              </p>
+            </div>
+          </ToolPanel>
 
-function stripExtension(fileName: string) {
-  return fileName.replace(/\.[^.]+$/, "")
+          <ToolPanel>
+            <PanelHeader eyebrow="Method" title="How the Image Converter Works" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Upload images", "Choose one or more browser-readable image files."],
+                ["Select output format", "Convert to PNG, JPG, or WebP."],
+                ["Adjust quality", "Use the quality slider for JPG and WebP output."],
+                ["Resize by max width", "Optionally limit width while preserving the original aspect ratio."],
+                ["Preview files", "Input and converted images appear as preview cards."],
+                ["Download output", "Download each converted image or use Download All for a batch."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Formats" title="Supported Image Formats" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                Output formats are PNG, JPG, and WebP. Input accepts files whose MIME type starts
+                with
+                <code className="mx-1 rounded bg-[var(--page-cream)] px-1">image/</code>
+                and then depends on browser decoding through
+                <code className="mx-1 rounded bg-[var(--page-cream)] px-1">createImageBitmap</code>.
+                The interface mentions JPG, PNG, WebP, GIF, BMP, and other browser-readable images.
+              </p>
+              <InfoBox>
+                This page does not output AVIF, GIF, BMP, TIFF, ICO, HEIC, or SVG, and it does not
+                provide vector conversion.
+              </InfoBox>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Conversions" title="Supported Conversions" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["JPG to PNG", "Useful when you need PNG output from a photo or uploaded JPEG file."],
+                ["JPG to WebP", "Useful for web delivery when WebP is accepted by your workflow."],
+                ["PNG to JPG", "Useful for broad photo-style compatibility; transparent pixels use a white background."],
+                ["PNG to WebP", "Useful for web graphics when WebP is supported."],
+                ["WebP to PNG", "Useful when a PNG file is required and your browser decodes the WebP input."],
+                ["WebP to JPG", "Useful for broader compatibility when transparency is not required."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Accuracy" title="Image Conversion Accuracy" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Canvas conversion", "The browser draws the source bitmap to a canvas and exports a new image file."],
+                ["Visual appearance", "The converter preserves appearance as closely as the destination format and browser encoder allow."],
+                ["Transparency", "PNG and WebP can support transparency; JPG output is composited onto white first."],
+                ["Quality setting", "The quality value applies to lossy-capable exports such as JPG and WebP."],
+                ["PNG quality", "PNG output ignores the quality slider because this implementation passes no quality value for PNG."],
+                ["Metadata", "No metadata-retention option is implemented; output is generated from rendered pixel data."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Examples" title="Common Examples" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["JPG photo to PNG", "Create a PNG copy for editing workflows that prefer PNG."],
+                ["PNG to WebP", "Prepare web graphics for smaller, modern website assets."],
+                ["WebP to JPG", "Create a broadly compatible image when WebP is not accepted."],
+                ["PNG to JPG", "Convert screenshots or graphics for systems that require JPEG."],
+                ["Batch to WebP", "Convert several browser-readable images into WebP output files."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Features" title="Implemented Features" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Batch conversion", "Select and convert multiple images at once."],
+                ["Output format selector", "Choose PNG, JPG, or WebP."],
+                ["Quality control", "Set quality from 45% to 100% for JPG and WebP."],
+                ["Max-width resizing", "Resize only when an image is wider than the entered max width."],
+                ["Input and output previews", "See selected files and converted files as image cards."],
+                ["Downloads", "Download individual files or all converted files."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Use" title="How to Use the Image Converter" />
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Choose one or more image files.</li>
+              <li>Select PNG, JPG, or WebP as the output format.</li>
+              <li>Adjust quality for JPG or WebP if needed.</li>
+              <li>Enter a max width if you want to resize wider images.</li>
+              <li>Click Convert Images.</li>
+              <li>Preview the converted files and download them individually or together.</li>
+            </ol>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Output" title="Understanding the Output" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Converted image", "The output card shows the converted file preview."],
+                ["Output format", "The file extension matches PNG, JPG, or WebP."],
+                ["File size", "Each card shows the converted file size."],
+                ["Resolution", "Resolution remains original unless max width resizes the image."],
+                ["Download option", "Each converted image has a Download button."],
+                ["Batch download", "Download All appears when more than one converted image exists."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Applications" title="Common Use Cases" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Website optimization", "Convert images to WebP for supported web workflows."],
+                ["Photography", "Create JPG copies for sharing or compatibility."],
+                ["Graphic design", "Use PNG when sharp edges or transparency matter."],
+                ["Digital publishing", "Prepare consistent image formats for articles and documents."],
+                ["Social media and email", "Convert files into accepted formats before uploading or attaching."],
+                ["E-commerce and mobile apps", "Create product and app images in practical delivery formats."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Practical Notes" title="Benefits, Limitations, Tips and Mistakes" />
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold">Benefits</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Converts images locally in the browser.</li>
+                  <li>Supports PNG, JPG, and WebP output.</li>
+                  <li>Handles multiple files in one conversion run.</li>
+                  <li>Includes previews, file sizes, quality control, and optional max-width resizing.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Limitations</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Only PNG, JPG, and WebP output formats are implemented.</li>
+                  <li>Lossy output may reduce visual quality.</li>
+                  <li>JPG output does not preserve transparency.</li>
+                  <li>Animation, metadata, and vector data are not preserved as separate features.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tips for Best Results</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Use JPG for photos and broad compatibility.</li>
+                  <li>Use PNG for graphics that need transparency or sharp detail.</li>
+                  <li>Use WebP for web optimization where your target browsers support it.</li>
+                  <li>Preview converted images before publishing or sending them.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Common Mistakes</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Choosing JPG when transparency is required.</li>
+                  <li>Using too much compression for text-heavy images.</li>
+                  <li>Uploading a format the browser cannot decode.</li>
+                  <li>Expecting raster images to become editable vector graphics.</li>
+                </ul>
+              </div>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="More Tools" title="Related Tools" />
+            <nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              {[
+                ["Image Resizer", "/image-resizer"],
+                ["Image to PDF Converter", "/image-to-pdf"],
+                ["PDF to Images", "/pdf-to-images"],
+                ["Image to Favicon", "/image-to-favicon"],
+                ["Image to ASCII Art", "/image-to-ascii-art"],
+                ["PDF Compress", "/pdf-compress"],
+                ["Base64 Encoder / Decoder", "/base64-encoder-decoder"],
+                ["QR Code Generator", "/qr-code-generator"],
+                ["Color Converter", "/color-converter"],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                  href={href}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Glossary" title="Image Format Terms" />
+            <dl className="mt-6 grid gap-4 text-sm leading-7 text-[var(--ink-700)] md:grid-cols-2">
+              {[
+                ["Raster Image", "An image made from pixels, such as a photo or screenshot."],
+                ["JPEG", "A widely supported lossy image format often used for photographs."],
+                ["PNG", "A lossless raster format that can support transparency."],
+                ["WebP", "A modern web image format supporting lossy and lossless compression."],
+                ["AVIF", "A modern compressed image format not provided as an output here."],
+                ["GIF", "A palette-based image format often associated with simple animation."],
+                ["TIFF", "A flexible image format often used in scanning, publishing, and archives."],
+                ["BMP", "A bitmap image format commonly associated with Windows."],
+                ["Transparency", "Pixels that are fully or partly see-through."],
+                ["Compression", "Encoding image data to reduce file size."],
+                ["Lossy Compression", "Compression that can discard visual information to reduce file size."],
+                ["Lossless Compression", "Compression that preserves the original decoded data."],
+                ["Resolution", "The pixel width and height of an image."],
+                ["Metadata", "Information stored with a file, such as camera or color details."],
+                ["Color Depth", "How much color information is stored per pixel or channel."],
+              ].map(([term, definition]) => (
+                <div key={term}>
+                  <dt className="font-semibold text-[var(--ink-900)]">{term}</dt>
+                  <dd>{definition}</dd>
+                </div>
+              ))}
+            </dl>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Sources" title="References" />
+            <ul className="mt-6 space-y-3 text-sm leading-7 text-[var(--ink-700)]">
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. Image file type and format guide.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. HTMLCanvasElement: toBlob() method.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.w3.org/TR/png-3/"
+                  rel="noreferrer"
+                >
+                  W3C. Portable Network Graphics (PNG) Specification.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.w3.org/TR/FileAPI/"
+                  rel="noreferrer"
+                >
+                  W3C. File API.
+                </a>
+              </li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
+            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
+              This Image Converter converts supported browser-readable images using the implemented
+              canvas-based conversion process. Results are intended for educational, informational,
+              and general productivity use. Some output formats may introduce compression,
+              transparency, metadata, or compatibility limitations. Verify converted images before
+              using them in production, printing, publishing, e-commerce, or archival workflows.
+            </p>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
+  )
 }

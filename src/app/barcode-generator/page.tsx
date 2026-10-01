@@ -1,436 +1,553 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { BarcodeTool } from "./barcode-tool"
 
-import { NumberField } from "@/components/form-controls"
-import { useMemo, useState } from "react"
-import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
-import { SITE_URL } from "@/lib/site"
+const pagePath = "/barcode-generator"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Barcode Generator | Free Online Code 128 Barcode Creator"
+const pageDescription =
+  "Create free Code 128 barcodes online as SVG images for product IDs, asset tags, tickets, URLs, inventory labels, and shipping references."
 
-const presets = [
-  { label: "Product", value: "M-2026-001" },
-  { label: "URL", value: `${SITE_URL}/order/12345` },
-  { label: "Asset", value: "ASSET-LAPTOP-0482" },
-  { label: "Ticket", value: "TICKET-9F7A-2026" },
+const faqs = [
+  {
+    question: "What is a barcode generator?",
+    answer:
+      "A barcode generator turns entered data into a machine-readable barcode image that scanners can decode.",
+  },
+  {
+    question: "How does this barcode generator work?",
+    answer:
+      "Enter printable ASCII text, adjust the display options, then the page generates a Code 128 SVG preview locally in your browser.",
+  },
+  {
+    question: "Which barcode format is supported?",
+    answer:
+      "This page supports Code 128-B. It does not generate EAN-13, EAN-8, UPC-A, UPC-E, ITF, Codabar, MSI, Pharmacode, or GS1-128.",
+  },
+  {
+    question: "What is Code 128?",
+    answer:
+      "Code 128 is a high-density linear barcode symbology used for alphanumeric identifiers in logistics, inventory, labels, and general tracking.",
+  },
+  {
+    question: "What is Code 128-B?",
+    answer:
+      "Code 128-B is a character set within Code 128 that supports printable ASCII characters in this implementation.",
+  },
+  {
+    question: "What characters can I enter?",
+    answer:
+      "This implementation accepts printable ASCII characters only. Control characters and unsupported Unicode characters are rejected.",
+  },
+  {
+    question: "Does the generator calculate a check digit?",
+    answer:
+      "Yes. The Code 128 checksum is calculated internally as part of the generated symbol.",
+  },
+  {
+    question: "Can I download the barcode?",
+    answer:
+      "Yes. Use Download SVG to save the generated barcode as a scalable SVG file.",
+  },
+  {
+    question: "Can I copy the barcode?",
+    answer:
+      "Yes. Use Copy SVG to copy the SVG markup to the clipboard.",
+  },
+  {
+    question: "Can I print generated barcodes?",
+    answer:
+      "You can print the downloaded SVG, but you should preserve the quiet zone, use strong contrast, avoid distortion, and test the printed result.",
+  },
+  {
+    question: "Why won't my barcode scan?",
+    answer:
+      "Common causes include unsupported characters, low contrast, insufficient quiet zone, printing too small, distortion, or scanner incompatibility.",
+  },
+  {
+    question: "Can I use these barcodes commercially?",
+    answer:
+      "You may use the generated image for general business workflows, but product identifiers and regulated uses may require GS1 registration or industry-specific rules.",
+  },
+  {
+    question: "Is this a GS1 barcode generator?",
+    answer:
+      "No. It creates a Code 128-B SVG from your text. It does not issue GS1 company prefixes, GTINs, or GS1-128 application identifier data structures.",
+  },
+  {
+    question: "Are the generated barcodes standards compliant?",
+    answer:
+      "The output follows this page's implemented Code 128-B encoding behavior, but final scan quality depends on sizing, contrast, printing, and scanner support.",
+  },
+  {
+    question: "Is the barcode generator free?",
+    answer: "Yes. This is a free online barcode creator.",
+  },
+  {
+    question: "Does it work on mobile devices?",
+    answer:
+      "Yes. The controls are browser-based and designed to work on modern desktop and mobile screens.",
+  },
 ]
 
-const code128Patterns = [
-  "212222",
-  "222122",
-  "222221",
-  "121223",
-  "121322",
-  "131222",
-  "122213",
-  "122312",
-  "132212",
-  "221213",
-  "221312",
-  "231212",
-  "112232",
-  "122132",
-  "122231",
-  "113222",
-  "123122",
-  "123221",
-  "223211",
-  "221132",
-  "221231",
-  "213212",
-  "223112",
-  "312131",
-  "311222",
-  "321122",
-  "321221",
-  "312212",
-  "322112",
-  "322211",
-  "212123",
-  "212321",
-  "232121",
-  "111323",
-  "131123",
-  "131321",
-  "112313",
-  "132113",
-  "132311",
-  "211313",
-  "231113",
-  "231311",
-  "112133",
-  "112331",
-  "132131",
-  "113123",
-  "113321",
-  "133121",
-  "313121",
-  "211331",
-  "231131",
-  "213113",
-  "213311",
-  "213131",
-  "311123",
-  "311321",
-  "331121",
-  "312113",
-  "312311",
-  "332111",
-  "314111",
-  "221411",
-  "431111",
-  "111224",
-  "111422",
-  "121124",
-  "121421",
-  "141122",
-  "141221",
-  "112214",
-  "112412",
-  "122114",
-  "122411",
-  "142112",
-  "142211",
-  "241211",
-  "221114",
-  "413111",
-  "241112",
-  "134111",
-  "111242",
-  "121142",
-  "121241",
-  "114212",
-  "124112",
-  "124211",
-  "411212",
-  "421112",
-  "421211",
-  "212141",
-  "214121",
-  "412121",
-  "111143",
-  "111341",
-  "131141",
-  "114113",
-  "114311",
-  "411113",
-  "411311",
-  "113141",
-  "114131",
-  "311141",
-  "411131",
-  "211412",
-  "211214",
-  "211232",
-  "2331112",
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    about: ["Barcode Generator", "Code 128", "Barcode Creator", "SVG Barcode"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Barcode Generator",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Barcode Generator",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Barcode Generator",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to generate a Code 128 barcode",
+    description: "Create a printable Code 128 SVG barcode from supported text.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Enter barcode data",
+        text: "Type printable ASCII text into the barcode value field.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Adjust output options",
+        text: "Set colors, bar width, bar height, quiet zone, and the readable label option.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Review the preview",
+        text: "Check the generated Code 128 barcode preview.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Copy or download",
+        text: "Copy the SVG markup or download the barcode SVG.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Test the barcode",
+        text: "Scan-test the barcode before using it in production.",
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
 ]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
+}
 
 export default function BarcodeGeneratorPage() {
-  const [value, setValue] = useState("M-2026-001")
-  const [foreground, setForeground] = useState("#212529")
-  const [background, setBackground] = useState("#ffffff")
-  const [moduleWidth, setModuleWidth] = useState("2")
-  const [barHeight, setBarHeight] = useState("120")
-  const [quietZone, setQuietZone] = useState("16")
-  const [showLabel, setShowLabel] = useState(true)
-  const [message, setMessage] = useState("Enter text to generate a Code 128 barcode.")
-
-  const barcodeResult = useMemo(() => {
-    try {
-      const bars = createCode128Bars(value)
-      return { bars, error: "" }
-    } catch (error) {
-      return {
-        bars: [],
-        error: error instanceof Error ? error.message : "Could not create barcode.",
-      }
-    }
-  }, [value])
-
-  const safeModuleWidth = clampNumber(moduleWidth, 1, 6, 2)
-  const safeBarHeight = clampNumber(barHeight, 60, 240, 120)
-  const safeQuietZone = clampNumber(quietZone, 8, 48, 16)
-  const svgMarkup = barcodeResult.error
-    ? ""
-    : renderBarcodeSvg({
-        bars: barcodeResult.bars,
-        value,
-        foreground,
-        background,
-        moduleWidth: safeModuleWidth,
-        barHeight: safeBarHeight,
-        quietZone: safeQuietZone,
-        showLabel,
-      })
-
-  async function copySvg() {
-    if (!svgMarkup) {
-      setMessage(barcodeResult.error || "Add content before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(svgMarkup)
-      setMessage("Barcode SVG copied.")
-    } catch {
-      setMessage("Copy failed. Select the SVG markup and copy it manually.")
-    }
-  }
-
-  function downloadSvg() {
-    if (!svgMarkup) {
-      setMessage(barcodeResult.error || "Add content before downloading.")
-      return
-    }
-
-    downloadTextFile(svgMarkup, "barcode.svg", "image/svg+xml;charset=utf-8")
-    setMessage("Barcode SVG downloaded.")
-  }
-
-  function loadPreset(nextValue: string) {
-    setValue(nextValue)
-    setMessage("Preset loaded.")
-  }
-
   return (
-    <ToolPage>
-        <ToolPanel>
-          <ToolIntro eyebrow="Utility tool" title="Barcode Generator">
-            Create a scannable Code 128 barcode for product IDs, URLs, asset tags, and ticket
-            numbers. The SVG is generated locally in your browser.
-          </ToolIntro>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
+          <BarcodeTool />
+        </section>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {presets.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => loadPreset(preset.value)}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-3 py-2 text-xs font-semibold text-[var(--ink-800)] transition hover:bg-white"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          <label htmlFor="barcode-value" className="mt-6 block text-sm font-medium">
-            Barcode value
-          </label>
-          <input
-            id="barcode-value"
-            value={value}
-            onChange={(event) => {
-              setValue(event.target.value)
-              setMessage("Barcode value updated.")
-            }}
-            className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="M-2026-001"
-          />
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <ColorField id="foreground" label="Foreground" value={foreground} onChange={setForeground} />
-            <ColorField id="background" label="Background" value={background} onChange={setBackground} />
-          </div>
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            <NumberField min="1" id="module-width" label="Bar width" value={moduleWidth} onChange={setModuleWidth} />
-            <NumberField min="1" id="bar-height" label="Bar height" value={barHeight} onChange={setBarHeight} />
-            <NumberField min="1" id="quiet-zone" label="Quiet zone" value={quietZone} onChange={setQuietZone} />
-          </div>
-
-          <label className="mt-5 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium">
-            <input
-              type="checkbox"
-              checked={showLabel}
-              onChange={(event) => setShowLabel(event.target.checked)}
-              className="h-4 w-4 accent-[var(--accent-rust)]"
-            />
-            Show readable label
-          </label>
-
-          <InfoBox className="mt-6">
-            {barcodeResult.error || message}
-          </InfoBox>
-        </ToolPanel>
-
-        <div className="space-y-6">
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
           <ToolPanel>
-            <PanelHeader eyebrow="Output" title="Barcode Preview" badge="Code 128" />
-
-            <div className="mt-6 flex min-h-[280px] items-center justify-center rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-6">
-              {svgMarkup ? (
-                <div
-                  className="max-w-full overflow-auto rounded-[1rem] bg-white p-4"
-                  dangerouslySetInnerHTML={{ __html: svgMarkup }}
-                />
-              ) : (
-                <p className="text-center text-sm text-[var(--ink-700)]">
-                  Enter printable ASCII text to generate a barcode.
-                </p>
-              )}
-            </div>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={copySvg}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-              >
-                Copy SVG
-              </button>
-              <button
-                type="button"
-                onClick={downloadSvg}
-                className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-              >
-                Download SVG
-              </button>
+            <PanelHeader eyebrow="Guide" title="What Is a Barcode Generator?" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                A barcode generator creates a scannable image from text or numbers. Barcodes help
+                organizations identify products, shipments, assets, tickets, documents, and
+                inventory without manual typing. They are common in retail, logistics,
+                warehousing, manufacturing, healthcare, libraries, shipping, and asset tracking.
+              </p>
+              <p>
+                This free online barcode generator creates a Code 128-B SVG locally in your
+                browser. Standardized barcode symbologies matter because scanners need predictable
+                bar and space patterns, quiet zones, and readable data rules.
+              </p>
             </div>
           </ToolPanel>
 
           <ToolPanel>
-            <PanelHeader eyebrow="Markup" title="SVG Source" badge={`${svgMarkup.length} chars`} />
-
-            <textarea
-              value={svgMarkup}
-              readOnly
-              rows={8}
-              spellCheck={false}
-              className="mt-6 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-xs leading-6 outline-none"
-              placeholder="SVG markup will appear here..."
-            />
+            <PanelHeader eyebrow="Method" title="How the Barcode Generator Works" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Data entry", "Enter the printable ASCII text to encode."],
+                ["Live preview", "The preview updates from the current value and output settings."],
+                ["SVG rendering", "The output is generated as scalable SVG markup."],
+                ["Color controls", "Choose foreground and background colors."],
+                ["Sizing controls", "Set bar width, bar height, and quiet-zone padding."],
+                ["Readable label", "Optionally show the encoded text under the bars."],
+                ["Copy SVG", "Copy the generated SVG markup to the clipboard."],
+                ["Download SVG", "Save the barcode image as barcode.svg."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
           </ToolPanel>
-        </div>
-    </ToolPage>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Format" title="Supported Barcode Format" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                The implemented format is Code 128-B. It supports printable ASCII input in this
+                page and calculates the required Code 128 checksum internally. The page does not
+                include a format selector and does not generate EAN-13, EAN-8, UPC-A, UPC-E, ITF,
+                Codabar, MSI, Pharmacode, or GS1-128 symbols.
+              </p>
+              <InfoBox>
+                Code 128 is useful for product SKUs, asset tags, ticket numbers, short URLs,
+                internal labels, and tracking identifiers when your scanner and workflow support
+                Code 128.
+              </InfoBox>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Quality" title="Barcode Accuracy and Scan Reliability" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Encoding", "The barcode represents the entered printable ASCII data according to the implemented Code 128-B behavior."],
+                ["Checksum", "A Code 128 checksum is added during generation."],
+                ["Quiet zone", "Clear space before and after the barcode helps scanners detect the symbol."],
+                ["Contrast", "Dark bars on a light, solid background usually scan more reliably."],
+                ["Size", "Bar width and height should be large enough for the scanner and print method."],
+                ["Testing", "Always scan-test the final printed or embedded barcode before production use."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Examples" title="Common Code 128 Barcode Examples" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Product SKU", "M-2026-001 for an internal product or inventory label."],
+                ["Asset tag", "ASSET-LAPTOP-0482 for equipment tracking."],
+                ["Ticket number", "TICKET-9F7A-2026 for event or support workflows."],
+                ["Order URL", `${SITE_URL}/order/12345 for a short internal order link.`],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Use" title="How to Use the Barcode Generator" />
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Enter printable ASCII text in the barcode value field.</li>
+              <li>Optionally load a product, URL, asset, or ticket preset.</li>
+              <li>Adjust foreground color, background color, bar width, bar height, and quiet zone.</li>
+              <li>Choose whether to show the human-readable label.</li>
+              <li>Review the generated Code 128 barcode preview.</li>
+              <li>Copy or download the SVG, then scan-test the final barcode.</li>
+            </ol>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Results" title="Understanding the Results" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Barcode preview", "The visible SVG image generated from the current settings."],
+                ["Encoded text", "The barcode value and optional readable label."],
+                ["Format", "The preview badge identifies the output as Code 128."],
+                ["SVG source", "The markup textarea contains the generated SVG source."],
+                ["Copy option", "Copies SVG markup for use in another system."],
+                ["Download option", "Downloads the SVG file for design, print, or label workflows."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Applications" title="Common Uses" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Retail and inventory", "Create internal SKU or shelf labels."],
+                ["Warehousing and logistics", "Label bins, shipments, work orders, and pick lists."],
+                ["Manufacturing", "Track parts, batches, equipment, and process steps."],
+                ["Healthcare and labs", "Support compatible internal sample, asset, or document labels."],
+                ["Libraries and offices", "Label books, files, hardware, badges, and documents."],
+                ["Events and support", "Encode ticket, order, or case identifiers."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Practical Notes" title="Benefits, Limitations, Tips and Mistakes" />
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold">Benefits</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Fast Code 128 barcode creation in the browser.</li>
+                  <li>Scalable SVG output for digital and print workflows.</li>
+                  <li>Useful for internal labels, assets, tickets, and inventory.</li>
+                  <li>Adjustable color, size, quiet zone, and readable label settings.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Limitations</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Only Code 128-B is implemented.</li>
+                  <li>Only printable ASCII input is accepted.</li>
+                  <li>Scan reliability depends on final size, contrast, print quality, and scanner support.</li>
+                  <li>The tool does not provide GS1 registration or product number licensing.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tips for Best Results</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Use the right symbology for your workflow before generating labels.</li>
+                  <li>Keep dark bars on a light background with strong contrast.</li>
+                  <li>Preserve quiet zones and avoid cropping the SVG.</li>
+                  <li>Do not stretch the barcode unevenly.</li>
+                  <li>Scan-test the final printed label before production.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Common Mistakes</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Entering unsupported characters.</li>
+                  <li>Choosing Code 128 for a workflow that requires EAN/UPC or GS1-128.</li>
+                  <li>Printing too small or with poor contrast.</li>
+                  <li>Removing the quiet zone.</li>
+                  <li>Using an unregistered product identifier where registration is required.</li>
+                </ul>
+              </div>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="More Tools" title="Related Tools" />
+            <nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              {[
+                ["QR Code Generator", "/qr-code-generator"],
+                ["UUID Generator", "/uuid-generator"],
+                ["Base64 Encoder / Decoder", "/base64-encoder-decoder"],
+                ["Case Converter", "/case-converter"],
+                ["Hash Generator", "/hash-generator"],
+                ["URL Encoder / Decoder", "/url-encoder-decoder"],
+                ["Password Generator", "/password-generator"],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                  href={href}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Glossary" title="Barcode Terms" />
+            <dl className="mt-6 grid gap-4 text-sm leading-7 text-[var(--ink-700)] md:grid-cols-2">
+              {[
+                ["Barcode", "A machine-readable pattern of bars and spaces."],
+                ["Barcode Symbology", "The rules used to encode data in a barcode format."],
+                ["Check Digit", "A calculated value used by scanners to help detect errors."],
+                ["Code 128", "A high-density linear barcode symbology for alphanumeric data."],
+                ["Code 39", "An older alphanumeric barcode symbology not generated by this page."],
+                ["EAN", "A GS1 retail barcode family used globally for product identification."],
+                ["UPC", "A GS1 retail barcode family commonly used for products in North America."],
+                ["GS1", "A standards organization for identifiers, barcodes, and supply chain data."],
+                ["Scanner", "A device or app that reads and decodes barcode data."],
+                ["Encoding", "The process of turning data into barcode patterns."],
+                ["Inventory", "Goods, materials, assets, or stock tracked by an organization."],
+                ["SKU", "A stock keeping unit used internally to identify an item."],
+              ].map(([term, definition]) => (
+                <div key={term}>
+                  <dt className="font-semibold text-[var(--ink-900)]">{term}</dt>
+                  <dd>{definition}</dd>
+                </div>
+              ))}
+            </dl>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Sources" title="References" />
+            <ul className="mt-6 space-y-3 text-sm leading-7 text-[var(--ink-700)]">
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.iso.org/standard/43896.html"
+                  rel="noreferrer"
+                >
+                  ISO/IEC 15417:2007. Code 128 bar code symbology specification.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.gs1.org/standards/barcodes"
+                  rel="noreferrer"
+                >
+                  GS1. Barcode standards overview.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.gs1.org/standards/barcodes/10-steps-to-barcode-your-product/english"
+                  rel="noreferrer"
+                >
+                  GS1. 10 steps to barcode your product.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.gs1uk.org/knowledge-hub/barcodes/what-is-a-quiet-zone"
+                  rel="noreferrer"
+                >
+                  GS1 UK. What is a quiet zone in barcodes?
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.aimglobal.org/technical-symbology/"
+                  rel="noreferrer"
+                >
+                  AIM Global. Technical Symbology Committee.
+                </a>
+              </li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
+            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
+              This Barcode Generator produces Code 128-B SVG barcodes using the implemented
+              encoding rules. Results are intended for educational, informational, testing, and
+              general business use. Verify compatibility with your scanners, printers, label
+              software, and industry requirements. This tool does not replace official GS1
+              registration, regulatory requirements, barcode verification, or commercial barcode
+              licensing where applicable.
+            </p>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
   )
-}
-
-function ColorField({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block text-sm font-medium">
-      {label}
-      <span className="mt-2 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-white px-3 py-2">
-        <input
-          id={id}
-          type="color"
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0"
-        />
-        <span className="font-mono text-sm text-[var(--ink-700)]">{value}</span>
-      </span>
-    </label>
-  )
-}
-
-function createCode128Bars(value: string) {
-  if (!value.trim()) {
-    throw new Error("Enter a barcode value.")
-  }
-
-  const codes = Array.from(value).map((character) => {
-    const charCode = character.charCodeAt(0)
-
-    if (charCode < 32 || charCode > 126) {
-      throw new Error("Code 128-B supports printable ASCII characters only.")
-    }
-
-    return charCode - 32
-  })
-
-  const startCodeB = 104
-  const checksum =
-    (startCodeB + codes.reduce((sum, code, index) => sum + code * (index + 1), 0)) % 103
-  const fullCodes = [startCodeB, ...codes, checksum, 106]
-
-  return fullCodes.flatMap((code) => {
-    const pattern = code128Patterns[code]
-
-    if (!pattern) {
-      throw new Error("Barcode pattern is unavailable.")
-    }
-
-    return Array.from(pattern, Number)
-  })
-}
-
-function renderBarcodeSvg({
-  bars,
-  value,
-  foreground,
-  background,
-  moduleWidth,
-  barHeight,
-  quietZone,
-  showLabel,
-}: {
-  bars: number[]
-  value: string
-  foreground: string
-  background: string
-  moduleWidth: number
-  barHeight: number
-  quietZone: number
-  showLabel: boolean
-}) {
-  const labelHeight = showLabel ? 34 : 0
-  const barcodeWidth = bars.reduce((sum, width) => sum + width, 0) * moduleWidth
-  const width = barcodeWidth + quietZone * 2
-  const height = barHeight + labelHeight + quietZone * 2
-  let x = quietZone
-
-  const rects = bars
-    .map((barWidth, index) => {
-      const rectWidth = barWidth * moduleWidth
-      const rect =
-        index % 2 === 0
-          ? `<rect x="${x}" y="${quietZone}" width="${rectWidth}" height="${barHeight}" fill="${escapeAttribute(
-              foreground,
-            )}"/>`
-          : ""
-      x += rectWidth
-      return rect
-    })
-    .join("")
-
-  const label = showLabel
-    ? `<text x="${width / 2}" y="${height - quietZone}" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="${escapeAttribute(
-        foreground,
-      )}">${escapeText(value)}</text>`
-    : ""
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Barcode for ${escapeAttribute(
-    value,
-  )}" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"><rect width="100%" height="100%" fill="${escapeAttribute(
-    background,
-  )}"/>${rects}${label}</svg>`
-}
-
-function clampNumber(value: string, min: number, max: number, fallback: number) {
-  const numberValue = Number(value)
-
-  if (!Number.isFinite(numberValue)) {
-    return fallback
-  }
-
-  return Math.min(Math.max(numberValue, min), max)
-}
-
-function escapeText(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-}
-
-function escapeAttribute(value: string) {
-  return escapeText(value).replace(/"/g, "&quot;")
 }

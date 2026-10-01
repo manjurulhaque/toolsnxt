@@ -1,345 +1,549 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { ImageToAsciiArtTool } from "./image-to-ascii-art-tool"
 
-import { ChangeEvent, useMemo, useState } from "react"
-import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard, downloadTextFile } from "@/lib/browser-actions"
+const pagePath = "/image-to-ascii-art"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Image to ASCII Art | Convert Pictures to Text Art Online"
+const pageDescription =
+  "Convert images to ASCII art online in your browser. Upload a picture, adjust width, tone map, contrast, and inversion, then copy or download text art."
 
-type Tone = "standard" | "dense" | "blocks"
+const faqs = [
+  {
+    question: "What is ASCII art?",
+    answer:
+      "ASCII art is an image-like design made from text characters rather than pixels.",
+  },
+  {
+    question: "How does image-to-ASCII conversion work?",
+    answer:
+      "This tool draws the image to a canvas, samples pixels, calculates brightness, and maps each brightness value to a character in the selected tone map.",
+  },
+  {
+    question: "Which image formats are supported?",
+    answer:
+      "The file picker accepts image files that the browser can read through image/*. Common formats may include JPG, PNG, WebP, GIF, BMP, and others depending on browser support.",
+  },
+  {
+    question: "Does the tool work on mobile devices?",
+    answer:
+      "Yes. It uses standard browser image input, controls, preview, and text output, so support depends on the mobile browser and image size.",
+  },
+  {
+    question: "Is my image uploaded to a server?",
+    answer:
+      "The conversion runs in your browser. The selected image is not intentionally uploaded by this tool.",
+  },
+  {
+    question: "Can I copy the generated ASCII art?",
+    answer:
+      "Yes. Generate the output and use Copy Art to copy the text to your clipboard.",
+  },
+  {
+    question: "Can I download the output?",
+    answer:
+      "Yes. Download TXT saves the generated ASCII art as ascii-art.txt.",
+  },
+  {
+    question: "Why does my ASCII art not look like the original image?",
+    answer:
+      "ASCII art is an approximation. Output depends on image contrast, cropping, selected width, tone map, text font, and the implemented brightness mapping.",
+  },
+  {
+    question: "Can I convert color images?",
+    answer:
+      "Yes. Color images can be uploaded, but this implementation outputs monochrome character art based on brightness values.",
+  },
+  {
+    question: "Does the tool support Unicode characters?",
+    answer:
+      "The standard and detailed tone maps use ASCII-style printable characters. The block shade tone map uses block-shading characters as implemented.",
+  },
+  {
+    question: "Can I use the output commercially?",
+    answer:
+      "The tool does not grant rights to the source image. Use images and generated outputs only when you have the necessary permissions.",
+  },
+  {
+    question: "Is this tool free?",
+    answer: "Yes. This is a free browser-based Image to ASCII Art tool.",
+  },
+  {
+    question: "Why do different ASCII generators produce different results?",
+    answer:
+      "Tools may use different scaling, luminance formulas, character sets, contrast handling, trimming, and output dimensions.",
+  },
+  {
+    question: "Is there a maximum image size?",
+    answer:
+      "The page does not show a fixed file-size limit, but large images may require more browser memory and processing time.",
+  },
+  {
+    question: "How can I improve ASCII art quality?",
+    answer:
+      "Use a clear high-contrast image, crop unnecessary background, choose a suitable output width, and try different tone maps and contrast settings.",
+  },
+  {
+    question: "Does it convert automatically?",
+    answer:
+      "No. After choosing an image or changing settings, click Generate ASCII to create the output.",
+  },
+]
 
-const toneMaps: Record<Tone, string> = {
-  standard: " .:-=+*#%@",
-  dense: " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$",
-  blocks: " ░▒▓█",
-}
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    about: ["Image to ASCII Art", "ASCII Art Generator", "ASCII Converter", "Image to Text Art"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Image to ASCII Art",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Image to ASCII Art",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Image to ASCII Art",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to convert an image to ASCII art online",
+    description: "Generate copyable ASCII art from a browser-readable image.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Choose image",
+        text: "Select a browser-readable image file.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Adjust settings",
+        text: "Set output width, tone map, contrast, and brightness inversion if needed.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Generate ASCII",
+        text: "Click Generate ASCII to convert the image.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Review output",
+        text: "Check the source preview, generated text art, line count, and character count.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Copy or download",
+        text: "Copy the ASCII art or download it as a TXT file.",
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
+]
 
-type ImageItem = {
-  name: string
-  url: string
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
 }
 
 export default function ImageToAsciiArtPage() {
-  const [image, setImage] = useState<ImageItem | null>(null)
-  const [asciiArt, setAsciiArt] = useState("")
-  const [width, setWidth] = useState("100")
-  const [tone, setTone] = useState<Tone>("standard")
-  const [invert, setInvert] = useState(false)
-  const [contrast, setContrast] = useState("1")
-  const [isConverting, setIsConverting] = useState(false)
-  const [message, setMessage] = useState("Choose an image to turn it into ASCII art.")
-
-  const stats = useMemo(() => {
-    const lines = asciiArt ? asciiArt.split("\n").length : 0
-    return {
-      lines,
-      characters: asciiArt.length,
-    }
-  }, [asciiArt])
-
-  function handleFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
-
-    if (!file || !file.type.startsWith("image/")) {
-      setMessage("Choose a valid image file.")
-      return
-    }
-
-    if (image) {
-      URL.revokeObjectURL(image.url)
-    }
-
-    const nextImage = {
-      name: file.name,
-      url: URL.createObjectURL(file),
-    }
-
-    setImage(nextImage)
-    setAsciiArt("")
-    setMessage(`${file.name} loaded.`)
-    event.target.value = ""
-  }
-
-  async function convertImage() {
-    if (!image) {
-      setMessage("Choose an image before converting.")
-      return
-    }
-
-    setIsConverting(true)
-    setMessage("Converting image...")
-
-    try {
-      const nextAsciiArt = await imageUrlToAscii(image.url, {
-        width: clampNumber(width, 24, 220, 100),
-        toneMap: toneMaps[tone],
-        invert,
-        contrast: clampFloat(contrast, 0.4, 2.6, 1),
-      })
-
-      setAsciiArt(nextAsciiArt)
-      setMessage("ASCII art generated.")
-    } catch (error) {
-      console.error("Image to ASCII conversion failed", error)
-      setMessage("Could not convert that image. Try a different file.")
-    } finally {
-      setIsConverting(false)
-    }
-  }
-
-  async function copyAsciiArt() {
-    if (!asciiArt) {
-      setMessage("Generate ASCII art before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(asciiArt)
-      setMessage("ASCII art copied.")
-    } catch {
-      setMessage("Copy failed. Select the art and copy it manually.")
-    }
-  }
-
-  function downloadAsciiArt() {
-    if (!asciiArt) {
-      setMessage("Generate ASCII art before downloading.")
-      return
-    }
-
-    downloadTextFile(asciiArt, "ascii-art.txt")
-    setMessage("ASCII art downloaded.")
-  }
-
-  function clearImage() {
-    if (image) {
-      URL.revokeObjectURL(image.url)
-    }
-
-    setImage(null)
-    setAsciiArt("")
-    setMessage("Image cleared.")
-  }
-
   return (
-    <ToolPage>
-        <ToolPanel>
-          <ToolIntro eyebrow="Image tool" title="Image to ASCII Art">
-            Convert an image into copyable text art in your browser. Tune width, contrast, tone
-            density, and inversion for cleaner output.
-          </ToolIntro>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
+          <ImageToAsciiArtTool />
+        </section>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose image</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              JPG, PNG, WebP, GIF, BMP, and other browser-readable images
-            </span>
-            <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
-          </label>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <label htmlFor="ascii-width" className="block">
-              <span className="text-sm font-medium">Output width</span>
-              <input
-                id="ascii-width"
-                type="number"
-                min="24"
-                max="220"
-                value={width}
-                onChange={(event) => setWidth(event.target.value)}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-              />
-            </label>
-
-            <label htmlFor="tone-map" className="block">
-              <span className="text-sm font-medium">Tone map</span>
-              <select
-                id="tone-map"
-                value={tone}
-                onChange={(event) => setTone(event.target.value as Tone)}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-              >
-                <option value="standard">Standard</option>
-                <option value="dense">Detailed</option>
-                <option value="blocks">Block shade</option>
-              </select>
-            </label>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <label htmlFor="contrast" className="block text-sm font-medium">
-              Contrast: {clampFloat(contrast, 0.4, 2.6, 1).toFixed(1)}x
-            </label>
-            <input
-              id="contrast"
-              type="range"
-              min="0.4"
-              max="2.6"
-              step="0.1"
-              value={clampFloat(contrast, 0.4, 2.6, 1)}
-              onChange={(event) => setContrast(event.target.value)}
-              className="w-full accent-[var(--accent-rust)]"
-            />
-          </div>
-
-          <label className="mt-5 flex items-center gap-3 rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm font-medium">
-            <input
-              type="checkbox"
-              checked={invert}
-              onChange={(event) => setInvert(event.target.checked)}
-              className="h-4 w-4 accent-[var(--accent-rust)]"
-            />
-            Invert brightness
-          </label>
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={convertImage}
-              disabled={!image || isConverting}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              {isConverting ? "Converting..." : "Generate ASCII"}
-            </button>
-            <button
-              type="button"
-              onClick={clearImage}
-              disabled={!image || isConverting}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              Clear
-            </button>
-          </div>
-
-          <InfoBox className="mt-6">
-            {message}
-          </InfoBox>
-        </ToolPanel>
-
-        <div className="space-y-6">
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
           <ToolPanel>
-            <PanelHeader eyebrow="Preview" title="Source Image" badge={image ? image.name : "No file"} />
-
-            <div className="mt-6 flex min-h-[260px] items-center justify-center overflow-hidden rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
-              {image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={image.url} alt={image.name} className="max-h-[420px] w-full object-contain" />
-              ) : (
-                <p className="text-center text-sm text-[var(--ink-700)]">
-                  Your selected image will appear here.
-                </p>
-              )}
+            <PanelHeader eyebrow="Guide" title="What Is Image to ASCII Art?" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                Image to ASCII Art converts a raster image into text art by representing sampled
+                pixels with characters. It is useful for terminal artwork, README files,
+                documentation, creative coding, retro design, classroom demonstrations, social
+                posts, and experiments by developers, designers, artists, students, and hobbyists.
+              </p>
+              <p>
+                Raster images are made of pixels. ASCII art is made of characters arranged in rows.
+                This tool estimates brightness from image pixels, then chooses characters from the
+                selected tone map so darker and lighter areas form a text-based approximation.
+              </p>
             </div>
           </ToolPanel>
 
           <ToolPanel>
-            <PanelHeader eyebrow="Output" title="ASCII Art" badge={`${stats.lines} lines / ${stats.characters} chars`} />
-
-            <textarea
-              value={asciiArt}
-              readOnly
-              rows={18}
-              className="mt-6 w-full resize-y whitespace-pre overflow-auto rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-[8px] leading-[8px] outline-none sm:text-[10px] sm:leading-[10px]"
-              aria-label="Generated ASCII art"
-              placeholder="ASCII art will appear here..."
-            />
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={copyAsciiArt}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-              >
-                Copy Art
-              </button>
-              <button
-                type="button"
-                onClick={downloadAsciiArt}
-                className="rounded-full bg-[var(--accent-gold)] px-5 py-3 text-sm font-semibold text-[var(--ink-900)] transition hover:bg-[var(--accent-sand)]"
-              >
-                Download TXT
-              </button>
+            <PanelHeader eyebrow="Method" title="How ASCII Art Conversion Works" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Choose image", "Upload one browser-readable image through the file picker."],
+                ["Preview source", "The selected image is shown in the Source Image panel."],
+                ["Scale to width", "The output width is clamped between 24 and 220 characters."],
+                ["Sample pixels", "The image is drawn to a canvas and pixel data is read with getImageData."],
+                ["Map brightness", "Red, green, blue, and alpha values are converted to brightness and mapped to the selected tone map."],
+                ["Generate text", "The output appears as monochrome text that can be copied or downloaded."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
             </div>
           </ToolPanel>
-        </div>
-    </ToolPage>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Features" title="Supported Features" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Image upload", "Accepts image/* files supported by the browser image decoder."],
+                ["Source preview", "Displays the selected image before conversion."],
+                ["Adjustable width", "Set output width from 24 to 220 characters."],
+                ["Tone maps", "Choose Standard, Detailed, or Block shade mapping."],
+                ["Contrast control", "Adjust contrast from 0.4x to 2.6x."],
+                ["Invert brightness", "Reverse light and dark mapping with a checkbox."],
+                ["Copy output", "Copy generated ASCII art to the clipboard."],
+                ["Download TXT", "Download the output as ascii-art.txt."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Accuracy" title="Conversion Accuracy" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Implemented algorithm", "ASCII output is generated from the uploaded image using the page's canvas and brightness mapping code."],
+                ["Brightness formula", "The implementation weights red, green, and blue channels, accounts for alpha, then applies contrast."],
+                ["Tone selection", "Character choice depends on brightness, invert mode, contrast, and the selected tone map."],
+                ["Width and detail", "Larger output widths generally keep more visual detail but create wider text."],
+                ["Text shape", "Output height is based on image aspect ratio and a fixed text-character adjustment."],
+                ["Different tools", "Other ASCII generators may produce different results because mapping, scaling, and trimming rules vary."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Examples" title="Common Examples" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Profile picture", "Convert a high-contrast avatar into text art."],
+                ["Terminal artwork", "Generate monochrome art for console output or demos."],
+                ["Retro graphics", "Create text-based visuals with a nostalgic computing style."],
+                ["Documentation banner", "Make an ASCII banner or image-inspired block for a README."],
+                ["Digital art project", "Experiment with tone maps, contrast, and width in creative coding."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Use" title="How to Use Image to ASCII Art" />
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Choose a browser-readable image file.</li>
+              <li>Set the output width and choose a tone map.</li>
+              <li>Adjust contrast or enable Invert brightness if needed.</li>
+              <li>Click Generate ASCII.</li>
+              <li>Review the output, then copy the art or download the TXT file.</li>
+            </ol>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Concepts" title="Understanding ASCII Art" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                ASCII characters are text symbols originally defined for a 7-bit character set.
+                Modern text systems often use Unicode, which includes ASCII-compatible characters
+                plus many more symbols. This page outputs text art rather than a new image file.
+              </p>
+              <p>
+                Dense characters visually cover more area, so they can represent darker regions.
+                Simpler characters and spaces represent lighter regions. Resizing changes how many
+                samples are taken, so narrow output is more compact while wider output preserves
+                more image structure.
+              </p>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Applications" title="Common Use Cases" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Terminal projects", "Add generated text art to console applications and demos."],
+                ["README files", "Create decorative text visuals for documentation."],
+                ["Education", "Demonstrate pixel sampling, grayscale, luminance, and character mapping."],
+                ["Creative design", "Explore retro computing, generative art, and typography experiments."],
+                ["Social content", "Share small text-based art snippets where monospaced formatting is supported."],
+                ["Programming practice", "Study how canvas pixel data can be transformed into text output."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Practical Notes" title="Benefits, Limitations, Tips and Mistakes" />
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold">Benefits</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Convert images into copyable text art in the browser.</li>
+                  <li>Adjust width, tone map, contrast, and brightness inversion.</li>
+                  <li>Copy or download ASCII output for projects and documentation.</li>
+                  <li>Learn image-processing concepts through a visual text output.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Limitations</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>ASCII art cannot preserve every image detail.</li>
+                  <li>Output quality depends on source image quality, contrast, and selected settings.</li>
+                  <li>Small output widths reduce detail.</li>
+                  <li>Drag-and-drop upload, color ASCII, and live auto-conversion are not implemented.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tips for Best Results</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Use clear, well-lit, high-contrast images.</li>
+                  <li>Crop unnecessary backgrounds before uploading.</li>
+                  <li>Choose a wider output for more detail.</li>
+                  <li>Try different tone maps and contrast settings before copying the final text.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Common Mistakes</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Uploading very low-resolution or blurry images.</li>
+                  <li>Expecting photographic accuracy from character art.</li>
+                  <li>Choosing an output width that is too small for the subject.</li>
+                  <li>Viewing the output in a proportional font instead of a monospaced font.</li>
+                </ul>
+              </div>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="More Tools" title="Related Tools" />
+            <nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              {[
+                ["Image Resizer", "/image-resizer"],
+                ["Image Converter", "/image-converter"],
+                ["Image to PDF Converter", "/image-to-pdf"],
+                ["Base64 Encoder / Decoder", "/base64-encoder-decoder"],
+                ["QR Code Generator", "/qr-code-generator"],
+                ["Color Converter", "/color-converter"],
+                ["Gradient Generator", "/gradient-generator"],
+                ["Markdown Previewer", "/markdown-previewer"],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                  href={href}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Glossary" title="ASCII Art Terms" />
+            <dl className="mt-6 grid gap-4 text-sm leading-7 text-[var(--ink-700)] md:grid-cols-2">
+              {[
+                ["ASCII", "American Standard Code for Information Interchange, a 7-bit character encoding."],
+                ["Unicode", "A modern character encoding standard that supports text from many writing systems."],
+                ["Character Set", "A collection of characters used to represent text."],
+                ["Pixel", "A single picture element in a raster image."],
+                ["Grayscale", "An image or value based on lightness rather than color hue."],
+                ["Brightness", "A lightness value calculated from sampled image pixels."],
+                ["Luminance", "A weighted measure of perceived brightness from color channels."],
+                ["Raster Image", "An image made from a grid of pixels."],
+                ["Resolution", "The pixel dimensions or detail level of an image."],
+                ["ASCII Art", "Artwork represented by arranged text characters."],
+              ].map(([term, definition]) => (
+                <div key={term}>
+                  <dt className="font-semibold text-[var(--ink-900)]">{term}</dt>
+                  <dd>{definition}</dd>
+                </div>
+              ))}
+            </dl>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Sources" title="References" />
+            <ul className="mt-6 space-y-3 text-sm leading-7 text-[var(--ink-700)]">
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.iana.org/assignments/character-sets/character-sets.xhtml"
+                  rel="noreferrer"
+                >
+                  IANA Character Sets Registry. US-ASCII aliases and ANSI X3.4 sources.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Glossary/ASCII"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. ASCII glossary.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.unicode.org/standard/standard.html"
+                  rel="noreferrer"
+                >
+                  Unicode Consortium. The Unicode Standard.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getImageData"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. CanvasRenderingContext2D getImageData.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.w3.org/TR/2015/REC-2dcontext-20151119/"
+                  rel="noreferrer"
+                >
+                  W3C. HTML Canvas 2D Context.
+                </a>
+              </li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
+            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
+              This Image to ASCII Art tool converts images into text art using the implemented
+              browser-based conversion algorithm. Results depend on image quality, selected width,
+              tone map, contrast, brightness inversion, browser image decoding, and character
+              mapping. Different applications may generate different ASCII output. The tool is
+              intended for educational, creative, and development purposes.
+            </p>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
   )
-}
-
-async function imageUrlToAscii(
-  url: string,
-  options: {
-    width: number
-    toneMap: string
-    invert: boolean
-    contrast: number
-  },
-) {
-  const image = await loadImage(url)
-  const aspectRatio = image.naturalHeight / image.naturalWidth
-  const outputWidth = options.width
-  const outputHeight = Math.max(1, Math.round(outputWidth * aspectRatio * 0.48))
-  const canvas = document.createElement("canvas")
-  canvas.width = outputWidth
-  canvas.height = outputHeight
-
-  const context = canvas.getContext("2d", { willReadFrequently: true })
-  if (!context) {
-    throw new Error("Canvas is unavailable")
-  }
-
-  context.drawImage(image, 0, 0, outputWidth, outputHeight)
-  const pixels = context.getImageData(0, 0, outputWidth, outputHeight).data
-  const lines: string[] = []
-
-  for (let y = 0; y < outputHeight; y += 1) {
-    let line = ""
-
-    for (let x = 0; x < outputWidth; x += 1) {
-      const index = (y * outputWidth + x) * 4
-      const alpha = pixels[index + 3] / 255
-      const red = pixels[index]
-      const green = pixels[index + 1]
-      const blue = pixels[index + 2]
-      const brightness = (0.2126 * red + 0.7152 * green + 0.0722 * blue) * alpha + 255 * (1 - alpha)
-      const adjusted = adjustContrast(options.invert ? 255 - brightness : brightness, options.contrast)
-      const toneIndex = Math.round((adjusted / 255) * (options.toneMap.length - 1))
-      line += options.toneMap[toneIndex]
-    }
-
-    lines.push(line.trimEnd())
-  }
-
-  return lines.join("\n")
-}
-
-function loadImage(url: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image()
-    image.onload = () => resolve(image)
-    image.onerror = () => reject(new Error("Image could not load"))
-    image.src = url
-  })
-}
-
-function adjustContrast(value: number, contrast: number) {
-  return Math.min(Math.max((value - 128) * contrast + 128, 0), 255)
-}
-
-function clampNumber(value: string, min: number, max: number, fallback: number) {
-  const numericValue = Number(value)
-
-  if (!Number.isFinite(numericValue)) {
-    return fallback
-  }
-
-  return Math.min(Math.max(Math.floor(numericValue), min), max)
-}
-
-function clampFloat(value: string, min: number, max: number, fallback: number) {
-  const numericValue = Number(value)
-
-  if (!Number.isFinite(numericValue)) {
-    return fallback
-  }
-
-  return Math.min(Math.max(numericValue, min), max)
 }

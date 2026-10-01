@@ -1,554 +1,610 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { ImageResizerTool } from "./image-resizer-tool"
 
-import { NumberField } from "@/components/form-controls"
-import { ChangeEvent, useMemo, useState } from "react"
-import { ToolIntro, ToolPage, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+const pagePath = "/image-resizer"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Image Resizer | Resize JPG, PNG and WebP Online"
+const pageDescription =
+  "Resize images online for free in your browser. Batch resize browser-readable images with width, height, aspect-ratio lock, contain, cover, stretch, quality, and download controls."
 
-type OutputFormat = "image/png" | "image/jpeg" | "image/webp"
-type ResizeMode = "contain" | "cover" | "stretch"
-
-type ImageItem = {
-  id: string
-  file: File
-  url: string
-}
-
-type ResizedImage = {
-  id: string
-  fileName: string
-  url: string
-  size: number
-  width: number
-  height: number
-}
-
-const formatOptions: Array<{ label: string; value: OutputFormat; extension: string }> = [
-  { label: "PNG", value: "image/png", extension: "png" },
-  { label: "JPG", value: "image/jpeg", extension: "jpg" },
-  { label: "WebP", value: "image/webp", extension: "webp" },
+const faqs = [
+  {
+    question: "What is an Image Resizer?",
+    answer:
+      "An Image Resizer changes an image's pixel dimensions, such as resizing a photo from 4000 x 3000 pixels to 1200 x 900 pixels.",
+  },
+  {
+    question: "How does this Image Resizer work?",
+    answer:
+      "It loads selected images in the browser, draws them to a canvas at the selected size and mode, exports the canvas, and creates download links.",
+  },
+  {
+    question: "Can I resize images without losing quality?",
+    answer:
+      "Reducing dimensions can preserve a good visual result, but resizing changes pixel data. Enlarging an image cannot recreate detail that was not in the original.",
+  },
+  {
+    question: "What output image formats are supported?",
+    answer:
+      "The implemented output formats are PNG, JPG, and WebP.",
+  },
+  {
+    question: "What input image formats are supported?",
+    answer:
+      "The file picker accepts image files, and resizing depends on your browser's ability to decode the selected image.",
+  },
+  {
+    question: "Can I resize JPG images?",
+    answer:
+      "Yes. Choose JPG or JPEG files, set the dimensions and mode, then resize.",
+  },
+  {
+    question: "Can I resize PNG images?",
+    answer:
+      "Yes. PNG images can be resized and exported as PNG, JPG, or WebP.",
+  },
+  {
+    question: "What is aspect ratio?",
+    answer:
+      "Aspect ratio is the proportional relationship between width and height, such as 1:1 for a square or 16:9 for widescreen.",
+  },
+  {
+    question: "Should I maintain aspect ratio?",
+    answer:
+      "Maintain aspect ratio when you want to avoid distortion while editing dimensions. Stretch mode still draws to the exact target size.",
+  },
+  {
+    question: "Does resizing reduce file size?",
+    answer:
+      "It often can, especially when reducing pixel dimensions or using JPG/WebP quality settings, but final size depends on the image and output format.",
+  },
+  {
+    question: "Can I resize multiple images?",
+    answer:
+      "Yes. Select multiple images, apply the same resize settings, then download individual outputs or use Download All.",
+  },
+  {
+    question: "Is the Image Resizer free?",
+    answer: "Yes. This is a free browser-based image resizer.",
+  },
+  {
+    question: "Does it work on mobile devices?",
+    answer:
+      "Yes. It uses standard browser file inputs, form controls, previews, and download actions for modern browsers.",
+  },
+  {
+    question: "Is my data uploaded to a server?",
+    answer:
+      "The resizing runs locally in your browser. Selected images are not intentionally uploaded by this tool.",
+  },
+  {
+    question: "What dimensions should I use for social media?",
+    answer:
+      "Use the dimensions required by the platform or campaign. This page includes a 1200 x 630 Social preset and a 1080 x 1080 Square preset.",
+  },
+  {
+    question: "Can I enlarge images?",
+    answer:
+      "Yes, by entering dimensions larger than the source, but upscaled images may look soft or blurry.",
+  },
+  {
+    question: "Why does my enlarged image look blurry?",
+    answer:
+      "Upscaling spreads existing pixels over a larger area. Smoothing can reduce jagged edges, but it cannot add real source detail.",
+  },
 ]
 
-const presets = [
-  { label: "Avatar", width: 512, height: 512 },
-  { label: "Social", width: 1200, height: 630 },
-  { label: "HD", width: 1280, height: 720 },
-  { label: "Square", width: 1080, height: 1080 },
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+    about: ["Image Resizer", "Resize Image", "Resize JPG", "Resize PNG"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Image Resizer",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Image Resizer",
+    applicationCategory: "MultimediaApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Image Resizer",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to resize images online",
+    description: "Resize browser-readable images to selected pixel dimensions.",
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Choose images",
+        text: "Select one or more image files from your device.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Set dimensions",
+        text: "Enter width and height or choose one of the preset sizes.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Choose resize settings",
+        text: "Set aspect-ratio editing, resize mode, output format, quality, and background where available.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Resize",
+        text: "Click Resize Images to generate resized files.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Download",
+        text: "Download one resized image or use Download All for multiple outputs.",
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
 ]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
+}
 
 export default function ImageResizerPage() {
-  const [images, setImages] = useState<ImageItem[]>([])
-  const [resizedImages, setResizedImages] = useState<ResizedImage[]>([])
-  const [width, setWidth] = useState("800")
-  const [height, setHeight] = useState("600")
-  const [lockAspectRatio, setLockAspectRatio] = useState(true)
-  const [resizeMode, setResizeMode] = useState<ResizeMode>("contain")
-  const [outputFormat, setOutputFormat] = useState<OutputFormat>("image/webp")
-  const [quality, setQuality] = useState(0.9)
-  const [background, setBackground] = useState("#ffffff")
-  const [isResizing, setIsResizing] = useState(false)
-  const [message, setMessage] = useState("Choose images, set a size, then resize them locally.")
-
-  const selectedSize = useMemo(
-    () => images.reduce((sum, image) => sum + image.file.size, 0),
-    [images],
-  )
-  const outputSize = useMemo(
-    () => resizedImages.reduce((sum, image) => sum + image.size, 0),
-    [resizedImages],
-  )
-
-  function handleFiles(event: ChangeEvent<HTMLInputElement>) {
-    const selectedFiles = Array.from(event.target.files ?? []).filter((file) =>
-      file.type.startsWith("image/"),
-    )
-
-    if (selectedFiles.length === 0) {
-      setMessage("Choose at least one image file.")
-      return
-    }
-
-    const nextImages = selectedFiles.map((file) => ({
-      id: `${file.name}-${file.lastModified}-${crypto.randomUUID()}`,
-      file,
-      url: URL.createObjectURL(file),
-    }))
-
-    setImages((currentImages) => [...currentImages, ...nextImages])
-    clearResizedImages()
-    setMessage(`${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} added.`)
-    event.target.value = ""
-  }
-
-  function removeImage(id: string) {
-    setImages((currentImages) => {
-      const image = currentImages.find((item) => item.id === id)
-      if (image) {
-        URL.revokeObjectURL(image.url)
-      }
-
-      return currentImages.filter((item) => item.id !== id)
-    })
-    clearResizedImages()
-  }
-
-  function clearImages() {
-    images.forEach((image) => URL.revokeObjectURL(image.url))
-    setImages([])
-    clearResizedImages()
-    setMessage("Selection cleared.")
-  }
-
-  function clearResizedImages() {
-    setResizedImages((currentImages) => {
-      currentImages.forEach((image) => URL.revokeObjectURL(image.url))
-      return []
-    })
-  }
-
-  function applyPreset(widthValue: number, heightValue: number) {
-    setWidth(String(widthValue))
-    setHeight(String(heightValue))
-    clearResizedImages()
-  }
-
-  function updateWidth(nextWidth: string) {
-    setWidth(nextWidth)
-
-    if (lockAspectRatio) {
-      const currentWidth = parseSize(width)
-      const currentHeight = parseSize(height)
-      const numericWidth = parseSize(nextWidth)
-
-      if (currentWidth && currentHeight && numericWidth) {
-        setHeight(String(Math.max(1, Math.round((numericWidth * currentHeight) / currentWidth))))
-      }
-    }
-
-    clearResizedImages()
-  }
-
-  function updateHeight(nextHeight: string) {
-    setHeight(nextHeight)
-
-    if (lockAspectRatio) {
-      const currentWidth = parseSize(width)
-      const currentHeight = parseSize(height)
-      const numericHeight = parseSize(nextHeight)
-
-      if (currentWidth && currentHeight && numericHeight) {
-        setWidth(String(Math.max(1, Math.round((numericHeight * currentWidth) / currentHeight))))
-      }
-    }
-
-    clearResizedImages()
-  }
-
-  async function resizeImages() {
-    const targetWidth = parseSize(width)
-    const targetHeight = parseSize(height)
-
-    if (images.length === 0) {
-      setMessage("Add images before resizing.")
-      return
-    }
-
-    if (!targetWidth || !targetHeight) {
-      setMessage("Enter a valid width and height.")
-      return
-    }
-
-    setIsResizing(true)
-    setMessage("Resizing images...")
-    clearResizedImages()
-
-    try {
-      const selectedFormat = formatOptions.find((format) => format.value === outputFormat) ?? formatOptions[0]
-      const nextImages = await Promise.all(
-        images.map((image) =>
-          resizeImage(
-            image.file,
-            targetWidth,
-            targetHeight,
-            resizeMode,
-            selectedFormat.value,
-            selectedFormat.extension,
-            quality,
-            background,
-          ),
-        ),
-      )
-
-      setResizedImages(nextImages)
-      setMessage(`${nextImages.length} image${nextImages.length === 1 ? "" : "s"} resized.`)
-    } catch (error) {
-      console.error("Image resize failed", error)
-      setMessage("Something went wrong while resizing. Try a different image file.")
-    } finally {
-      setIsResizing(false)
-    }
-  }
-
-  function downloadImage(image: ResizedImage) {
-    const link = document.createElement("a")
-    link.href = image.url
-    link.download = image.fileName
-    link.click()
-  }
-
-  function downloadAll() {
-    resizedImages.forEach((image) => downloadImage(image))
-  }
-
   return (
-    <ToolPage gridClassName="lg:grid-cols-[0.88fr_1.12fr]">
-        <ToolPanel>
-          <ToolIntro eyebrow="Local tool" title="Image Resizer">
-            Resize one or more images in your browser with aspect-ratio, crop, fit, quality, and
-            format controls.
-          </ToolIntro>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.88fr_1.12fr] lg:py-12">
+          <ImageResizerTool />
+        </section>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose images</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              JPG, PNG, WebP, GIF, BMP, and other browser-readable images
-            </span>
-            <input type="file" accept="image/*" multiple className="sr-only" onChange={handleFiles} />
-          </label>
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
+          <ToolPanel>
+            <PanelHeader eyebrow="Guide" title="What Is an Image Resizer?" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                An Image Resizer changes the pixel width and height of a raster image. Resizing is
+                useful when photos, screenshots, product images, banners, or app assets need to fit
+                a target platform, upload limit, layout, or sharing workflow.
+              </p>
+              <p>
+                Image dimensions describe pixel width and height, while file size describes how
+                many bytes the saved file uses. This online image resizer helps with social media,
+                websites, email attachments, printing, photography, graphic design, e-commerce,
+                mobile apps, and digital publishing.
+              </p>
+            </div>
+          </ToolPanel>
 
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {presets.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => applyPreset(preset.width, preset.height)}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-2 text-sm font-semibold text-[var(--ink-700)] transition hover:bg-white"
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <NumberField min="1" id="resize-width" label="Width" value={width} onChange={updateWidth} />
-            <NumberField min="1" id="resize-height" label="Height" value={height} onChange={updateHeight} />
-          </div>
-
-          <label className="mt-4 flex items-center gap-3 text-sm font-medium">
-            <input
-              type="checkbox"
-              checked={lockAspectRatio}
-              onChange={(event) => setLockAspectRatio(event.target.checked)}
-              className="h-4 w-4 accent-[var(--accent-rust)]"
-            />
-            Lock aspect ratio while editing dimensions
-          </label>
-
-          <div className="mt-6">
-            <label htmlFor="resize-mode" className="block text-sm font-medium">
-              Resize mode
-            </label>
-            <select
-              id="resize-mode"
-              value={resizeMode}
-              onChange={(event) => {
-                setResizeMode(event.target.value as ResizeMode)
-                clearResizedImages()
-              }}
-              className="mt-2 w-full rounded-2xl border border-[var(--ink-900)]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            >
-              <option value="contain">Fit inside canvas</option>
-              <option value="cover">Fill and crop</option>
-              <option value="stretch">Stretch to exact size</option>
-            </select>
-          </div>
-
-          <div className="mt-6">
-            <label htmlFor="format" className="block text-sm font-medium">
-              Output format
-            </label>
-            <select
-              id="format"
-              value={outputFormat}
-              onChange={(event) => {
-                setOutputFormat(event.target.value as OutputFormat)
-                clearResizedImages()
-              }}
-              className="mt-2 w-full rounded-2xl border border-[var(--ink-900)]/10 bg-white px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-            >
-              {formatOptions.map((format) => (
-                <option key={format.value} value={format.value}>
-                  {format.label}
-                </option>
+          <ToolPanel>
+            <PanelHeader eyebrow="Method" title="How the Image Resizer Works" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Upload images", "Choose one or more browser-readable image files."],
+                ["Set dimensions", "Enter width and height in pixels or select a preset."],
+                ["Aspect-ratio editing", "When locked, changing width or height updates the other field proportionally."],
+                ["Resize mode", "Choose contain, cover, or stretch for how the image is drawn into the target canvas."],
+                ["Output format", "Export resized images as PNG, JPG, or WebP."],
+                ["Preview and download", "Review selected and resized image cards, then download individual files or all outputs."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
               ))}
-            </select>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            <label htmlFor="quality" className="block text-sm font-medium">
-              Quality: {Math.round(quality * 100)}%
-            </label>
-            <input
-              id="quality"
-              type="range"
-              min="0.45"
-              max="1"
-              step="0.01"
-              value={quality}
-              disabled={outputFormat === "image/png"}
-              onChange={(event) => {
-                setQuality(Number(event.target.value))
-                clearResizedImages()
-              }}
-              className="w-full accent-[var(--accent-rust)] disabled:opacity-40"
-            />
-          </div>
-
-          {resizeMode === "contain" || outputFormat === "image/jpeg" ? (
-            <label htmlFor="background" className="mt-6 block text-sm font-medium">
-              Background color
-              <input
-                id="background"
-                type="color"
-                value={background}
-                onChange={(event) => {
-                  setBackground(event.target.value)
-                  clearResizedImages()
-                }}
-                className="mt-2 h-11 w-full rounded-xl border border-[var(--ink-900)]/10 bg-white p-1"
-              />
-            </label>
-          ) : null}
-
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={resizeImages}
-              disabled={images.length === 0 || isResizing}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)] disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              {isResizing ? "Resizing..." : "Resize Images"}
-            </button>
-            <button
-              type="button"
-              onClick={clearImages}
-              disabled={images.length === 0 || isResizing}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 disabled:cursor-not-allowed disabled:opacity-45"
-            >
-              Clear
-            </button>
-          </div>
-
-          <InfoBox className="mt-6">
-            {message}
-          </InfoBox>
-        </ToolPanel>
-
-        <div className="space-y-6">
-          <ToolPanel>
-            <PanelHeader eyebrow="Input" title="Selected Images" badge={`${images.length} files / ${formatBytes(selectedSize)}`} />
-
-            {images.length === 0 ? (
-              <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
-                Your selected images will appear here before resizing.
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {images.map((image) => (
-                  <ImageCard
-                    key={image.id}
-                    imageUrl={image.url}
-                    title={image.file.name}
-                    subtitle={formatBytes(image.file.size)}
-                    actionLabel="Remove"
-                    onAction={() => removeImage(image.id)}
-                    disabled={isResizing}
-                  />
-                ))}
-              </div>
-            )}
+            </div>
           </ToolPanel>
 
           <ToolPanel>
-            <PanelHeader eyebrow="Output" title="Resized Images" badge={`${resizedImages.length} files / ${formatBytes(outputSize)}`} />
-
-            {resizedImages.length > 1 ? (
-              <button
-                type="button"
-                onClick={downloadAll}
-                className="mt-5 rounded-full bg-[var(--accent-gold)] px-5 py-3 text-sm font-semibold text-[var(--ink-900)] transition hover:bg-[var(--accent-sand)]"
-              >
-                Download All
-              </button>
-            ) : null}
-
-            {resizedImages.length === 0 ? (
-              <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
-                Resized files will appear here with download buttons.
-              </div>
-            ) : (
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                {resizedImages.map((image) => (
-                  <ImageCard
-                    key={image.id}
-                    imageUrl={image.url}
-                    title={image.fileName}
-                    subtitle={`${image.width} x ${image.height} / ${formatBytes(image.size)}`}
-                    actionLabel="Download"
-                    onAction={() => downloadImage(image)}
-                  />
-                ))}
-              </div>
-            )}
+            <PanelHeader eyebrow="Formats" title="Supported Image Formats" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                Output formats are PNG, JPG, and WebP. Input accepts files whose MIME type starts
+                with
+                <code className="mx-1 rounded bg-[var(--page-cream)] px-1">image/</code>
+                and depends on browser decoding through
+                <code className="mx-1 rounded bg-[var(--page-cream)] px-1">createImageBitmap</code>.
+                The upload copy mentions JPG, PNG, WebP, GIF, BMP, and other browser-readable
+                images.
+              </p>
+              <InfoBox>
+                This page does not output AVIF, GIF, BMP, TIFF, ICO, HEIC, or SVG, and it does not
+                perform vector conversion or OCR.
+              </InfoBox>
+            </div>
           </ToolPanel>
-        </div>
-    </ToolPage>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Options" title="Resize Options" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Width and height", "Target pixel dimensions are required before resizing."],
+                ["Presets", "Avatar 512 x 512, Social 1200 x 630, HD 1280 x 720, and Square 1080 x 1080."],
+                ["Lock aspect ratio", "Keeps the width and height fields proportional while editing values."],
+                ["Fit inside canvas", "Contain mode fits the full image inside the target canvas and may leave background space."],
+                ["Fill and crop", "Cover mode fills the target canvas and crops overflow."],
+                ["Stretch to exact size", "Stretch mode draws the image to the exact target dimensions."],
+                ["Background color", "Shown for contain mode or JPG output, where a background fill is used."],
+                ["Quality", "Applies to JPG and WebP exports; PNG ignores the quality slider."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Accuracy" title="Image Resizing Accuracy" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Target dimensions", "Every resized output uses the selected target width and height."],
+                ["Resampling", "The canvas context uses image smoothing enabled with high smoothing quality."],
+                ["Aspect ratio", "Locking aspect ratio affects dimension field editing; the selected resize mode controls final drawing."],
+                ["Contain mode", "Uses the smaller scale so the full source image fits inside the target canvas."],
+                ["Cover mode", "Uses the larger scale so the target canvas is filled, cropping edges if needed."],
+                ["Stretch mode", "Draws the source image directly into the target width and height."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Examples" title="Common Examples" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Product photo", "Resize a product image to 1200 x 1200 pixels by entering custom dimensions."],
+                ["Profile picture", "Use the Avatar preset for a 512 x 512 image."],
+                ["Email attachment", "Reduce large photos to smaller pixel dimensions before sending."],
+                ["Website banner", "Use the HD preset or custom dimensions for a page header image."],
+                ["Online submission", "Resize scanned document photos before uploading them to a form."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Features" title="Implemented Features" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Batch resizing", "Resize multiple selected images with the same settings."],
+                ["Custom dimensions", "Set exact width and height values."],
+                ["Preset dimensions", "Quickly apply common avatar, social, HD, and square sizes."],
+                ["Resize modes", "Choose contain, cover, or stretch."],
+                ["Multiple output formats", "Export PNG, JPG, or WebP."],
+                ["Previews and downloads", "View input and output cards, then download one file or all files."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Use" title="How to Use the Image Resizer" />
+            <ol className="mt-6 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Choose one or more image files.</li>
+              <li>Enter the target width and height, or select a preset size.</li>
+              <li>Keep aspect ratio locked while editing dimensions if you want proportional values.</li>
+              <li>Select contain, cover, or stretch mode.</li>
+              <li>Choose PNG, JPG, or WebP output and adjust quality where available.</li>
+              <li>Click Resize Images, preview the outputs, and download them.</li>
+            </ol>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Output" title="Understanding the Output" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Resized image", "The output card shows the resized image preview."],
+                ["Width and height", "The subtitle shows final pixel dimensions."],
+                ["File size", "Input and output badges show total file sizes; each output card shows its size."],
+                ["Output format", "The downloaded file extension matches PNG, JPG, or WebP."],
+                ["Download option", "Each output card has a Download button."],
+                ["Batch download", "Download All appears when more than one resized output exists."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Applications" title="Common Use Cases" />
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {[
+                ["Website optimization", "Prepare images for page layouts, thumbnails, and responsive assets."],
+                ["Social media", "Resize photos for profile, square, or link-preview style dimensions."],
+                ["Photography", "Create smaller review or sharing copies from large originals."],
+                ["E-commerce", "Standardize product image dimensions."],
+                ["Printing and publishing", "Prepare image dimensions for documents, flyers, and presentations."],
+                ["Email and mobile apps", "Reduce dimensions for easier sharing and app-friendly assets."],
+              ].map(([label, text]) => (
+                <InfoBox key={label}>
+                  <strong className="block text-[var(--ink-900)]">{label}</strong>
+                  <span>{text}</span>
+                </InfoBox>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Practical Notes" title="Benefits, Limitations, Tips and Mistakes" />
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+              <div>
+                <h2 className="text-lg font-semibold">Benefits</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Resize images locally in the browser.</li>
+                  <li>Apply the same settings to multiple images.</li>
+                  <li>Choose exact dimensions, presets, output format, mode, quality, and background.</li>
+                  <li>Preview and download resized images without installing desktop software.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Limitations</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Input depends on browser-readable image formats.</li>
+                  <li>Only PNG, JPG, and WebP output formats are implemented.</li>
+                  <li>Enlarging images cannot restore lost detail.</li>
+                  <li>Very large images may take more browser memory and processing time.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tips for Best Results</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Start with the highest-quality original available.</li>
+                  <li>Use locked aspect-ratio editing when you want proportional dimensions.</li>
+                  <li>Choose dimensions appropriate for your target website, platform, or document.</li>
+                  <li>Preview the resized output before publishing, printing, or sending it.</li>
+                </ul>
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Common Mistakes</h2>
+                <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+                  <li>Using stretch mode unintentionally and distorting the image.</li>
+                  <li>Upscaling a low-resolution image and expecting sharper detail.</li>
+                  <li>Choosing dimensions that do not match the final platform.</li>
+                  <li>Confusing pixel dimensions with DPI, PPI, or file size.</li>
+                </ul>
+              </div>
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="More Tools" title="Related Tools" />
+            <nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              {[
+                ["Image Converter", "/image-converter"],
+                ["Image to PDF Converter", "/image-to-pdf"],
+                ["PDF to Images", "/pdf-to-images"],
+                ["Image to Favicon", "/image-to-favicon"],
+                ["Image to ASCII Art", "/image-to-ascii-art"],
+                ["PDF Compress", "/pdf-compress"],
+                ["SVG Optimizer", "/svg-optimizer"],
+                ["Base64 Encoder / Decoder", "/base64-encoder-decoder"],
+                ["QR Code Generator", "/qr-code-generator"],
+                ["Color Converter", "/color-converter"],
+              ].map(([label, href]) => (
+                <Link
+                  key={href}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white"
+                  href={href}
+                >
+                  {label}
+                </Link>
+              ))}
+            </nav>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Glossary" title="Image Resizing Terms" />
+            <dl className="mt-6 grid gap-4 text-sm leading-7 text-[var(--ink-700)] md:grid-cols-2">
+              {[
+                ["Resolution", "The pixel dimensions or detail level of an image."],
+                ["Pixel", "The smallest addressable picture element in a raster image."],
+                ["Width", "The horizontal pixel count."],
+                ["Height", "The vertical pixel count."],
+                ["Aspect Ratio", "The proportional relationship between width and height."],
+                ["DPI", "Dots per inch, commonly used for print device output."],
+                ["PPI", "Pixels per inch, often used when discussing image density."],
+                ["Resampling", "Calculating new pixel values when an image changes size."],
+                ["Scaling", "Increasing or decreasing image dimensions."],
+                ["Interpolation", "Estimating pixel values between known pixels during resizing."],
+                ["Compression", "Encoding image data to reduce file size."],
+                ["JPEG", "A widely supported lossy format often used for photographs."],
+                ["PNG", "A lossless raster format that can support transparency."],
+                ["WebP", "A web image format supporting lossy and lossless compression."],
+              ].map(([term, definition]) => (
+                <div key={term}>
+                  <dt className="font-semibold text-[var(--ink-900)]">{term}</dt>
+                  <dd>{definition}</dd>
+                </div>
+              ))}
+            </dl>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Sources" title="References" />
+            <ul className="mt-6 space-y-3 text-sm leading-7 text-[var(--ink-700)]">
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Image_types"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. Image file type and format guide.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. CanvasRenderingContext2D.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/imageSmoothingEnabled"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. Canvas image smoothing.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Glossary/Aspect_ratio"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. Aspect ratio glossary.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob"
+                  rel="noreferrer"
+                >
+                  MDN Web Docs. HTMLCanvasElement: toBlob() method.
+                </a>
+              </li>
+              <li>
+                <a
+                  className="font-semibold text-[var(--ink-900)] underline-offset-4 hover:underline"
+                  href="https://www.w3.org/TR/png-3/"
+                  rel="noreferrer"
+                >
+                  W3C. Portable Network Graphics (PNG) Specification.
+                </a>
+              </li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
+            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
+              This Image Resizer changes image dimensions using the implemented browser
+              canvas-based resizing process. Results are intended for educational, informational,
+              and general productivity use. Enlarging images cannot recreate missing visual detail.
+              Verify image dimensions, quality, transparency, and format compatibility before
+              publishing, printing, submitting, or using resized images in production.
+            </p>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
   )
-}
-
-function ImageCard({
-  imageUrl,
-  title,
-  subtitle,
-  actionLabel,
-  onAction,
-  disabled = false,
-}: {
-  imageUrl: string
-  title: string
-  subtitle: string
-  actionLabel: string
-  onAction: () => void
-  disabled?: boolean
-}) {
-  return (
-    <article className="overflow-hidden rounded-[1.4rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)]">
-      <div className="aspect-[4/3] bg-white">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageUrl} alt={title} className="h-full w-full object-contain" />
-      </div>
-      <div className="space-y-3 p-4">
-        <div>
-          <p className="truncate text-sm font-semibold">{title}</p>
-          <p className="mt-1 text-xs text-[var(--ink-700)]/75">{subtitle}</p>
-        </div>
-        <button
-          type="button"
-          onClick={onAction}
-          disabled={disabled}
-          className="w-full rounded-full border border-[var(--ink-900)]/10 bg-white px-3 py-2 text-xs font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 disabled:opacity-40"
-        >
-          {actionLabel}
-        </button>
-      </div>
-    </article>
-  )
-}
-
-async function resizeImage(
-  file: File,
-  targetWidth: number,
-  targetHeight: number,
-  resizeMode: ResizeMode,
-  outputFormat: OutputFormat,
-  extension: string,
-  quality: number,
-  background: string,
-): Promise<ResizedImage> {
-  const bitmap = await createImageBitmap(file)
-  const canvas = document.createElement("canvas")
-  canvas.width = targetWidth
-  canvas.height = targetHeight
-
-  const context = canvas.getContext("2d")
-  if (!context) {
-    throw new Error("Canvas is unavailable")
-  }
-
-  if (resizeMode === "contain" || outputFormat === "image/jpeg") {
-    context.fillStyle = background
-    context.fillRect(0, 0, targetWidth, targetHeight)
-  } else {
-    context.clearRect(0, 0, targetWidth, targetHeight)
-  }
-
-  context.imageSmoothingEnabled = true
-  context.imageSmoothingQuality = "high"
-
-  const drawBox = getDrawBox(bitmap.width, bitmap.height, targetWidth, targetHeight, resizeMode)
-  context.drawImage(bitmap, drawBox.x, drawBox.y, drawBox.width, drawBox.height)
-  bitmap.close()
-
-  const blob = await canvasToBlob(canvas, outputFormat, quality)
-
-  return {
-    id: `${file.name}-${Date.now()}-${crypto.randomUUID()}`,
-    fileName: `${stripExtension(file.name)}-${targetWidth}x${targetHeight}.${extension}`,
-    url: URL.createObjectURL(blob),
-    size: blob.size,
-    width: targetWidth,
-    height: targetHeight,
-  }
-}
-
-function getDrawBox(
-  sourceWidth: number,
-  sourceHeight: number,
-  targetWidth: number,
-  targetHeight: number,
-  resizeMode: ResizeMode,
-) {
-  if (resizeMode === "stretch") {
-    return { x: 0, y: 0, width: targetWidth, height: targetHeight }
-  }
-
-  const scale =
-    resizeMode === "cover"
-      ? Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight)
-      : Math.min(targetWidth / sourceWidth, targetHeight / sourceHeight)
-  const width = Math.round(sourceWidth * scale)
-  const height = Math.round(sourceHeight * scale)
-
-  return {
-    x: Math.round((targetWidth - width) / 2),
-    y: Math.round((targetHeight - height) / 2),
-    width,
-    height,
-  }
-}
-
-function canvasToBlob(canvas: HTMLCanvasElement, type: OutputFormat, quality: number) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob)
-          return
-        }
-
-        reject(new Error("Browser could not create an image file"))
-      },
-      type,
-      type === "image/png" ? undefined : quality,
-    )
-  })
-}
-
-function parseSize(value: string) {
-  const numericValue = Number(value)
-  return Number.isFinite(numericValue) && numericValue > 0 ? Math.floor(numericValue) : 0
-}
-
-function formatBytes(bytes: number) {
-  if (bytes === 0) {
-    return "0 B"
-  }
-
-  const units = ["B", "KB", "MB", "GB"]
-  const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
-  const value = bytes / 1024 ** unitIndex
-  return `${value.toFixed(value >= 10 || unitIndex === 0 ? 0 : 1)} ${units[unitIndex]}`
-}
-
-function stripExtension(fileName: string) {
-  return fileName.replace(/\.[^.]+$/, "")
 }
