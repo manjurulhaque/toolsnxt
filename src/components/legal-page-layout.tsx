@@ -16,7 +16,7 @@ export interface LegalStat {
 interface LegalPageLayoutProps {
   title: string
   subtitle: string
-  currentPath: "/privacy" | "/terms" | "/cookies" | "/disclaimer" | "/contact"
+  currentPath: "/about" | "/privacy" | "/terms" | "/cookies" | "/disclaimer" | "/contact"
   effectiveDate?: string
   lastReviewedDate?: string
   stats?: LegalStat[]
@@ -25,6 +25,7 @@ interface LegalPageLayoutProps {
 }
 
 const LEGAL_NAV_ITEMS = [
+  { href: "/about", label: "About Us", description: "Our mission, architecture & team" },
   { href: "/privacy", label: "Privacy Policy", description: "Zero-server data processing & local execution" },
   { href: "/terms", label: "Terms of Use", description: "Acceptable use, ownership & service limits" },
   { href: "/cookies", label: "Cookie & Storage Policy", description: "Local storage keys & cookieless analytics" },

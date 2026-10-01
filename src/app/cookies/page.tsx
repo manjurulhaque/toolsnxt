@@ -1,11 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { LegalPageLayout, type LegalStat, type TableOfContentsItem } from "@/components/legal-page-layout"
-import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_NAME, SITE_URL } from "@/lib/site"
+import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_DOMAIN, SITE_NAME, SITE_URL } from "@/lib/site"
 
 export const metadata: Metadata = {
   title: `Cookie & Web Storage Policy | ${SITE_NAME}`,
-  description: `Discover how ${SITE_NAME} uses local browser storage for favorites and recents with zero third-party advertising cookies and cookieless aggregate analytics.`,
+  description: `Discover how ${SITE_NAME} uses local browser storage for favorites and recents, alongside our Google AdSense and third-party advertising cookie disclosures.`,
   alternates: {
     canonical: `${SITE_URL}/cookies`,
   },
@@ -18,9 +18,9 @@ export const metadata: Metadata = {
 
 const STATS: LegalStat[] = [
   {
-    label: "Advertising Cookies",
-    value: "0 Cookies",
-    description: "Zero marketing trackers, behavioral pixels, or cross-site ad identifiers.",
+    label: "Ad Transparency",
+    value: "AdSense Compliant",
+    description: "Full disclosure of third-party advertising cookies and user opt-out controls.",
   },
   {
     label: "Local Storage Keys",
@@ -43,7 +43,7 @@ const TOC: TableOfContentsItem[] = [
   { id: "overview", title: "1. Overview & Core Philosophy" },
   { id: "cookies-vs-storage", title: "2. Cookies vs. HTML5 Local Storage" },
   { id: "inventory", title: "3. Complete Inventory of Client Storage Keys" },
-  { id: "advertising-policy", title: "4. Zero Third-Party Advertising Trackers" },
+  { id: "advertising-policy", title: "4. Third-Party Advertising & Google AdSense" },
   { id: "analytics", title: "5. Cookieless Performance Telemetry" },
   { id: "management-guide", title: "6. How to Inspect, Clear & Disable Storage" },
   { id: "privacy-signals", title: "7. Do Not Track (DNT) & GPC Signals" },
@@ -213,17 +213,58 @@ export default function CookiePolicyPage() {
               4
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Zero Third-Party Advertising Trackers
+              Third-Party Advertising Cookies & Google AdSense
             </h2>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
-            We hold a strict policy regarding commercial tracking technologies:
+            To support the ongoing hosting, maintenance, and development of our free in-browser utility suite, we may
+            partner with third-party advertising networks, primarily <strong>Google AdSense</strong>. When advertising
+            is enabled, the following cookie practices apply:
           </p>
           <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[var(--ink-700)]">
-            <li><strong>No Ad Networks:</strong> We do not run Google AdSense, DoubleClick, Media.net, or ad exchange scripts.</li>
-            <li><strong>No Social Media Pixels:</strong> We do not embed Meta (Facebook) Pixel, TikTok Pixel, LinkedIn Insight, or X tracking tags.</li>
-            <li><strong>No Data Brokers:</strong> We do not sell or share browsing patterns with data aggregators or market research panels.</li>
-            <li><strong>No Canvas Fingerprinting:</strong> We do not execute browser fingerprinting scripts to identify your hardware signature across sites.</li>
+            <li>
+              <strong>Google Advertising Cookies:</strong> Third-party vendors, including Google, use cookies (such as{" "}
+              <code className="font-mono text-xs">__gads</code>, <code className="font-mono text-xs">__gpi</code>, or IDE cookies)
+              to serve ads based on your prior visits to {SITE_DOMAIN} or other websites across the web.
+            </li>
+            <li>
+              <strong>Frequency Capping & Fraud Prevention:</strong> Cookies help ensure you do not see the same advertisement
+              repeatedly and assist in combating invalid traffic and click-fraud.
+            </li>
+            <li>
+              <strong>Personalized vs. Non-Personalized Ads:</strong> Depending on your jurisdiction and consent selections,
+              advertisements may be personalized based on your general interests or non-personalized (contextual to the tool you are using).
+            </li>
+            <li>
+              <strong>Opt-Out Options:</strong> You can manage or disable personalized advertising cookies directly via{" "}
+              <a
+                href="https://www.google.com/settings/ads"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                Google Ads Settings
+              </a>{" "}
+              or through consumer choice platforms such as{" "}
+              <a
+                href="https://www.aboutads.info"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                www.aboutads.info
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://www.youronlinechoices.eu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                Your Online Choices
+              </a>
+              .
+            </li>
           </ul>
         </section>
 

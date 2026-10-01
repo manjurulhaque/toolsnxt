@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { LegalPageLayout, type LegalStat, type TableOfContentsItem } from "@/components/legal-page-layout"
-import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_NAME, SITE_URL } from "@/lib/site"
+import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_DOMAIN, SITE_NAME, SITE_URL } from "@/lib/site"
 
 export const metadata: Metadata = {
   title: `Privacy Policy | Zero-Server Processing | ${SITE_NAME}`,
@@ -28,9 +28,9 @@ const STATS: LegalStat[] = [
     description: "No database records, user accounts, or input logging on our servers.",
   },
   {
-    label: "Tracking Cookies",
-    value: "0 Advertising Trackers",
-    description: "Zero third-party advertising cookies, retargeting pixels, or data brokers.",
+    label: "Ad Transparency",
+    value: "AdSense Compliant",
+    description: "Full disclosure of third-party advertising cookies and user opt-out controls.",
   },
   {
     label: "Local Storage",
@@ -44,12 +44,13 @@ const TOC: TableOfContentsItem[] = [
   { id: "data-handled", title: "2. Data Processed Locally on Your Machine" },
   { id: "local-storage", title: "3. Local Browser Storage & Preferences" },
   { id: "analytics-telemetry", title: "4. Cookieless Analytics & Telemetry" },
-  { id: "infrastructure-security", title: "5. Static Infrastructure & Security Headers" },
-  { id: "data-retention-sharing", title: "6. Data Retention, Sharing & Sale Policies" },
-  { id: "gdpr-ccpa-rights", title: "7. Your Rights under GDPR & CCPA/CPRA" },
-  { id: "children-privacy", title: "8. Children's Privacy (COPPA)" },
-  { id: "security-measures", title: "9. Technical Safeguards & Sandboxing" },
-  { id: "updates-contact", title: "10. Policy Updates & Privacy Inquiries" },
+  { id: "advertising-policy", title: "5. Third-Party Advertising & Google AdSense" },
+  { id: "infrastructure-security", title: "6. Static Infrastructure & Security Headers" },
+  { id: "data-retention-sharing", title: "7. Data Retention, Sharing & Sale Policies" },
+  { id: "gdpr-ccpa-rights", title: "8. Your Rights under GDPR & CCPA/CPRA" },
+  { id: "children-privacy", title: "9. Children's Privacy (COPPA)" },
+  { id: "security-measures", title: "10. Technical Safeguards & Sandboxing" },
+  { id: "updates-contact", title: "11. Policy Updates & Privacy Inquiries" },
 ]
 
 export default function PrivacyPage() {
@@ -268,11 +269,74 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        {/* Section 5 */}
-        <section id="infrastructure-security" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
+        {/* Section 5: Third-Party Advertising & Google AdSense */}
+        <section id="advertising-policy" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
               5
+            </span>
+            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+              Third-Party Advertising & Google AdSense Disclosures
+            </h2>
+          </div>
+          <p className="text-sm leading-7 text-[var(--ink-700)]">
+            To ensure our suite of 52 in-browser utilities remains completely free and accessible without paid subscriptions,
+            we may display advertisements served by third-party advertising networks, including Google AdSense. In
+            accordance with Google Publisher Policies and privacy regulations, we provide the following required disclosures:
+          </p>
+          <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[var(--ink-700)]">
+            <li>
+              <strong>Third-Party Cookies:</strong> Third-party vendors, including Google, use cookies and web beacons
+              to serve ads based on a user&apos;s prior visits to this website or other websites on the Internet.
+            </li>
+            <li>
+              <strong>Personalized Ad Serving:</strong> Google&apos;s use of advertising cookies enables it and its partners
+              to serve ads to our users based on their visits to {SITE_DOMAIN} and/or other sites across the World Wide Web.
+            </li>
+            <li>
+              <strong>User Opt-Out Controls:</strong> Users may opt out of personalized advertising at any time by visiting{" "}
+              <a
+                href="https://www.google.com/settings/ads"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                Google Ads Settings
+              </a>
+              . Alternatively, users can opt out of third-party vendors&apos; use of cookies for personalized advertising by
+              visiting{" "}
+              <a
+                href="https://www.aboutads.info"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                www.aboutads.info
+              </a>{" "}
+              or{" "}
+              <a
+                href="https://www.youronlinechoices.eu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                Your Online Choices (Europe)
+              </a>
+              .
+            </li>
+            <li>
+              <strong>Consent Management (EEA, UK & California):</strong> For visitors located in jurisdictions requiring
+              explicit consent (such as the EU/EEA under GDPR, the UK under UK GDPR, and California under CCPA/CPRA), we
+              deploy Google-certified Consent Management Platforms (CMP) to collect and record your granular ad consent choices.
+            </li>
+          </ul>
+        </section>
+
+        {/* Section 6 */}
+        <section id="infrastructure-security" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
+              6
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Static Infrastructure & Security Headers
@@ -302,11 +366,11 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        {/* Section 6 */}
+        {/* Section 7 */}
         <section id="data-retention-sharing" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              6
+              7
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Data Retention, Sharing & Sale Policies
@@ -331,11 +395,11 @@ export default function PrivacyPage() {
           </ul>
         </section>
 
-        {/* Section 7 */}
+        {/* Section 8 */}
         <section id="gdpr-ccpa-rights" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              7
+              8
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Your Rights under GDPR & CCPA/CPRA
@@ -352,11 +416,11 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        {/* Section 8 */}
+        {/* Section 9 */}
         <section id="children-privacy" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              8
+              9
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Children&apos;s Privacy (COPPA Compliance)
@@ -370,11 +434,11 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        {/* Section 9 */}
+        {/* Section 10 */}
         <section id="security-measures" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              9
+              10
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Technical Safeguards & Sandboxing
@@ -388,11 +452,11 @@ export default function PrivacyPage() {
           </p>
         </section>
 
-        {/* Section 10 */}
+        {/* Section 11 */}
         <section id="updates-contact" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              10
+              11
             </span>
             <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
               Policy Updates & Privacy Inquiries

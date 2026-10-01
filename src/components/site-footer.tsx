@@ -18,7 +18,10 @@ export function SiteFooter() {
             </p>
           </div>
 
-          <nav aria-label="Legal" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--ink-700)]">
+          <nav aria-label="Transparency & Legal" className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[var(--ink-700)]">
+            <Link href="/about" className="transition hover:text-[var(--ink-900)]">
+              About
+            </Link>
             <Link href="/privacy" className="transition hover:text-[var(--ink-900)]">
               Privacy
             </Link>
