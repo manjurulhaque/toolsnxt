@@ -20,7 +20,7 @@ const STATS: LegalStat[] = [
   {
     label: "Primary Channel",
     value: "Direct Email",
-    description: "Reach our maintainers directly at contact@manjurul.com.",
+    description: `Reach our maintainers directly at ${SITE_CONTACT_EMAIL}.`,
   },
   {
     label: "Response Target",

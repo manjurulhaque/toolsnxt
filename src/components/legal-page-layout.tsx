@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
-import { LEGAL_EFFECTIVE_DATE, SITE_NAME } from "@/lib/site"
+import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_NAME } from "@/lib/site"
 import {
   AlertTriangleIcon,
   CookieIcon,
@@ -202,10 +202,10 @@ export function LegalPageLayout({
                   </Link>{" "}
                   or email{" "}
                   <a
-                    href="mailto:contact@manjurul.com"
+                    href={`mailto:${SITE_CONTACT_EMAIL}`}
                     className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
                   >
-                    contact@manjurul.com
+                    {SITE_CONTACT_EMAIL}
                   </a>
                   .
                 </p>
