@@ -384,10 +384,9 @@ function canvasToBlob(canvas: HTMLCanvasElement, format: ImageFormat, quality: n
 
 async function loadPdfJs() {
   const pdfjs = await import("pdfjs-dist")
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    "pdfjs-dist/build/pdf.worker.min.mjs",
-    import.meta.url,
-  ).toString()
+  if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs"
+  }
   return pdfjs
 }
 
