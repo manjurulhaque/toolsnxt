@@ -1,383 +1,203 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { ScreenReaderSimulatorTool } from "./screen-reader-simulator-tool"
 
-import { useMemo, useState } from "react"
-import { PanelHeader, ToolIntro, ToolPage, InfoBox, SummaryTile, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard } from "@/lib/browser-actions"
+const pagePath = "/screen-reader-simulator"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Screen Reader Simulator | Test Accessibility Reading Order Online"
+const pageDescription =
+  "Simulate screen reader reading order, accessible names, landmarks, and text-to-speech announcements from HTML markup online in your browser."
 
-type ReadingItem = {
-  id: string
-  type: string
-  announcement: string
+const faqs = [
+  {
+    question: "What is a screen reader simulator?",
+    answer:
+      "A screen reader simulator models how assistive technologies (such as NVDA, JAWS, or VoiceOver) traverse DOM landmarks, headings, interactive controls, and accessible names in linearized reading order.",
+  },
+  {
+    question: "Does this replace testing with real assistive technology?",
+    answer:
+      "No. This simulator is a rapid developmental aid for checking source order and aria labels. Final compliance audits must always be verified with genuine screen readers.",
+  },
+  {
+    question: "How does the simulated speech output work?",
+    answer:
+      "The tool uses the browser-native Web Speech API (SpeechSynthesis) to read linearized announcement items sequentially.",
+  },
+  {
+    question: "How are accessible names computed?",
+    answer:
+      "The simulator inspects aria-label, aria-labelledby, alt attributes, title attributes, button text, and input placeholders according to simplified W3C accessible name computation heuristics.",
+  },
+  {
+    question: "Is my HTML markup sent to a server?",
+    answer:
+      "No. All DOM parsing runs in an isolated in-memory DOMParser document inside your browser. No HTML or text is uploaded to any server.",
+  },
+]
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: {
+      "@type": "WebSite",
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Screen Reader Simulator",
+    applicationCategory: "AccessibilityApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "USD",
+    },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Screen Reader Simulator",
+        item: pageUrl,
+      },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faq.answer,
+      },
+    })),
+  },
+]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: {
+    canonical: pagePath,
+  },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
 }
-
-const sampleMarkup = `<main>
-  <header>
-    <h1>Quarterly Report</h1>
-    <nav aria-label="Report sections">
-      <a href="#summary">Summary</a>
-      <a href="#details">Details</a>
-    </nav>
-  </header>
-
-  <section aria-labelledby="summary">
-    <h2 id="summary">Executive summary</h2>
-    <p>Revenue grew across three product lines.</p>
-    <button>Download report</button>
-  </section>
-
-  <img src="chart.png" alt="Bar chart showing steady revenue growth" />
-</main>`
 
 export default function ScreenReaderSimulatorPage() {
-  const [markup, setMarkup] = useState(sampleMarkup)
-  const [message, setMessage] = useState("Paste HTML to inspect its likely reading order.")
-
-  const readingItems = useMemo(() => parseReadingOrder(markup), [markup])
-  const transcript = useMemo(
-    () => readingItems.map((item, index) => `${index + 1}. ${item.announcement}`).join("\n"),
-    [readingItems],
-  )
-  const stats = useMemo(() => getStats(readingItems), [readingItems])
-
-  async function copyTranscript() {
-    if (!transcript) {
-      setMessage("Add content before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(transcript)
-      setMessage("Reading transcript copied.")
-    } catch {
-      setMessage("Copy failed. Select the transcript and copy it manually.")
-    }
-  }
-
-  function speakTranscript() {
-    if (!transcript) {
-      setMessage("Add content before playing.")
-      return
-    }
-
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
-      setMessage("Speech playback is not available in this browser.")
-      return
-    }
-
-    window.speechSynthesis.cancel()
-    const utterance = new SpeechSynthesisUtterance(
-      readingItems.map((item) => item.announcement).join(". "),
-    )
-    utterance.rate = 0.92
-    window.speechSynthesis.speak(utterance)
-    setMessage("Playing simulated screen reader output.")
-  }
-
-  function stopSpeech() {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel()
-    }
-
-    setMessage("Playback stopped.")
-  }
-
-  function clearMarkup() {
-    setMarkup("")
-    setMessage("Markup cleared.")
-  }
-
-  function loadSample() {
-    setMarkup(sampleMarkup)
-    setMessage("Sample markup loaded.")
-  }
-
   return (
-    <ToolPage>
-        <ToolPanel>
-          <ToolIntro eyebrow="Accessibility tool" title="Screen Reader Simulator">
-            Paste HTML to preview a simplified reading order with headings, landmarks, links,
-            buttons, images, fields, and text content.
-          </ToolIntro>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
+      <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+        <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12">
+          <ScreenReaderSimulatorTool />
+        </section>
 
-          <label htmlFor="markup" className="mt-6 block text-sm font-medium">
-            HTML markup
-          </label>
-          <textarea
-            id="markup"
-            value={markup}
-            onChange={(event) => {
-              setMarkup(event.target.value)
-              setMessage("Markup updated.")
-            }}
-            rows={17}
-            className="mt-2 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-xs leading-6 outline-none transition focus:border-[var(--accent-rust)]"
-            placeholder="<main><h1>Page title</h1><p>Intro text</p></main>"
-          />
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={clearMarkup}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Load Sample
-            </button>
-          </div>
-
-          <div className="mt-6 rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm leading-6 text-[var(--ink-700)]">
-            This is a planning aid for reading order and labels. Always test important interfaces
-            with real assistive technology.
-          </div>
-        </ToolPanel>
-
-        <div className="space-y-6">
+        <section className="mx-auto max-w-6xl space-y-6 px-5 pb-12 sm:px-8 lg:pb-16">
           <ToolPanel>
-            <PanelHeader eyebrow="Simulation" title="Reading Order" badge={"{readingItems.length} stops"} />
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-4">
-              <SummaryTile label="Headings" value={stats.headings} />
-              <SummaryTile label="Links" value={stats.links} />
-              <SummaryTile label="Controls" value={stats.controls} />
-              <SummaryTile label="Images" value={stats.images} />
+            <PanelHeader eyebrow="Guide" title="Accessibility & Source Reading Order" />
+            <div className="mt-6 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+              <p>
+                Visual CSS layouts (such as flexbox, grid, and absolute positioning) can rearrange elements
+                on screen in a manner that completely diverges from the underlying HTML DOM reading sequence.
+                Blind and low-vision users rely on sequential reading order to navigate information logically.
+              </p>
+              <p>
+                Paste your component HTML to inspect the linearized reading order, check accessible labels,
+                and listen to simulated announcements via browser text-to-speech.
+              </p>
             </div>
-
-            {readingItems.length === 0 ? (
-              <div className="mt-6 rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-8 text-center text-sm text-[var(--ink-700)]">
-                Simulated announcements will appear here.
-              </div>
-            ) : (
-              <ol className="mt-6 space-y-3">
-                {readingItems.map((item, index) => (
-                  <li
-                    key={item.id}
-                    className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
-                        {index + 1} / {item.type}
-                      </span>
-                    </div>
-                    <p className="mt-2 text-sm leading-7 text-[var(--ink-800)]">{item.announcement}</p>
-                  </li>
-                ))}
-              </ol>
-            )}
           </ToolPanel>
 
           <ToolPanel>
-            <PanelHeader eyebrow="Transcript" title="Simulated Speech" />
-
-            <textarea
-              value={transcript}
-              readOnly
-              rows={8}
-              className="mt-6 w-full resize-y rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm leading-7 outline-none"
-              aria-label="Simulated screen reader transcript"
-              placeholder="Transcript will appear here..."
-            />
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
+            <PanelHeader eyebrow="Checklist" title="Key Accessibility Elements" />
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
               <InfoBox>
-                {message}
-          </InfoBox>
-              <button
-                type="button"
-                onClick={copyTranscript}
-                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-              >
-                Copy
-              </button>
-              <button
-                type="button"
-                onClick={speakTranscript}
-                className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-              >
-                Play
-              </button>
-              <button
-                type="button"
-                onClick={stopSpeech}
-                className="rounded-full border border-[var(--accent-rust)]/25 bg-white px-5 py-3 text-sm font-semibold text-[var(--accent-rust)] transition hover:border-[var(--accent-rust)]/45"
-              >
-                Stop
-              </button>
+                <strong className="block text-[var(--ink-900)]">Landmarks</strong>
+                Ensure header, nav, main, section, and footer elements structure page zones.
+              </InfoBox>
+              <InfoBox>
+                <strong className="block text-[var(--ink-900)]">Headings</strong>
+                Maintain a logical h1 &gt; h2 &gt; h3 hierarchy without skipping heading ranks.
+              </InfoBox>
+              <InfoBox>
+                <strong className="block text-[var(--ink-900)]">Interactive Labels</strong>
+                All buttons and links must have explicit text or aria-label attributes.
+              </InfoBox>
             </div>
           </ToolPanel>
-        </div>
-    </ToolPage>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="FAQ" title="Frequently Asked Questions" />
+            <div className="mt-6 grid gap-3">
+              {faqs.map((faq) => (
+                <details
+                  key={faq.question}
+                  className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-semibold text-[var(--ink-900)]">
+                    {faq.question}
+                  </summary>
+                  <p className="mt-3 text-sm leading-7 text-[var(--ink-700)]">{faq.answer}</p>
+                </details>
+              ))}
+            </div>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Related" title="Related Developer Tools" />
+            <div className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+              <Link className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white" href="/html-to-markdown">
+                HTML to Markdown
+              </Link>
+              <Link className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white" href="/markdown-previewer">
+                Markdown Previewer
+              </Link>
+              <Link className="rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 transition hover:bg-white" href="/html-css-js-minifier">
+                HTML CSS JS Minifier
+              </Link>
+            </div>
+          </ToolPanel>
+        </section>
+      </main>
+    </>
   )
-}
-
-function parseReadingOrder(markup: string): ReadingItem[] {
-  if (!markup.trim()) {
-    return []
-  }
-
-  if (typeof window === "undefined") {
-    return textFallback(markup)
-  }
-
-  const parser = new DOMParser()
-  const document = parser.parseFromString(markup, "text/html")
-  const items: ReadingItem[] = []
-  let index = 0
-
-  function add(type: string, announcement: string) {
-    const normalizedAnnouncement = normalizeWhitespace(announcement)
-    if (!normalizedAnnouncement) {
-      return
-    }
-
-    items.push({
-      id: `${type}-${index}`,
-      type,
-      announcement: normalizedAnnouncement,
-    })
-    index += 1
-  }
-
-  function walk(element: Element) {
-    if (isHidden(element)) {
-      return
-    }
-
-    const tagName = element.tagName.toLowerCase()
-    const role = element.getAttribute("role")
-
-    if (tagName === "nav" || tagName === "main" || tagName === "aside" || tagName === "header" || tagName === "footer" || tagName === "section" || role) {
-      const landmarkName = getAccessibleName(element)
-      const landmarkType = role ?? tagName
-      if (["nav", "main", "aside", "header", "footer", "section", "banner", "contentinfo", "search", "region"].includes(landmarkType)) {
-        add("landmark", `${landmarkType}${landmarkName ? `, ${landmarkName}` : ""}`)
-      }
-    }
-
-    if (/^h[1-6]$/.test(tagName)) {
-      add("heading", `Heading level ${tagName.slice(1)}, ${getText(element)}`)
-      return
-    }
-
-    if (tagName === "a") {
-      add("link", `Link, ${getAccessibleName(element) || getText(element) || "unlabeled link"}`)
-      return
-    }
-
-    if (tagName === "button") {
-      add("button", `Button, ${getAccessibleName(element) || getText(element) || "unlabeled button"}`)
-      return
-    }
-
-    if (tagName === "img") {
-      const alt = element.getAttribute("alt")
-      add("image", alt === "" ? "Decorative image" : `Image, ${alt || "missing alt text"}`)
-      return
-    }
-
-    if (["input", "textarea", "select"].includes(tagName)) {
-      add("control", describeControl(element))
-      return
-    }
-
-    if (tagName === "li") {
-      add("list item", `List item, ${getDirectText(element) || getText(element)}`)
-    } else if (["p", "blockquote", "figcaption", "dt", "dd"].includes(tagName)) {
-      add("text", getDirectText(element) || getText(element))
-    }
-
-    Array.from(element.children).forEach(walk)
-  }
-
-  Array.from(document.body.children).forEach(walk)
-  return items.length > 0 ? items : textFallback(document.body.textContent || markup)
-}
-
-function textFallback(value: string): ReadingItem[] {
-  return normalizeWhitespace(value)
-    .split(/\n+/)
-    .map((line) => normalizeWhitespace(line))
-    .filter(Boolean)
-    .map((line, index) => ({
-      id: `text-${index}`,
-      type: "text",
-      announcement: line,
-    }))
-}
-
-function getStats(items: ReadingItem[]) {
-  return {
-    headings: items.filter((item) => item.type === "heading").length,
-    links: items.filter((item) => item.type === "link").length,
-    controls: items.filter((item) => item.type === "button" || item.type === "control").length,
-    images: items.filter((item) => item.type === "image").length,
-  }
-}
-
-function describeControl(element: Element) {
-  const tagName = element.tagName.toLowerCase()
-  const inputType = element.getAttribute("type") || (tagName === "select" ? "select" : "text")
-  const name = getAccessibleName(element) || "unlabeled field"
-
-  if (tagName === "textarea") {
-    return `Text area, ${name}`
-  }
-
-  if (tagName === "select") {
-    return `Select, ${name}`
-  }
-
-  return `${inputType} input, ${name}`
-}
-
-function getAccessibleName(element: Element) {
-  const ariaLabel = element.getAttribute("aria-label")
-  if (ariaLabel) {
-    return ariaLabel
-  }
-
-  const title = element.getAttribute("title")
-  if (title) {
-    return title
-  }
-
-  const id = element.getAttribute("id")
-  if (id) {
-    const label = element.ownerDocument.querySelector(`label[for="${CSS.escape(id)}"]`)
-    if (label?.textContent) {
-      return normalizeWhitespace(label.textContent)
-    }
-  }
-
-  return ""
-}
-
-function getText(element: Element) {
-  return normalizeWhitespace(element.textContent || "")
-}
-
-function getDirectText(element: Element) {
-  const text = Array.from(element.childNodes)
-    .filter((node) => node.nodeType === Node.TEXT_NODE)
-    .map((node) => node.textContent || "")
-    .join(" ")
-
-  return normalizeWhitespace(text)
-}
-
-function isHidden(element: Element) {
-  return (
-    element.getAttribute("aria-hidden") === "true" ||
-    element.hasAttribute("hidden") ||
-    element.getAttribute("style")?.toLowerCase().includes("display: none") === true
-  )
-}
-
-function normalizeWhitespace(value: string) {
-  return value.replace(/\s+/g, " ").trim()
 }
