@@ -1,5 +1,5 @@
 {
-  "name": "quotations",
+  "name": "web-tools",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@vercel/analytics": "^2.0.1",
     "csso": "^5.0.5",
     "html-minifier-terser": "^7.2.0",
@@ -25,6 +24,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.2",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^25.6.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
