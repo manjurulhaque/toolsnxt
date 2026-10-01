@@ -115,7 +115,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
 
   function scrollHighlightedIntoView(index: number) {
     if (!listRef.current) return
-    const items = listRef.current.querySelectorAll<HTMLButtonElement>("[data-tool-item]")
+    const items = listRef.current.querySelectorAll<HTMLElement>("[data-tool-item]")
     const target = items[index]
     if (target) {
       target.scrollIntoView({ block: "nearest", behavior: "smooth" })
@@ -261,13 +261,20 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                 const isHighlighted = index === safeHighlightedIndex
                 const favorited = isFavorite(tool.href)
                 return (
-                  <button
+                  <div
                     key={tool.href}
                     data-tool-item
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigateToTool(tool.href)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault()
+                        navigateToTool(tool.href)
+                      }
+                    }}
                     onMouseEnter={() => setHighlightedIndex(index)}
-                    className={`group flex w-full items-start justify-between gap-3 rounded-2xl p-3 text-left transition ${
+                    className={`group flex w-full cursor-pointer items-start justify-between gap-3 rounded-2xl p-3 text-left transition ${
                       isHighlighted
                         ? "bg-[var(--page-cream)] ring-1 ring-[var(--accent-rust)]"
                         : "hover:bg-[var(--page-cream)]/60"
@@ -322,7 +329,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                         </span>
                       )}
                     </div>
-                  </button>
+                  </div>
                 )
               })}
             </div>

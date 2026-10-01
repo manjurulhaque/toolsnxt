@@ -325,34 +325,30 @@ function ToolCard({
 }) {
   return (
     <div className="group relative flex flex-col justify-between rounded-[1.4rem] border border-[var(--ink-900)]/8 bg-white p-5 shadow-[0_14px_36px_rgba(33,37,41,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[var(--accent-rust)]/30 hover:shadow-[0_24px_48px_rgba(33,37,41,0.12)]">
-      <Link href={tool.href} className="flex min-h-full flex-col">
-        <div className="flex items-center justify-between gap-2">
-          <span className="w-fit rounded-full bg-[var(--page-cream)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent-rust)]">
-            {tool.category}
-          </span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="w-fit rounded-full bg-[var(--page-cream)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent-rust)]">
+          {tool.category}
+        </span>
 
-          {onToggleFavorite ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onToggleFavorite()
-              }}
-              className={`rounded-full p-1.5 transition ${
-                isFavorite
-                  ? "text-[var(--accent-rust)] opacity-100"
-                  : "text-[var(--ink-700)]/30 opacity-60 group-hover:opacity-100 hover:text-[var(--ink-900)]"
-              }`}
-              title={isFavorite ? "Remove favorite" : "Pin favorite"}
-              aria-label={isFavorite ? "Remove favorite" : "Pin favorite"}
-            >
-              <span className="text-base leading-none">{isFavorite ? "★" : "☆"}</span>
-            </button>
-          ) : null}
-        </div>
+        {onToggleFavorite ? (
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            className={`rounded-full p-1.5 transition ${
+              isFavorite
+                ? "text-[var(--accent-rust)] opacity-100"
+                : "text-[var(--ink-700)]/30 opacity-60 group-hover:opacity-100 hover:text-[var(--ink-900)]"
+            }`}
+            title={isFavorite ? "Remove favorite" : "Pin favorite"}
+            aria-label={isFavorite ? "Remove favorite" : "Pin favorite"}
+          >
+            <span className="text-base leading-none">{isFavorite ? "★" : "☆"}</span>
+          </button>
+        ) : null}
+      </div>
 
-        <h4 className="mt-4 text-xl font-semibold text-[var(--ink-900)] group-hover:text-[var(--accent-rust)] transition-colors">
+      <Link href={tool.href} className="mt-4 flex flex-1 flex-col">
+        <h4 className="text-xl font-semibold text-[var(--ink-900)] group-hover:text-[var(--accent-rust)] transition-colors">
           {tool.title}
         </h4>
         <p className="mt-3 flex-1 text-sm leading-7 text-[var(--ink-700)]/78">
