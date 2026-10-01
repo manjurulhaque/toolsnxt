@@ -2,6 +2,30 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { LegalPageLayout, type LegalStat, type TableOfContentsItem } from "@/components/legal-page-layout"
 import { LEGAL_EFFECTIVE_DATE, SITE_CONTACT_EMAIL, SITE_DOMAIN, SITE_NAME, SITE_URL } from "@/lib/site"
+import {
+  ActivityIcon,
+  BrowserChromeIcon,
+  BrowserFirefoxIcon,
+  BrowserSafariIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  ClockHistoryIcon,
+  CloudOffIcon,
+  CompareArrowsIcon,
+  CookieIcon,
+  DatabaseIcon,
+  ExternalLinkIcon,
+  HandStopIcon,
+  KeyIcon,
+  MailIcon,
+  MegaphoneIcon,
+  ShieldCheckIcon,
+  ShieldLockIcon,
+  SlidersIcon,
+  SparklesIcon,
+  StarIcon,
+  TrashIcon,
+} from "@/components/icons"
 
 export const metadata: Metadata = {
   title: `Cookie & Web Storage Policy | ${SITE_NAME}`,
@@ -21,21 +45,25 @@ const STATS: LegalStat[] = [
     label: "Ad Transparency",
     value: "AdSense Compliant",
     description: "Full disclosure of third-party advertising cookies and user opt-out controls.",
+    icon: <ShieldCheckIcon className="h-4 w-4" />,
   },
   {
     label: "Local Storage Keys",
     value: "2 Keys Only",
     description: "Used exclusively for your starred favorites and recently opened tools.",
+    icon: <KeyIcon className="h-4 w-4" />,
   },
   {
     label: "Server Transmission",
     value: "0 Transmission",
     description: "HTML5 local storage keys stay on your machine and never send over HTTP.",
+    icon: <CloudOffIcon className="h-4 w-4" />,
   },
   {
     label: "Analytics",
     value: "Cookieless",
     description: "Privacy-preserving aggregate telemetry without persistent device fingerprinting.",
+    icon: <ChartBarIcon className="h-4 w-4" />,
   },
 ]
 
@@ -97,13 +125,18 @@ export default function CookiePolicyPage() {
       >
         {/* Section 1 */}
         <section id="overview" className="scroll-mt-28 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              1
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <SparklesIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Overview & Core Philosophy
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 1
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Overview & Core Philosophy
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             At {SITE_NAME}, we believe that using utility software should not come at the expense of your digital privacy.
@@ -115,17 +148,30 @@ export default function CookiePolicyPage() {
             user settings (such as which tools you pinned to your favorites or recently accessed), we store that data
             locally inside your own browser using HTML5 Local Storage.
           </p>
+          <div className="flex items-start gap-3 rounded-2xl border border-emerald-600/20 bg-emerald-500/5 p-4 text-xs leading-6 text-emerald-950 sm:items-center">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-600/10 text-emerald-700">
+              <ShieldCheckIcon className="h-4 w-4" />
+            </span>
+            <p>
+              <strong>Privacy Assurance:</strong> Zero personal data profiles are built, saved, or sold by {SITE_NAME}. All processing runs client-side in your web browser.
+            </p>
+          </div>
         </section>
 
         {/* Section 2 */}
         <section id="cookies-vs-storage" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              2
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <CompareArrowsIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Understanding Cookies vs. Modern HTML5 Web Storage
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 2
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Understanding Cookies vs. Modern HTML5 Web Storage
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             To understand how your data is handled, it is helpful to distinguish between traditional HTTP cookies and
@@ -134,38 +180,55 @@ export default function CookiePolicyPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-2xl border border-[var(--ink-900)]/10 bg-[var(--page-cream)]/50 p-5">
-              <h3 className="text-sm font-bold text-[var(--ink-900)]">Traditional HTTP Cookies</h3>
-              <p className="mt-2 text-xs leading-6 text-[var(--ink-700)]">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent-rust)]/15 text-[var(--accent-rust)]">
+                  <CookieIcon className="h-4 w-4" />
+                </span>
+                <h3 className="text-sm font-bold text-[var(--ink-900)]">Traditional HTTP Cookies</h3>
+              </div>
+              <p className="mt-3 text-xs leading-6 text-[var(--ink-700)]">
                 Small text files sent by a server that your browser automatically attaches to <em>every single subsequent
                 network request</em> back to that server. Third-party cookies can track users across multiple websites.
               </p>
-              <p className="mt-3 text-xs font-semibold text-[var(--accent-rust)]">
-                &rarr; {SITE_NAME} uses ZERO third-party tracking cookies.
-              </p>
+              <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[var(--accent-rust)]">
+                <ShieldCheckIcon className="h-4 w-4 shrink-0" />
+                <span>{SITE_NAME} uses ZERO third-party tracking cookies.</span>
+              </div>
             </div>
 
-            <div className="rounded-2xl border border-[var(--ink-900)]/10 bg-white p-5 shadow-xs">
-              <h3 className="text-sm font-bold text-[var(--ink-900)]">HTML5 Local Storage (localStorage)</h3>
-              <p className="mt-2 text-xs leading-6 text-[var(--ink-700)]">
+            <div className="rounded-2xl border border-emerald-600/20 bg-white p-5 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-700">
+                  <DatabaseIcon className="h-4 w-4" />
+                </span>
+                <h3 className="text-sm font-bold text-[var(--ink-900)]">HTML5 Local Storage (localStorage)</h3>
+              </div>
+              <p className="mt-3 text-xs leading-6 text-[var(--ink-700)]">
                 Key-value storage maintained strictly within your local browser sandbox. Data saved in localStorage is
                 <em>never automatically transmitted over the network</em> with HTTP requests, providing superior privacy.
               </p>
-              <p className="mt-3 text-xs font-semibold text-[var(--ink-900)]">
-                &rarr; Used solely to persist your pinned tool preferences locally.
-              </p>
+              <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-800">
+                <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+                <span>Used solely to persist your pinned tool preferences locally.</span>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Section 3 */}
         <section id="inventory" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              3
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <KeyIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Complete Inventory of Client Storage Keys
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 3
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Complete Inventory of Client Storage Keys
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             Here is an exhaustive list of every browser storage key utilized by {SITE_NAME}:
@@ -184,22 +247,42 @@ export default function CookiePolicyPage() {
               </thead>
               <tbody className="divide-y divide-[var(--ink-900)]/5 bg-white text-[var(--ink-700)]">
                 <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-[var(--ink-900)]">webtools_favorites</td>
+                  <td className="py-3 px-4 font-mono font-bold text-[var(--ink-900)]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <StarIcon className="h-3.5 w-3.5 text-amber-500" />
+                      webtools_favorites
+                    </span>
+                  </td>
                   <td className="py-3 px-4">localStorage</td>
                   <td className="py-3 px-4">
                     Array of route strings (e.g., <code className="rounded bg-black/5 px-1 py-0.5 font-mono text-[11px]">[&quot;/json-formatter&quot;, &quot;/pdf-compress&quot;]</code>)
                   </td>
                   <td className="py-3 px-4">Persistent until deleted</td>
-                  <td className="py-3 px-4 font-semibold text-emerald-700">No (Local Only)</td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                      <CheckCircleIcon className="h-3.5 w-3.5" />
+                      No (Local Only)
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 font-mono font-bold text-[var(--ink-900)]">webtools_recents</td>
+                  <td className="py-3 px-4 font-mono font-bold text-[var(--ink-900)]">
+                    <span className="inline-flex items-center gap-1.5">
+                      <ClockHistoryIcon className="h-3.5 w-3.5 text-[var(--accent-rust)]" />
+                      webtools_recents
+                    </span>
+                  </td>
                   <td className="py-3 px-4">localStorage</td>
                   <td className="py-3 px-4">
                     Array of up to 10 objects (<code className="rounded bg-black/5 px-1 py-0.5 font-mono text-[11px]">&#123; href, title, category, visitedAt, count &#125;</code>)
                   </td>
                   <td className="py-3 px-4">Persistent until cleared</td>
-                  <td className="py-3 px-4 font-semibold text-emerald-700">No (Local Only)</td>
+                  <td className="py-3 px-4">
+                    <span className="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                      <CheckCircleIcon className="h-3.5 w-3.5" />
+                      No (Local Only)
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -208,107 +291,176 @@ export default function CookiePolicyPage() {
 
         {/* Section 4 */}
         <section id="advertising-policy" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              4
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <MegaphoneIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Third-Party Advertising Cookies & Google AdSense
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 4
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Third-Party Advertising Cookies & Google AdSense
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             To support the ongoing hosting, maintenance, and development of our free in-browser utility suite, we may
             partner with third-party advertising networks, primarily <strong>Google AdSense</strong>. When advertising
             is enabled, the following cookie practices apply:
           </p>
-          <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[var(--ink-700)]">
-            <li>
-              <strong>Google Advertising Cookies:</strong> Third-party vendors, including Google, use cookies (such as{" "}
-              <code className="font-mono text-xs">__gads</code>, <code className="font-mono text-xs">__gpi</code>, or IDE cookies)
-              to serve ads based on your prior visits to {SITE_DOMAIN} or other websites across the web.
-            </li>
-            <li>
-              <strong>Frequency Capping & Fraud Prevention:</strong> Cookies help ensure you do not see the same advertisement
-              repeatedly and assist in combating invalid traffic and click-fraud.
-            </li>
-            <li>
-              <strong>Personalized vs. Non-Personalized Ads:</strong> Depending on your jurisdiction and consent selections,
-              advertisements may be personalized based on your general interests or non-personalized (contextual to the tool you are using).
-            </li>
-            <li>
-              <strong>Opt-Out Options:</strong> You can manage or disable personalized advertising cookies directly via{" "}
-              <a
-                href="https://www.google.com/settings/ads"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
-              >
-                Google Ads Settings
-              </a>{" "}
-              or through consumer choice platforms such as{" "}
-              <a
-                href="https://www.aboutads.info"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
-              >
-                www.aboutads.info
-              </a>{" "}
-              and{" "}
-              <a
-                href="https://www.youronlinechoices.eu"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
-              >
-                Your Online Choices
-              </a>
-              .
-            </li>
-          </ul>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                  <CookieIcon className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Google Advertising Cookies
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
+                Third-party vendors, including Google, use cookies (such as <code className="font-mono text-xs">__gads</code>, <code className="font-mono text-xs">__gpi</code>, or IDE cookies) to serve ads based on prior visits to {SITE_DOMAIN} or other websites.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-500/10 text-emerald-700">
+                  <ShieldCheckIcon className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Frequency Capping & Fraud Prevention
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
+                Cookies help ensure you do not see the same advertisement repeatedly and assist in combating invalid traffic and click-fraud.
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-500/10 text-amber-700">
+                  <SlidersIcon className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Personalized vs. Non-Personalized Ads
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
+                Depending on jurisdiction and consent, ads may be personalized based on general interests or non-personalized (contextual to the active tool).
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-sky-500/10 text-sky-700">
+                  <ExternalLinkIcon className="h-3.5 w-3.5" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Opt-Out Options & Controls
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
+                Manage personalized advertising directly via{" "}
+                <a
+                  href="https://www.google.com/settings/ads"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+                >
+                  Google Ads Settings
+                </a>
+                ,{" "}
+                <a
+                  href="https://www.aboutads.info"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+                >
+                  aboutads.info
+                </a>
+                , or{" "}
+                <a
+                  href="https://www.youronlinechoices.eu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+                >
+                  Your Online Choices
+                </a>
+                .
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Section 5 */}
         <section id="analytics" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              5
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <ActivityIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Cookieless Performance Telemetry
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 5
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Cookieless Performance Telemetry
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             We use Vercel Web Analytics to monitor aggregate traffic patterns (such as popular tools and page load latency).
             This telemetry is completely <strong>cookieless</strong>:
           </p>
-          <ul className="list-disc space-y-1.5 pl-5 text-xs leading-6 text-[var(--ink-700)]">
-            <li>It does not create or write any cookie file to your machine.</li>
-            <li>It does not track individual user paths across sessions or across multiple browser tabs.</li>
-            <li>Visitor counts are aggregated using temporary cryptographic hashes that cycle daily to prevent cross-day profiling.</li>
-          </ul>
+          <div className="space-y-2 rounded-2xl border border-[var(--ink-900)]/10 bg-white p-5 shadow-xs">
+            <div className="flex items-start gap-2.5 text-xs leading-6 text-[var(--ink-700)]">
+              <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+              <span>It does not create, read, or write any cookie files to your machine.</span>
+            </div>
+            <div className="flex items-start gap-2.5 text-xs leading-6 text-[var(--ink-700)]">
+              <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+              <span>It does not track individual user paths across sessions or across multiple browser tabs.</span>
+            </div>
+            <div className="flex items-start gap-2.5 text-xs leading-6 text-[var(--ink-700)]">
+              <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+              <span>Visitor counts are aggregated using temporary cryptographic hashes that cycle daily to prevent cross-day profiling.</span>
+            </div>
+          </div>
         </section>
 
         {/* Section 6 */}
         <section id="management-guide" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              6
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <SlidersIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              How to Inspect, Clear & Disable Browser Storage
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 6
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                How to Inspect, Clear & Disable Browser Storage
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             You maintain absolute control over the data saved in your browser:
           </p>
 
-          <div className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                Method 1: Instant In-App Reset
-              </h4>
-              <p className="mt-1 text-xs leading-5 text-[var(--ink-700)]">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                  <TrashIcon className="h-4 w-4" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                  Method 1: Instant In-App Reset
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
                 Navigate to the <Link href="/" className="font-semibold underline text-[var(--accent-rust)]">Homepage</Link>{" "}
                 and locate the &quot;Recently Visited&quot; section. Clicking the &quot;Clear history&quot; button immediately
                 wipes your recent tools log.
@@ -316,28 +468,43 @@ export default function CookiePolicyPage() {
             </div>
 
             <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                Method 2: Google Chrome & Microsoft Edge
-              </h4>
-              <p className="mt-1 text-xs leading-5 text-[var(--ink-700)]">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600">
+                  <BrowserChromeIcon className="h-4 w-4" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Method 2: Google Chrome & Microsoft Edge
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
                 Press <kbd className="rounded border bg-black/5 px-1 py-0.5 font-mono text-[11px]">F12</kbd> &rarr; Application tab &rarr; Storage &rarr; Local Storage &rarr; Click <code className="font-mono">Clear Site Data</code>.
               </p>
             </div>
 
             <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                Method 3: Mozilla Firefox
-              </h4>
-              <p className="mt-1 text-xs leading-5 text-[var(--ink-700)]">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600">
+                  <BrowserFirefoxIcon className="h-4 w-4" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Method 3: Mozilla Firefox
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
                 Settings &rarr; Privacy & Security &rarr; Cookies and Site Data &rarr; Manage Data &rarr; Search &quot;manjurul.com&quot; &rarr; Remove Selected.
               </p>
             </div>
 
             <div className="rounded-xl border border-[var(--ink-900)]/8 bg-white p-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                Method 4: Apple Safari (macOS & iOS)
-              </h4>
-              <p className="mt-1 text-xs leading-5 text-[var(--ink-700)]">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
+                  <BrowserSafariIcon className="h-4 w-4" />
+                </span>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--ink-900)]">
+                  Method 4: Apple Safari (macOS & iOS)
+                </h4>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-[var(--ink-700)]">
                 Safari Settings &rarr; Privacy &rarr; Manage Website Data &rarr; Remove data for &quot;manjurul.com&quot;.
               </p>
             </div>
@@ -346,45 +513,68 @@ export default function CookiePolicyPage() {
 
         {/* Section 7 */}
         <section id="privacy-signals" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              7
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <HandStopIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Do Not Track (DNT) & Global Privacy Control (GPC)
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 7
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Do Not Track (DNT) & Global Privacy Control (GPC)
+              </h2>
+            </div>
           </div>
-          <p className="text-sm leading-7 text-[var(--ink-700)]">
-            We honor modern browser privacy mechanisms. Because our architecture is inherently devoid of advertising
-            and tracking networks, our operations naturally comply with Do Not Track (DNT) and Global Privacy Control (GPC)
-            signals by default.
-          </p>
+          <div className="flex items-start gap-4 rounded-2xl border border-[var(--ink-900)]/10 bg-white p-5 shadow-xs">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-700">
+              <ShieldLockIcon className="h-5 w-5" />
+            </span>
+            <div className="space-y-2">
+              <h3 className="text-sm font-bold text-[var(--ink-900)]">Automatic Signal Respect by Architecture</h3>
+              <p className="text-sm leading-7 text-[var(--ink-700)]">
+                We honor modern browser privacy mechanisms. Because our architecture is inherently devoid of tracking
+                networks and persistent profiling databases, our operations naturally comply with Do Not Track (DNT) and
+                Global Privacy Control (GPC) signals by default.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* Section 8 */}
         <section id="updates-contact" className="scroll-mt-28 space-y-4 border-t border-[var(--ink-900)]/10 pt-8">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[var(--accent-rust)]/10 font-mono text-xs font-bold text-[var(--accent-rust)]">
-              8
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <MailIcon className="h-4 w-4" />
             </span>
-            <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
-              Policy Revisions & Inquiries
-            </h2>
+            <div>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
+                Section 8
+              </span>
+              <h2 className="text-xl font-bold text-[var(--ink-900)] sm:text-2xl">
+                Policy Revisions & Inquiries
+              </h2>
+            </div>
           </div>
           <p className="text-sm leading-7 text-[var(--ink-700)]">
             Should we ever introduce new client-side features that utilize additional web storage keys, this document
             will be updated with exact key names, data schemas, and clearing procedures.
           </p>
-          <p className="text-sm leading-7 text-[var(--ink-700)]">
-            For questions regarding browser storage or cookie policies, contact us at{" "}
-            <a
-              href={`mailto:${SITE_CONTACT_EMAIL}`}
-              className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
-            >
-              {SITE_CONTACT_EMAIL}
-            </a>
-            .
-          </p>
+          <div className="flex items-center gap-3 rounded-2xl border border-[var(--accent-rust)]/20 bg-[var(--accent-rust)]/5 p-4 text-xs leading-6 text-[var(--ink-800)]">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+              <MailIcon className="h-4 w-4" />
+            </span>
+            <p>
+              For questions regarding browser storage or cookie policies, contact us at{" "}
+              <a
+                href={`mailto:${SITE_CONTACT_EMAIL}`}
+                className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]"
+              >
+                {SITE_CONTACT_EMAIL}
+              </a>
+              .
+            </p>
+          </div>
         </section>
       </LegalPageLayout>
     </>

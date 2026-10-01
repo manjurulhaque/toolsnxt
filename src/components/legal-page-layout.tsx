@@ -1,6 +1,14 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
 import { LEGAL_EFFECTIVE_DATE, SITE_NAME } from "@/lib/site"
+import {
+  AlertTriangleIcon,
+  CookieIcon,
+  MailIcon,
+  ScalesIcon,
+  ShieldLockIcon,
+  UserCheckIcon,
+} from "@/components/icons"
 
 export interface TableOfContentsItem {
   id: string
@@ -11,6 +19,7 @@ export interface LegalStat {
   label: string
   value: string
   description: string
+  icon?: ReactNode
 }
 
 interface LegalPageLayoutProps {
@@ -25,12 +34,12 @@ interface LegalPageLayoutProps {
 }
 
 const LEGAL_NAV_ITEMS = [
-  { href: "/about", label: "About Us", description: "Our mission, architecture & team" },
-  { href: "/privacy", label: "Privacy Policy", description: "Zero-server data processing & local execution" },
-  { href: "/terms", label: "Terms of Use", description: "Acceptable use, ownership & service limits" },
-  { href: "/cookies", label: "Cookie & Storage Policy", description: "Local storage keys & cookieless analytics" },
-  { href: "/disclaimer", label: "Disclaimer", description: "Medical, financial, cryptographic & code disclosures" },
-  { href: "/contact", label: "Contact & Support", description: "Bug reports, legal notices & inquiries" },
+  { href: "/about", label: "About Us", description: "Our mission, architecture & team", icon: UserCheckIcon },
+  { href: "/privacy", label: "Privacy Policy", description: "Zero-server data processing & local execution", icon: ShieldLockIcon },
+  { href: "/terms", label: "Terms of Use", description: "Acceptable use, ownership & service limits", icon: ScalesIcon },
+  { href: "/cookies", label: "Cookie & Storage Policy", description: "Local storage keys & cookieless analytics", icon: CookieIcon },
+  { href: "/disclaimer", label: "Disclaimer", description: "Medical, financial, cryptographic & code disclosures", icon: AlertTriangleIcon },
+  { href: "/contact", label: "Contact & Support", description: "Bug reports, legal notices & inquiries", icon: MailIcon },
 ] as const
 
 export function LegalPageLayout({
@@ -87,12 +96,19 @@ export function LegalPageLayout({
               {stats.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-[var(--ink-900)]/8 bg-white p-4 shadow-xs transition hover:border-[var(--accent-rust)]/25"
+                  className="group rounded-2xl border border-[var(--ink-900)]/8 bg-white p-4 shadow-xs transition hover:border-[var(--accent-rust)]/30 hover:shadow-sm"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent-rust)]">
-                    {stat.label}
-                  </p>
-                  <p className="mt-1 text-lg font-bold text-[var(--ink-900)] sm:text-xl">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--accent-rust)]">
+                      {stat.label}
+                    </p>
+                    {stat.icon ? (
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-rust)]/10 text-[var(--accent-rust)] transition group-hover:scale-110 group-hover:bg-[var(--accent-rust)] group-hover:text-white">
+                        {stat.icon}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-lg font-bold text-[var(--ink-900)] sm:text-xl">
                     {stat.value}
                   </p>
                   <p className="mt-1 text-xs leading-5 text-[var(--ink-700)]/80">
@@ -121,9 +137,12 @@ export function LegalPageLayout({
                       <li key={item.id}>
                         <a
                           href={`#${item.id}`}
-                          className="block text-[var(--ink-700)] transition hover:text-[var(--accent-rust)] hover:underline"
+                          className="group flex items-start gap-2 text-[var(--ink-700)] transition hover:text-[var(--accent-rust)]"
                         >
-                          {item.title}
+                          <span className="mt-0.5 text-[10px] text-[var(--ink-700)]/40 transition group-hover:text-[var(--accent-rust)]">
+                            #
+                          </span>
+                          <span className="leading-snug">{item.title}</span>
                         </a>
                       </li>
                     ))}
@@ -136,20 +155,24 @@ export function LegalPageLayout({
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--ink-700)]/80">
                   Legal Documents
                 </p>
-                <nav className="mt-3 space-y-1.5 text-xs font-medium">
+                <nav className="mt-3 space-y-1 text-xs font-medium">
                   {LEGAL_NAV_ITEMS.map((item) => {
                     const isActive = item.href === currentPath
+                    const IconComponent = item.icon
                     return (
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`block rounded-lg px-2.5 py-1.5 transition ${
+                        className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition ${
                           isActive
                             ? "bg-[var(--accent-rust)]/10 font-semibold text-[var(--accent-rust)]"
                             : "text-[var(--ink-700)] hover:bg-[var(--page-cream)] hover:text-[var(--ink-900)]"
                         }`}
                       >
-                        {item.label}
+                        <span className={`shrink-0 ${isActive ? "text-[var(--accent-rust)]" : "text-[var(--ink-700)]/60"}`}>
+                          <IconComponent className="h-3.5 w-3.5" />
+                        </span>
+                        <span>{item.label}</span>
                       </Link>
                     )
                   })}
