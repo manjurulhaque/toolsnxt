@@ -1,5 +1,5 @@
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Manjurul"
-export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || "manjurul.com"
+export const SITE_DOMAIN = process.env.NEXT_PUBLIC_SITE_DOMAIN || "www.manjurul.com"
 export const SITE_CONTACT_EMAIL =
   process.env.NEXT_PUBLIC_SITE_CONTACT_EMAIL || "contact@manjurul.com"
 export const SITE_URL = (
