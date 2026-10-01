@@ -4,6 +4,16 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toolCategories, tools } from "@/lib/tools"
 import { useToolPreferences } from "@/lib/user-preferences"
+import {
+  ArrowRightIcon,
+  CategoryIcon,
+  CornerDownLeftIcon,
+  GridIcon,
+  RotateCcwIcon,
+  SearchIcon,
+  StarIcon,
+  XIcon,
+} from "@/components/icons"
 
 type ToolSearchDialogProps = {
   isOpen: boolean
@@ -68,52 +78,55 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
     })
 
     // On initial view without search, pin favorites to top
-    if (!q && activeCategory === "All" && favorites.length > 0) {
-      return [
-        ...base.filter((t) => favorites.includes(t.href)),
-        ...base.filter((t) => !favorites.includes(t.href)),
-      ]
+    if (!q && activeCategory === "All") {
+      const favs = base.filter((t) => favorites.includes(t.href))
+      const others = base.filter((t) => !favorites.includes(t.href))
+      return [...favs, ...others]
     }
 
     return base
   }, [query, activeCategory, favorites])
 
-  const safeHighlightedIndex =
-    filteredTools.length > 0 ? Math.min(highlightedIndex, filteredTools.length - 1) : 0
+  const safeHighlightedIndex = Math.min(
+    Math.max(0, highlightedIndex),
+    Math.max(0, filteredTools.length - 1),
+  )
 
-  function handleQueryChange(newQuery: string) {
-    setQuery(newQuery)
+  function handleQueryChange(value: string) {
+    setQuery(value)
     setHighlightedIndex(0)
   }
 
-  function handleCategoryChange(newCategory: string) {
-    setActiveCategory(newCategory)
+  function handleCategoryChange(cat: string) {
+    setActiveCategory(cat)
     setHighlightedIndex(0)
   }
 
-  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (filteredTools.length === 0) return
-
+  function handleInputKeyDown(e: React.KeyboardEvent) {
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      const nextIndex = (safeHighlightedIndex + 1) % filteredTools.length
-      setHighlightedIndex(nextIndex)
-      scrollHighlightedIntoView(nextIndex)
+      setHighlightedIndex((prev) => {
+        const next = Math.min(prev + 1, filteredTools.length - 1)
+        scrollToItem(next)
+        return next
+      })
     } else if (e.key === "ArrowUp") {
       e.preventDefault()
-      const prevIndex = (safeHighlightedIndex - 1 + filteredTools.length) % filteredTools.length
-      setHighlightedIndex(prevIndex)
-      scrollHighlightedIntoView(prevIndex)
+      setHighlightedIndex((prev) => {
+        const next = Math.max(prev - 1, 0)
+        scrollToItem(next)
+        return next
+      })
     } else if (e.key === "Enter") {
       e.preventDefault()
-      const selected = filteredTools[safeHighlightedIndex]
-      if (selected) {
-        navigateToTool(selected.href)
+      const targetTool = filteredTools[safeHighlightedIndex]
+      if (targetTool) {
+        navigateToTool(targetTool.href)
       }
     }
   }
 
-  function scrollHighlightedIntoView(index: number) {
+  function scrollToItem(index: number) {
     if (!listRef.current) return
     const items = listRef.current.querySelectorAll<HTMLElement>("[data-tool-item]")
     const target = items[index]
@@ -140,20 +153,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
       <div className="flex max-h-[82vh] w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-[var(--ink-900)]/15 bg-white shadow-[0_24px_64px_rgba(33,37,41,0.22)]">
         {/* Search Input Bar */}
         <div className="relative flex items-center border-b border-[var(--ink-900)]/10 px-4 py-3 sm:px-6">
-          <svg
-            className="h-5 w-5 shrink-0 text-[var(--ink-700)]"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          <SearchIcon className="h-5 w-5 shrink-0 text-[var(--ink-700)]/70" />
           <input
             ref={inputRef}
             type="search"
@@ -170,10 +170,10 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                 handleQueryChange("")
                 inputRef.current?.focus()
               }}
-              className="mr-2 rounded-full p-1 text-xs text-[var(--ink-700)] hover:bg-[var(--ink-900)]/5 hover:text-[var(--ink-900)]"
+              className="mr-2 inline-flex items-center justify-center rounded-full p-1 text-xs text-[var(--ink-700)] hover:bg-[var(--ink-900)]/5 hover:text-[var(--ink-900)] transition-colors"
               title="Clear search"
             >
-              ✕
+              <XIcon className="h-4 w-4" />
             </button>
           ) : null}
           <button
@@ -190,26 +190,27 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
           <button
             type="button"
             onClick={() => handleCategoryChange("All")}
-            className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
+            className={`inline-flex items-center gap-1 shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
               activeCategory === "All"
                 ? "bg-[var(--ink-900)] text-white shadow-sm"
                 : "border border-[var(--ink-900)]/10 bg-white text-[var(--ink-700)] hover:border-[var(--ink-900)]/30 hover:text-[var(--ink-900)]"
             }`}
           >
-            All ({tools.length})
+            <GridIcon className="h-3 w-3 shrink-0" />
+            <span>All ({tools.length})</span>
           </button>
 
           {favorites.length > 0 ? (
             <button
               type="button"
               onClick={() => handleCategoryChange("Favorites")}
-              className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1 text-xs font-medium transition ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
                 activeCategory === "Favorites"
                   ? "bg-[var(--accent-rust)] text-white shadow-sm"
                   : "border border-[var(--accent-gold)]/40 bg-[var(--accent-gold)]/20 text-[var(--ink-900)] hover:border-[var(--accent-gold)]"
               }`}
             >
-              <span>★</span>
+              <StarIcon className="h-3 w-3 fill-amber-400 text-amber-400" />
               <span>Favorites ({favorites.length})</span>
             </button>
           ) : null}
@@ -222,13 +223,14 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                 key={category}
                 type="button"
                 onClick={() => handleCategoryChange(category)}
-                className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
+                className={`inline-flex items-center gap-1 shrink-0 rounded-full px-3 py-1 text-xs font-medium transition ${
                   isSelected
                     ? "bg-[var(--ink-900)] text-white shadow-sm"
                     : "border border-[var(--ink-900)]/10 bg-white text-[var(--ink-700)] hover:border-[var(--ink-900)]/30 hover:text-[var(--ink-900)]"
                 }`}
               >
-                {category} ({count})
+                <CategoryIcon category={category} className="h-3 w-3 shrink-0" />
+                <span>{category} ({count})</span>
               </button>
             )
           })}
@@ -238,6 +240,7 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
         <div ref={listRef} className="flex-1 overflow-y-auto p-2 sm:p-3">
           {filteredTools.length === 0 ? (
             <div className="py-12 text-center">
+              <SearchIcon className="mx-auto h-8 w-8 text-[var(--ink-700)]/30 mb-2" />
               <p className="text-sm font-semibold text-[var(--ink-900)]">No tools found</p>
               <p className="mt-1 text-xs text-[var(--ink-700)]">
                 No matching tools for &ldquo;{query}&rdquo;
@@ -250,9 +253,10 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                   handleCategoryChange("All")
                   inputRef.current?.focus()
                 }}
-                className="mt-4 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-1.5 text-xs font-medium text-[var(--ink-800)] hover:border-[var(--ink-900)]/25"
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-1.5 text-xs font-medium text-[var(--ink-800)] hover:border-[var(--ink-900)]/25"
               >
-                Reset filters
+                <RotateCcwIcon className="h-3 w-3" />
+                <span>Reset filters</span>
               </button>
             </div>
           ) : (
@@ -280,26 +284,27 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                         : "hover:bg-[var(--page-cream)]/60"
                     }`}
                   >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-[var(--ink-900)] group-hover:text-[var(--accent-rust)]">
-                          {tool.title}
-                        </span>
-                        <span className="rounded-full border border-[var(--ink-900)]/10 bg-white px-2 py-0.5 text-[11px] font-medium text-[var(--ink-700)]">
-                          {tool.category}
-                        </span>
-                        {favorited ? (
-                          <span
-                            className="text-xs text-[var(--accent-rust)]"
-                            title="Favorited tool"
-                          >
-                            ★
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white border border-[var(--ink-900)]/8 text-[var(--accent-rust)] group-hover:bg-[var(--accent-rust)]/10 transition-colors">
+                        <CategoryIcon category={tool.category} className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-[var(--ink-900)] group-hover:text-[var(--accent-rust)]">
+                            {tool.title}
                           </span>
-                        ) : null}
+                          <span className="inline-flex items-center gap-1 rounded-full border border-[var(--ink-900)]/10 bg-white px-2 py-0.5 text-[10px] font-medium text-[var(--ink-700)]">
+                            <CategoryIcon category={tool.category} className="h-2.5 w-2.5 text-[var(--accent-rust)]" />
+                            <span>{tool.category}</span>
+                          </span>
+                          {favorited ? (
+                            <StarIcon className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
+                          ) : null}
+                        </div>
+                        <p className="mt-1 line-clamp-1 text-xs text-[var(--ink-700)]">
+                          {tool.description}
+                        </p>
                       </div>
-                      <p className="mt-1 line-clamp-1 text-xs text-[var(--ink-700)]">
-                        {tool.description}
-                      </p>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2 self-center text-xs text-[var(--ink-700)]">
@@ -309,24 +314,23 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
                           e.stopPropagation()
                           toggleFavorite(tool.href)
                         }}
-                        className={`rounded-full p-1 transition ${
+                        className={`rounded-full p-1.5 transition ${
                           favorited
-                            ? "text-[var(--accent-rust)] opacity-100"
-                            : "text-[var(--ink-700)]/30 opacity-0 group-hover:opacity-100 hover:text-[var(--ink-900)]"
+                            ? "text-amber-500 opacity-100 bg-amber-500/10 hover:bg-amber-500/20"
+                            : "text-[var(--ink-700)]/30 opacity-0 group-hover:opacity-100 hover:text-[var(--ink-900)] hover:bg-white"
                         }`}
                         title={favorited ? "Remove from favorites" : "Add to favorites"}
                       >
-                        <span className="text-sm">{favorited ? "★" : "☆"}</span>
+                        <StarIcon className={`h-4 w-4 ${favorited ? "fill-amber-500 text-amber-500" : ""}`} />
                       </button>
 
                       {isHighlighted ? (
                         <span className="flex items-center gap-1 rounded bg-white px-2 py-1 font-mono text-[10px] font-semibold text-[var(--accent-rust)] shadow-sm">
-                          Open <span className="text-xs">↵</span>
+                          <span>Open</span>
+                          <CornerDownLeftIcon className="h-3 w-3" />
                         </span>
                       ) : (
-                        <span className="text-[var(--ink-700)]/40 group-hover:text-[var(--accent-rust)]">
-                          →
-                        </span>
+                        <ArrowRightIcon className="h-3.5 w-3.5 text-[var(--ink-700)]/30 group-hover:text-[var(--accent-rust)] transition-transform group-hover:translate-x-0.5" />
                       )}
                     </div>
                   </div>

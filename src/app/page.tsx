@@ -1,5 +1,19 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import {
+  ArrowRightIcon,
+  CodeIcon,
+  FilePdfIcon,
+  GlobeSearchIcon,
+  HeartPulseIcon,
+  ImageIcon,
+  LayersIcon,
+  ShieldCheckIcon,
+  ShieldLockIcon,
+  SmartphoneIcon,
+  WrenchIcon,
+  ZapIcon,
+} from "@/components/icons"
 import { HeroIntro, SummaryTile, ToolPanel } from "@/components/tool-page"
 import { ToolSearchDirectory } from "@/components/tool-search-directory"
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site"
@@ -67,9 +81,21 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-80">
-              <SummaryTile label="Tools" value={tools.length} />
-              <SummaryTile label="Categories" value={toolCategories.length} />
-              <SummaryTile label="Local Execution" value="100%" />
+              <SummaryTile
+                label="Tools"
+                value={tools.length}
+                icon={<WrenchIcon className="h-4 w-4" />}
+              />
+              <SummaryTile
+                label="Categories"
+                value={toolCategories.length}
+                icon={<LayersIcon className="h-4 w-4" />}
+              />
+              <SummaryTile
+                label="Local Execution"
+                value="100%"
+                icon={<ShieldCheckIcon className="h-4 w-4" />}
+              />
             </div>
           </div>
         </ToolPanel>
@@ -86,8 +112,8 @@ export default function HomePage() {
           {/* Core Philosophy Grid */}
           <div className="grid gap-6 md:grid-cols-3">
             <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-lg text-[var(--accent-rust)]">
-                🛡️
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <ShieldLockIcon className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
                 Zero Server Data Storage
@@ -100,8 +126,8 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-lg text-[var(--accent-rust)]">
-                ⚡
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <ZapIcon className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
                 Zero Cloud Upload Latency
@@ -113,8 +139,8 @@ export default function HomePage() {
             </div>
 
             <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-lg text-[var(--accent-rust)]">
-                📱
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <SmartphoneIcon className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
                 Progressive Web App Ready
@@ -139,9 +165,12 @@ export default function HomePage() {
 
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  PDF & Document Tools
-                </h4>
+                <div className="flex items-center gap-2">
+                  <FilePdfIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    PDF & Document Tools
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   In-browser PDF compression, document merging, page splitting, and PDF-to-image extraction
                   powered by client-side Web Workers.
@@ -149,9 +178,12 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  Image & Media Utilities
-                </h4>
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Image & Media Utilities
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   Convert between PNG, JPG, and WebP, generate multi-size favicon packages, resize banners,
                   and render creative ASCII art directly on HTML5 Canvas.
@@ -159,9 +191,12 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  Code Minifiers & Converters
-                </h4>
+                <div className="flex items-center gap-2">
+                  <CodeIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Code Minifiers & Converters
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   Compress HTML, CSS, and JavaScript using Terser and CSSO; optimize vector SVGs, convert YAML
                   to JSON, and generate TypeScript interfaces from raw payloads.
@@ -169,9 +204,12 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  Calculators & Health Formulas
-                </h4>
+                <div className="flex items-center gap-2">
+                  <HeartPulseIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Calculators & Health Formulas
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   Scientific calculations, loan amortization schedules, BMI, Ideal Body Weight,
                   Cockcroft-Gault Creatinine Clearance, and optimal sleep cycle estimators.
@@ -179,9 +217,12 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  Security & Cryptography
-                </h4>
+                <div className="flex items-center gap-2">
+                  <ShieldLockIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Security & Cryptography
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   Cryptographically secure password generation using browser CSPRNG, v4 UUIDs, SHA-256/512 hashes,
                   and client-side JWT token structure inspection.
@@ -189,9 +230,12 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
-                  SEO & Webmaster Tools
-                </h4>
+                <div className="flex items-center gap-2">
+                  <GlobeSearchIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    SEO & Webmaster Tools
+                  </h4>
+                </div>
                 <p className="text-xs leading-6 text-[var(--ink-700)]">
                   Generate compliant robots.txt directives, XML sitemaps, OpenGraph social meta tags, and test
                   web accessibility with our screen reader simulator.
@@ -215,7 +259,8 @@ export default function HomePage() {
                 href="/about"
                 className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold text-[var(--ink-900)] transition hover:border-[var(--accent-rust)]/30 hover:bg-white"
               >
-                Learn more about {SITE_NAME} &rarr;
+                <span>Learn more about {SITE_NAME}</span>
+                <ArrowRightIcon className="h-3 w-3" />
               </Link>
             </div>
           </div>

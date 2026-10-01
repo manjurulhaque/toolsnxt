@@ -1,4 +1,5 @@
 import type { ChangeEvent, ReactNode } from "react"
+import { UploadCloudIcon } from "@/components/icons"
 
 type NumberFieldProps = {
   id: string
@@ -187,7 +188,8 @@ type FilePickerProps = {
 
 export function FilePicker({ label, description, onChange, accept }: FilePickerProps) {
   return (
-    <label className="flex cursor-pointer flex-col items-center justify-center rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-4 py-5 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
+    <label className="group flex cursor-pointer flex-col items-center justify-center rounded-[1.2rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-4 py-5 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
+      <UploadCloudIcon className="mb-2 h-6 w-6 text-[var(--accent-rust)] transition-transform group-hover:-translate-y-0.5" />
       <span className="text-sm font-semibold">{label}</span>
       <span className="mt-1 text-xs text-[var(--ink-700)]/75">{description}</span>
       <input type="file" accept={accept} className="sr-only" onChange={onChange} />

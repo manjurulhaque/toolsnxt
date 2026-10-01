@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SiteBrand } from "@/components/site-brand"
 import { ToolSearchDialog } from "@/components/tool-search-dialog"
+import { GridIcon, SearchIcon, StarIcon } from "@/components/icons"
 import { useToolPreferences } from "@/lib/user-preferences"
 import { tools } from "@/lib/tools"
 
@@ -86,13 +87,12 @@ export function SiteHeader() {
                 title={isFavorite(pathname) ? "Remove from favorites" : "Add to favorites"}
                 aria-label={isFavorite(pathname) ? "Remove from favorites" : "Add to favorites"}
               >
-                <span
-                  className={`text-sm ${
+                <StarIcon
+                  filled={isFavorite(pathname)}
+                  className={`h-3.5 w-3.5 ${
                     isFavorite(pathname) ? "text-[var(--accent-rust)]" : "text-[var(--ink-700)]/60"
                   }`}
-                >
-                  ★
-                </span>
+                />
                 <span className="hidden sm:inline">
                   {isFavorite(pathname) ? "Favorited" : "Favorite"}
                 </span>
@@ -106,20 +106,7 @@ export function SiteHeader() {
               aria-label="Search tools"
               title="Search tools (⌘K)"
             >
-              <svg
-                className="h-3.5 w-3.5 text-[var(--ink-700)] sm:h-4 sm:w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <SearchIcon className="h-3.5 w-3.5 text-[var(--ink-700)] sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">
                 {compact ? "Search tools..." : "Quick search 52 tools..."}
               </span>
@@ -132,9 +119,10 @@ export function SiteHeader() {
             {compact ? (
               <Link
                 href="/"
-                className="rounded-full border border-[var(--ink-900)]/10 bg-white px-3.5 py-1.5 text-xs font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 hover:bg-[var(--page-cream)]/50 sm:px-4 sm:py-2 sm:text-sm"
+                className="flex items-center gap-1.5 rounded-full border border-[var(--ink-900)]/10 bg-white px-3.5 py-1.5 text-xs font-medium text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25 hover:bg-[var(--page-cream)]/50 sm:px-4 sm:py-2 sm:text-sm"
               >
-                All Tools
+                <GridIcon className="h-3.5 w-3.5 text-[var(--ink-700)]" />
+                <span>All Tools</span>
               </Link>
             ) : null}
           </div>

@@ -1,5 +1,13 @@
 import type { ReactNode } from "react"
 import Link from "next/link"
+import {
+  ArrowRightIcon,
+  BanknoteIcon,
+  HeartPulseIcon,
+  ShieldCheckIcon,
+  ShieldLockIcon,
+  WrenchIcon,
+} from "@/components/icons"
 
 export interface EducationalDisclaimerCardProps {
   type?: "educational" | "medical" | "financial" | "security" | "technical"
@@ -23,37 +31,38 @@ export function EducationalDisclaimerCard({
       defaultEyebrow: "Transparency & Verification",
       defaultTitle: "Educational Disclaimer",
       defaultBadge: "100% In-Browser Execution",
-      icon: "🛡️",
+      icon: ShieldCheckIcon,
     },
     medical: {
       defaultEyebrow: "Health & Medical Notice",
       defaultTitle: "Medical & Educational Disclaimer",
       defaultBadge: "Non-Clinical Estimate",
-      icon: "🩺",
+      icon: HeartPulseIcon,
     },
     financial: {
       defaultEyebrow: "Financial Calculation Notice",
       defaultTitle: "Financial & Educational Disclaimer",
       defaultBadge: "Mathematical Estimate",
-      icon: "📊",
+      icon: BanknoteIcon,
     },
     security: {
       defaultEyebrow: "Security & Cryptography Notice",
       defaultTitle: "Security & Educational Disclaimer",
       defaultBadge: "Client-Side Cryptography",
-      icon: "🔐",
+      icon: ShieldLockIcon,
     },
     technical: {
       defaultEyebrow: "Technical Verification Notice",
       defaultTitle: "Technical & Educational Disclaimer",
       defaultBadge: "Specification Standard",
-      icon: "⚙️",
+      icon: WrenchIcon,
     },
   }[type]
 
   const displayEyebrow = eyebrow ?? config.defaultEyebrow
   const displayTitle = title ?? config.defaultTitle
   const displayBadge = badge ?? config.defaultBadge
+  const IconComponent = config.icon
 
   return (
     <div
@@ -61,8 +70,8 @@ export function EducationalDisclaimerCard({
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--ink-900)]/8 pb-4">
         <div className="flex items-center gap-3">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-lg text-[var(--accent-rust)]">
-            {config.icon}
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+            <IconComponent className="h-5 w-5" />
           </span>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent-rust)]">
@@ -89,9 +98,10 @@ export function EducationalDisclaimerCard({
         </p>
         <Link
           href="/disclaimer"
-          className="font-semibold text-[var(--accent-rust)] underline transition hover:text-[var(--ink-900)]"
+          className="inline-flex items-center gap-1 font-semibold text-[var(--accent-rust)] underline transition hover:text-[var(--ink-900)]"
         >
-          View full legal disclaimer &rarr;
+          <span>View full legal disclaimer</span>
+          <ArrowRightIcon className="h-3 w-3" />
         </Link>
       </div>
     </div>
