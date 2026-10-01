@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PdfMergeTool } from "./pdf-merge-tool"
 
@@ -567,17 +567,16 @@ export default function PdfMergePage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This PDF Merge tool combines multiple PDF documents using the implemented
-              browser-based merge logic. Results are intended for educational, informational, and
-              general productivity use. Merging preserves document content as supported by the
-              implementation and follows the selected file order. Verify document order, page order,
-              file completeness, document properties, and compatibility before sharing, publishing,
-              printing, filing, archiving, or using generated PDFs in production workflows.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This PDF Merge tool combines multiple PDF documents using the implemented
+            browser-based merge logic. Results are intended for educational, informational, and
+            general productivity use. Merging preserves document content as supported by the
+            implementation and follows the selected file order. Verify document order, page order,
+            file completeness, document properties, and compatibility before sharing, publishing,
+            printing, filing, archiving, or using generated PDFs in production workflows.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

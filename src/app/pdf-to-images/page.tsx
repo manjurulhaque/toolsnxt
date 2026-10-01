@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PdfToImagesTool } from "./pdf-to-images-tool"
 
@@ -581,17 +581,16 @@ export default function PdfToImagesPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This PDF to Images tool converts PDF pages into raster images using the implemented
-              PDF.js rendering workflow. Results are intended for educational, informational, and
-              general productivity use. Converted images may not retain editable PDF text, forms,
-              vector scalability, annotations, layers, or metadata. Verify image quality, page
-              accuracy, and format suitability before publishing, printing, archiving, or production
-              use.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This PDF to Images tool converts PDF pages into raster images using the implemented
+            PDF.js rendering workflow. Results are intended for educational, informational, and
+            general productivity use. Converted images may not retain editable PDF text, forms,
+            vector scalability, annotations, layers, or metadata. Verify image quality, page
+            accuracy, and format suitability before publishing, printing, archiving, or production
+            use.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

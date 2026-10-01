@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ImageResizerTool } from "./image-resizer-tool"
 
@@ -593,16 +593,15 @@ export default function ImageResizerPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Image Resizer changes image dimensions using the implemented browser
-              canvas-based resizing process. Results are intended for educational, informational,
-              and general productivity use. Enlarging images cannot recreate missing visual detail.
-              Verify image dimensions, quality, transparency, and format compatibility before
-              publishing, printing, submitting, or using resized images in production.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Image Resizer changes image dimensions using the implemented browser
+            canvas-based resizing process. Results are intended for educational, informational,
+            and general productivity use. Enlarging images cannot recreate missing visual detail.
+            Verify image dimensions, quality, transparency, and format compatibility before
+            publishing, printing, submitting, or using resized images in production.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

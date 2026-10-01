@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { CronExpressionBuilderTool } from "./cron-expression-builder-tool"
 
@@ -477,13 +477,15 @@ export default function CronExpressionBuilderPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Technical disclaimer: This builder generates expressions according to the numeric
-          five-field syntax supported by this page. Cron syntax varies between schedulers, and a
-          generated expression should be checked in the environment that will execute it. Time-zone
-          and daylight-saving behavior depends on the scheduler and runtime configuration. This
-          tool builds schedule expressions; it does not execute cron jobs.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This builder generates expressions according to the numeric
+            five-field syntax supported by this page. Cron syntax varies between schedulers, and a
+            generated expression should be checked in the environment that will execute it. Time-zone
+            and daylight-saving behavior depends on the scheduler and runtime configuration. This
+            tool builds schedule expressions; it does not execute cron jobs.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

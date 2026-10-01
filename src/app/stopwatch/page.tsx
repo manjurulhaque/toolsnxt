@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { StopwatchTool } from "./stopwatch-tool"
 
@@ -390,13 +390,15 @@ export default function StopwatchPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This stopwatch measures elapsed time using its implemented
-          browser-based timing mechanism. Display precision does not guarantee certified
-          measurement accuracy. Browser scheduling, background-tab behavior, operating-system
-          scheduling, device performance, and main-thread workload can affect visual updates and
-          timing behavior. Use certified timing equipment where strict precision is required.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This stopwatch measures elapsed time using its implemented
+            browser-based timing mechanism. Display precision does not guarantee certified
+            measurement accuracy. Browser scheduling, background-tab behavior, operating-system
+            scheduling, device performance, and main-thread workload can affect visual updates and
+            timing behavior. Use certified timing equipment where strict precision is required.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ScreenReaderSimulatorTool } from "./screen-reader-simulator-tool"
 
@@ -593,12 +593,14 @@ export default function ScreenReaderSimulatorPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This Screen Reader Simulator models linearized reading order and accessible
-          names using client-side heuristics and the browser Web Speech API. It is an engineering development tool
-          and does not substitute for formal accessibility compliance testing with native assistive devices
-          (such as NVDA, JAWS, or VoiceOver) or evaluation by users with disabilities.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This Screen Reader Simulator models linearized reading order and accessible
+            names using client-side heuristics and the browser Web Speech API. It is an engineering development tool
+            and does not substitute for formal accessibility compliance testing with native assistive devices
+            (such as NVDA, JAWS, or VoiceOver) or evaluation by users with disabilities.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

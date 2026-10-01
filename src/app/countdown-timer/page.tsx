@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { CountdownTimerTool } from "./countdown-timer-tool"
 
@@ -530,16 +530,15 @@ export default function CountdownTimerPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Countdown Timer calculates remaining time using the implemented duration-based
-              countdown algorithm. Results depend on browser timer scheduling, page visibility,
-              device behavior, and selected settings. Different applications may calculate or
-              display countdowns differently. This tool is intended for educational, productivity,
-              and planning purposes, not for safety-critical timing.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Countdown Timer calculates remaining time using the implemented duration-based
+            countdown algorithm. Results depend on browser timer scheduling, page visibility,
+            device behavior, and selected settings. Different applications may calculate or
+            display countdowns differently. This tool is intended for educational, productivity,
+            and planning purposes, not for safety-critical timing.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

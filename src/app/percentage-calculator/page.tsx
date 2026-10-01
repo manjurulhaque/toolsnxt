@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PercentageTool } from "./percentage-tool"
 
@@ -494,15 +494,14 @@ export default function PercentageCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This percentage calculator provides mathematical estimates based on user inputs. The
-              results are for educational and informational purposes only. Verify critical
-              calculations independently. This tool does not provide financial, legal, tax,
-              accounting, statistical, or other professional advice.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This percentage calculator provides mathematical estimates based on user inputs. The
+            results are for educational and informational purposes only. Verify critical
+            calculations independently. This tool does not provide financial, legal, tax,
+            accounting, statistical, or other professional advice.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

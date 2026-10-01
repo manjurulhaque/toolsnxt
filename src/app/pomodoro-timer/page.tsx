@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PomodoroTool } from "./pomodoro-tool"
 
@@ -454,15 +454,14 @@ export default function PomodoroTimerPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Pomodoro timer is a productivity aid for informational and personal use. Results
-              vary depending on task type, work habits, environment, energy, and preferences. It is
-              not a substitute for professional medical, psychological, ergonomic, or occupational
-              advice.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Pomodoro timer is a productivity aid for informational and personal use. Results
+            vary depending on task type, work habits, environment, energy, and preferences. It is
+            not a substitute for professional medical, psychological, ergonomic, or occupational
+            advice.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

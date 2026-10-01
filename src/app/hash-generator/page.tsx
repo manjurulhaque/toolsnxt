@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { HashTool } from "./hash-tool"
 
@@ -571,17 +571,16 @@ export default function HashGeneratorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Security Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This tool generates hashes based on the selected algorithm and current text input.
-              Hashing is not encryption, and generated hashes should be interpreted according to
-              the selected algorithm and use case. Older algorithms may not be appropriate for
-              modern security-sensitive applications. Follow current cryptographic best practices
-              for production systems. This tool is intended for educational, development, testing,
-              and text integrity verification purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="security">
+          <p>
+            This tool generates hashes based on the selected algorithm and current text input.
+            Hashing is not encryption, and generated hashes should be interpreted according to
+            the selected algorithm and use case. Older algorithms may not be appropriate for
+            modern security-sensitive applications. Follow current cryptographic best practices
+            for production systems. This tool is intended for educational, development, testing,
+            and text integrity verification purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

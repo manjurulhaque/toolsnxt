@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { YamlJsonConverterTool } from "./yaml-json-converter-tool"
 
@@ -579,12 +579,14 @@ export default function YamlJsonConverterPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This conversion utility processes YAML and JSON according to standard
-          specification rules using client-side JavaScript. While output is syntactically validated, it does
-          not validate target schema rules (such as Kubernetes CustomResourceDefinitions or specific JSON Schemas).
-          Always test generated configurations in staging environments before applying to production infrastructure.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This conversion utility processes YAML and JSON according to standard
+            specification rules using client-side JavaScript. While output is syntactically validated, it does
+            not validate target schema rules (such as Kubernetes CustomResourceDefinitions or specific JSON Schemas).
+            Always test generated configurations in staging environments before applying to production infrastructure.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

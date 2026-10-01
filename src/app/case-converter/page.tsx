@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { CaseConverterTool } from "./case-converter-tool"
 
@@ -593,17 +593,16 @@ export default function CaseConverterPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Case Converter converts text according to its implemented case-conversion rules.
-              Results depend on the input text and selected conversion mode. Case conversion does
-              not necessarily perform grammar or spelling correction. Unicode characters may have
-              different case-mapping behavior, and different case-conversion tools may produce
-              different results. The tool is intended for writing, editing, development,
-              educational, and general text-formatting purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Case Converter converts text according to its implemented case-conversion rules.
+            Results depend on the input text and selected conversion mode. Case conversion does
+            not necessarily perform grammar or spelling correction. Unicode characters may have
+            different case-mapping behavior, and different case-conversion tools may produce
+            different results. The tool is intended for writing, editing, development,
+            educational, and general text-formatting purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

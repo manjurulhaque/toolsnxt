@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { UrlEncoderDecoderTool } from "./url-encoder-decoder-tool"
 
@@ -562,12 +562,14 @@ export default function UrlEncoderDecoderPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This URL Encoder and Decoder operates exclusively via your web browser&apos;s
-          native JavaScript engine (<code>encodeURIComponent</code>, <code>encodeURI</code>, and <code>URLSearchParams</code>).
-          It does not validate whether a URL destination is active, reachable, or safe. Always verify links and
-          test encoded URLs in your staging environment before deploying in production systems.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This URL Encoder and Decoder operates exclusively via your web browser&apos;s
+            native JavaScript engine (<code>encodeURIComponent</code>, <code>encodeURI</code>, and <code>URLSearchParams</code>).
+            It does not validate whether a URL destination is active, reachable, or safe. Always verify links and
+            test encoded URLs in your staging environment before deploying in production systems.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

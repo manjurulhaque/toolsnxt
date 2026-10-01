@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ImageToAsciiArtTool } from "./image-to-ascii-art-tool"
 
@@ -532,16 +532,15 @@ export default function ImageToAsciiArtPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Image to ASCII Art tool converts images into text art using the implemented
-              browser-based conversion algorithm. Results depend on image quality, selected width,
-              tone map, contrast, brightness inversion, browser image decoding, and character
-              mapping. Different applications may generate different ASCII output. The tool is
-              intended for educational, creative, and development purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Image to ASCII Art tool converts images into text art using the implemented
+            browser-based conversion algorithm. Results depend on image quality, selected width,
+            tone map, contrast, brightness inversion, browser image decoding, and character
+            mapping. Different applications may generate different ASCII output. The tool is
+            intended for educational, creative, and development purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

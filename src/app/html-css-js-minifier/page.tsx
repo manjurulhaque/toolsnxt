@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { HtmlCssJsMinifierTool } from "./html-css-js-minifier-tool"
 
@@ -567,16 +567,15 @@ export default function HtmlCssJsMinifierPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This HTML, CSS & JavaScript Minifier performs minification using the implemented
-              libraries and configuration. Minification removes unnecessary characters and applies
-              supported optimizations while aiming to preserve functionality for valid supported
-              code. Different minification libraries and settings may produce different output.
-              Test minified code before deploying it to production.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="technical">
+          <p>
+            This HTML, CSS & JavaScript Minifier performs minification using the implemented
+            libraries and configuration. Minification removes unnecessary characters and applies
+            supported optimizations while aiming to preserve functionality for valid supported
+            code. Different minification libraries and settings may produce different output.
+            Test minified code before deploying it to production.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

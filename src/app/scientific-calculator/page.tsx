@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ScientificTool } from "./scientific-tool"
 
@@ -534,15 +534,14 @@ export default function ScientificCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This scientific calculator performs mathematical computations based on user inputs.
-              Results are for educational and informational purposes only. Independently verify
-              critical academic, engineering, scientific, financial, or professional calculations.
-              This tool does not replace professional analysis or domain-specific validation.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This scientific calculator performs mathematical computations based on user inputs.
+            Results are for educational and informational purposes only. Independently verify
+            critical academic, engineering, scientific, financial, or professional calculations.
+            This tool does not replace professional analysis or domain-specific validation.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

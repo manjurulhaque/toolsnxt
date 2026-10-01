@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { TextDiffCheckerTool } from "./text-diff-checker-tool"
 
@@ -539,12 +539,14 @@ export default function TextDiffCheckerPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This Text Diff Checker performs line-level comparisons entirely in your web browser.
-          While it identifies line insertions, deletions, and modifications accurately, it does not analyze programming
-          language semantics, AST structures, or legal contract implications. Always review critical code changes and legal
-          amendments carefully before publishing or executing.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This Text Diff Checker performs line-level comparisons entirely in your web browser.
+            While it identifies line insertions, deletions, and modifications accurately, it does not analyze programming
+            language semantics, AST structures, or legal contract implications. Always review critical code changes and legal
+            amendments carefully before publishing or executing.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

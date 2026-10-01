@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { GradientGeneratorTool } from "./gradient-generator-tool"
 
@@ -388,12 +388,14 @@ export default function GradientGeneratorPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This tool generates CSS gradients using its implemented HEX color,
-          stop-position, and direction controls. Results are intended for design, learning, and web
-          development workflows. Review copied CSS in its target layout and verify text contrast,
-          browser support, and visual requirements before production use.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool generates CSS gradients using its implemented HEX color,
+            stop-position, and direction controls. Results are intended for design, learning, and web
+            development workflows. Review copied CSS in its target layout and verify text contrast,
+            browser support, and visual requirements before production use.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

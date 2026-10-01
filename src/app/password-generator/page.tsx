@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PasswordTool } from "./password-tool"
 
@@ -520,16 +520,15 @@ export default function PasswordGeneratorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Security Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              Passwords are generated based on this page&apos;s implemented random generation
-              method and are intended to improve account security. You remain responsible for
-              securely storing generated passwords, using unique credentials, enabling MFA for
-              critical accounts, and following the security requirements of each service. No
-              password generator can guarantee protection against all cybersecurity threats.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="security">
+          <p>
+            Passwords are generated based on this page&apos;s implemented random generation
+            method and are intended to improve account security. You remain responsible for
+            securely storing generated passwords, using unique credentials, enabling MFA for
+            critical accounts, and following the security requirements of each service. No
+            password generator can guarantee protection against all cybersecurity threats.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

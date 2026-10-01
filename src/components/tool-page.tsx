@@ -189,3 +189,5 @@ export function CheckboxOption({
     </label>
   )
 }
+
+export { EducationalDisclaimerCard } from "@/components/educational-disclaimer"

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { IntervalTimerTool } from "./interval-timer-tool"
 
@@ -188,7 +188,11 @@ export default function IntervalTimerPage() {
 
         <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://html.spec.whatwg.org/multipage/timers-and-user-prompts.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">WHATWG HTML Standard: Timers</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/setInterval" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Window.setInterval()</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Page Visibility API</a></li></ul></ToolPanel>
 
-        <InfoBox>Educational disclaimer: This tool counts down work and rest durations using its implemented browser timer logic. Results can depend on browser scheduling and tab visibility. It is intended for general planning, study, rehearsal, and activity timing, and does not provide medical, fitness, or professional advice.</InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool counts down work and rest durations using its implemented browser timer logic. Results can depend on browser scheduling and tab visibility. It is intended for general planning, study, rehearsal, and activity timing, and does not provide medical, fitness, or professional advice.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

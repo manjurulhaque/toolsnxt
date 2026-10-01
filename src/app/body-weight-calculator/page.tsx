@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { BodyWeightTool } from "./body-weight-tool"
 
@@ -505,16 +505,15 @@ export default function BodyWeightCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Medical Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This body weight calculator provides estimates for informational and educational
-              purposes only. Results are not intended to diagnose, treat, or replace professional
-              medical advice. Consult a qualified healthcare professional for personalized guidance,
-              especially for children, pregnancy, eating concerns, chronic disease, medication
-              dosing, or major weight changes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="medical">
+          <p>
+            This body weight calculator provides estimates for informational and educational
+            purposes only. Results are not intended to diagnose, treat, or replace professional
+            medical advice. Consult a qualified healthcare professional for personalized guidance,
+            especially for children, pregnancy, eating concerns, chronic disease, medication
+            dosing, or major weight changes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

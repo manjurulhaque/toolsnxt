@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { Base64EncoderDecoderTool } from "./base64-encoder-decoder-tool"
 
@@ -557,16 +557,15 @@ export default function Base64EncoderDecoderPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Base64 Encoder / Decoder performs Base64 encoding and decoding using the
-              implemented browser-based logic. Base64 is a binary-to-text encoding scheme, not
-              encryption or compression. Results are intended for educational, development,
-              debugging, and interoperability purposes. Sensitive information should be protected
-              with appropriate encryption and access controls before it is Base64 encoded or shared.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Base64 Encoder / Decoder performs Base64 encoding and decoding using the
+            implemented browser-based logic. Base64 is a binary-to-text encoding scheme, not
+            encryption or compression. Results are intended for educational, development,
+            debugging, and interoperability purposes. Sensitive information should be protected
+            with appropriate encryption and access controls before it is Base64 encoded or shared.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

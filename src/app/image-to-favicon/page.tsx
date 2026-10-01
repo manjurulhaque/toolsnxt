@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ImageToFaviconTool } from "./image-to-favicon-tool"
 
@@ -531,16 +531,15 @@ export default function ImageToFaviconPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Image to Favicon tool converts images into favicon files using the implemented
-              browser-based conversion algorithm. Results depend on source image quality, padding,
-              background settings, browser image decoding, canvas export behavior, and supported
-              output formats. Different favicon generators may produce different results. This tool
-              is intended for educational, branding, and web development purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Image to Favicon tool converts images into favicon files using the implemented
+            browser-based conversion algorithm. Results depend on source image quality, padding,
+            background settings, browser image decoding, canvas export behavior, and supported
+            output formats. Different favicon generators may produce different results. This tool
+            is intended for educational, branding, and web development purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

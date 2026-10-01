@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { HtmlToMarkdownTool } from "./html-to-markdown-tool"
 
@@ -534,16 +534,15 @@ export default function HtmlToMarkdownPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This HTML to Markdown tool converts HTML into Markdown using the implemented
-              browser-based conversion algorithm. Results depend on supported HTML elements,
-              Markdown syntax, whitespace handling, and mapping rules. Different converters and
-              Markdown flavors may produce different output. The tool is intended for educational,
-              documentation, and development purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This HTML to Markdown tool converts HTML into Markdown using the implemented
+            browser-based conversion algorithm. Results depend on supported HTML elements,
+            Markdown syntax, whitespace handling, and mapping rules. Different converters and
+            Markdown flavors may produce different output. The tool is intended for educational,
+            documentation, and development purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

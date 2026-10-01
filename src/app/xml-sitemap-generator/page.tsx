@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { XmlSitemapGeneratorTool } from "./xml-sitemap-generator-tool"
 
@@ -567,11 +567,13 @@ export default function XmlSitemapGeneratorPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This XML Sitemap Generator formats URLs according to the Sitemaps.org XML schema.
-          Submitting a sitemap provides search engines with discovery hints, but does not guarantee indexation,
-          ranking, or traffic. Ensure all included URLs are active, canonical 200 OK responses before publishing.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This XML Sitemap Generator formats URLs according to the Sitemaps.org XML schema.
+            Submitting a sitemap provides search engines with discovery hints, but does not guarantee indexation,
+            ranking, or traffic. Ensure all included URLs are active, canonical 200 OK responses before publishing.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

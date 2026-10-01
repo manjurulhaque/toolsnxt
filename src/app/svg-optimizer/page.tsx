@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { SvgOptimizerTool } from "./svg-optimizer-tool"
 
@@ -575,11 +575,13 @@ export default function SvgOptimizerPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This SVG Optimizer uses client-side SVGO transformations to reduce file size.
-          Always check the rendered visual preview before deploying optimized assets to production, especially
-          when working with intricate typography curves or complex vector illustrations.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This SVG Optimizer uses client-side SVGO transformations to reduce file size.
+            Always check the rendered visual preview before deploying optimized assets to production, especially
+            when working with intricate typography curves or complex vector illustrations.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

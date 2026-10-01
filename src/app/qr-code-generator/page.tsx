@@ -43,7 +43,7 @@ export const metadata: Metadata = {
   twitter: { card: "summary", title: pageTitle, description: pageDescription },
 }
 
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import Link from "next/link"
 import { QrCodeGeneratorTool } from "./qr-code-generator-tool"
 
@@ -376,15 +376,14 @@ function FormattedContentGuide() {
         </ul>
       </ToolPanel>
 
-      <ToolPanel>
-        <PanelHeader eyebrow="Disclaimer" title="Usage Disclaimer" />
-        <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-          This tool generates QR codes from user-provided data. You are responsible for verifying
-          encoded information before sharing or printing. The tool does not validate the safety,
-          accuracy, or availability of URLs or other embedded content. Test QR codes before public
-          distribution. This tool is intended for informational, educational, and general-purpose use.
-        </p>
-      </ToolPanel>
+              <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool generates QR codes from user-provided data. You are responsible for verifying
+            encoded information before sharing or printing. The tool does not validate the safety,
+            accuracy, or availability of URLs or other embedded content. Test QR codes before public
+            distribution. This tool is intended for informational, educational, and general-purpose use.
+          </p>
+        </EducationalDisclaimerCard>
     </>
   )
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { RegexTesterTool } from "./regex-tester-tool"
 
@@ -56,7 +56,11 @@ export default function RegexTesterPage() {
       <ToolPanel><PanelHeader eyebrow="More Tools" title="Related Tools" /><nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">{[["JSON Formatter", "/json-formatter"], ["HTML, CSS & JavaScript Minifier", "/html-css-js-minifier"], ["Case Converter", "/case-converter"], ["Word & Character Counter", "/word-character-counter"], ["Text Diff Checker", "/text-diff-checker"], ["URL Encoder / Decoder", "/url-encoder-decoder"]].map(([label, href]) => <Link key={href} href={href} className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40">{label}</Link>)}</nav></ToolPanel>
       <ToolPanel><PanelHeader eyebrow="Terms" title="Glossary" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Regular expression", "A pattern used to match text."], ["Pattern", "The regular-expression source entered into this tool."], ["Match", "The portion of text returned by a successful pattern search."], ["Capture group", "A parenthesized part of a pattern whose matched text is returned separately."], ["Index", "The zero-based character position at which a match begins."], ["Flag", "A modifier that changes matching behavior."], ["Global", "A flag used for repeated matching across text."], ["Multiline", "A flag that changes the behavior of start and end anchors at line boundaries."], ["DotAll", "A flag that lets a dot match line terminators."], ["Unicode", "A JavaScript regex mode that enables Unicode-aware features."], ["Sticky", "A mode that requires matching exactly at lastIndex."], ["lastIndex", "The RegExp position used as the starting point for a subsequent global or sticky match."]].map(([term, definition]) => <div key={term}><h3 className="font-semibold">{term}</h3><p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p></div>)}</div></ToolPanel>
       <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: RegExp</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: RegExp.prototype.exec()</a></li><li><a href="https://tc39.es/ecma262/multipage/text-processing.html#sec-regexp-regular-expression-objects" className="font-semibold underline" rel="noopener noreferrer" target="_blank">ECMAScript Language Specification: RegExp Objects</a></li></ul></ToolPanel>
-      <InfoBox>Educational disclaimer: This tool evaluates patterns with the browser&apos;s JavaScript RegExp implementation and shows its implemented match details. Results can differ across regex flavors and browser versions. It is intended for development, learning, debugging, and text-analysis workflows, not as a substitute for security review or complete application validation.</InfoBox>
+              <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool evaluates patterns with the browser&apos;s JavaScript RegExp implementation and shows its implemented match details. Results can differ across regex flavors and browser versions. It is intended for development, learning, debugging, and text-analysis workflows, not as a substitute for security review or complete application validation.
+          </p>
+        </EducationalDisclaimerCard>
     </section>
   </main>
 }

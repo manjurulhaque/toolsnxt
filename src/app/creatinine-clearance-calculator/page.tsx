@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { CreatinineClearanceTool } from "./creatinine-clearance-tool"
 
@@ -482,15 +482,14 @@ export default function CreatinineClearanceCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Medical Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This calculator is for general education only. It does not provide medical advice,
-              diagnosis, treatment, medication dosing, or emergency guidance. Kidney function
-              interpretation should be reviewed with a licensed healthcare professional who can
-              consider your full medical history, lab trends, medications, and current condition.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="medical">
+          <p>
+            This calculator is for general education only. It does not provide medical advice,
+            diagnosis, treatment, medication dosing, or emergency guidance. Kidney function
+            interpretation should be reviewed with a licensed healthcare professional who can
+            consider your full medical history, lab trends, medications, and current condition.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

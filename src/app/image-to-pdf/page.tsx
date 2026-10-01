@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ImageToPdfTool } from "./image-to-pdf-tool"
 
@@ -556,17 +556,16 @@ export default function ImageToPdfPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Image to PDF Converter generates PDF documents from uploaded images using the
-              implemented browser conversion process. Results are intended for educational,
-              informational, and general productivity use. Verify output before submitting,
-              printing, archiving, or sharing important documents. This tool does not certify
-              compliance with archival, legal, accessibility, regulatory, PDF/A, or industry-specific
-              PDF standards unless those requirements are explicitly implemented.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Image to PDF Converter generates PDF documents from uploaded images using the
+            implemented browser conversion process. Results are intended for educational,
+            informational, and general productivity use. Verify output before submitting,
+            printing, archiving, or sharing important documents. This tool does not certify
+            compliance with archival, legal, accessibility, regulatory, PDF/A, or industry-specific
+            PDF standards unless those requirements are explicitly implemented.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

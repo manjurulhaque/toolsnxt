@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { PdfSplitTool } from "./pdf-split-tool"
 
@@ -562,17 +562,16 @@ export default function PdfSplitPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This PDF Split tool separates PDF pages using the implemented browser-based page
-              extraction logic. Results are intended for educational, informational, and general
-              productivity use. Splitting a PDF does not modify the content of the extracted pages,
-              and the original file remains unchanged. Verify page order, file completeness,
-              document properties, and compatibility before sharing, publishing, filing, archiving,
-              or using generated PDFs in production workflows.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This PDF Split tool separates PDF pages using the implemented browser-based page
+            extraction logic. Results are intended for educational, informational, and general
+            productivity use. Splitting a PDF does not modify the content of the extracted pages,
+            and the original file remains unchanged. Verify page order, file completeness,
+            document properties, and compatibility before sharing, publishing, filing, archiving,
+            or using generated PDFs in production workflows.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

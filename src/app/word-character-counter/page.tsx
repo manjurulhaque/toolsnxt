@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { WordCharacterCounterTool } from "./word-character-counter-tool"
 
@@ -564,17 +564,16 @@ export default function WordCharacterCounterPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Word & Character Counter calculates statistics using the implemented counting
-              logic. Results are intended for educational, informational, writing, and productivity
-              purposes. Different applications may use different word, character, sentence,
-              paragraph, Unicode, and formatting rules. Verify counts against assignment,
-              publishing, SEO, platform, legal, or submission requirements when exact limits are
-              critical.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Word & Character Counter calculates statistics using the implemented counting
+            logic. Results are intended for educational, informational, writing, and productivity
+            purposes. Different applications may use different word, character, sentence,
+            paragraph, Unicode, and formatting rules. Verify counts against assignment,
+            publishing, SEO, platform, legal, or submission requirements when exact limits are
+            critical.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

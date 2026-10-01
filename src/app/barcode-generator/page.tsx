@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { BarcodeTool } from "./barcode-tool"
 
@@ -535,17 +535,16 @@ export default function BarcodeGeneratorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Barcode Generator produces Code 128-B SVG barcodes using the implemented
-              encoding rules. Results are intended for educational, informational, testing, and
-              general business use. Verify compatibility with your scanners, printers, label
-              software, and industry requirements. This tool does not replace official GS1
-              registration, regulatory requirements, barcode verification, or commercial barcode
-              licensing where applicable.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Barcode Generator produces Code 128-B SVG barcodes using the implemented
+            encoding rules. Results are intended for educational, informational, testing, and
+            general business use. Verify compatibility with your scanners, printers, label
+            software, and industry requirements. This tool does not replace official GS1
+            registration, regulatory requirements, barcode verification, or commercial barcode
+            licensing where applicable.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

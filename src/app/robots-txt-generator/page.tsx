@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { RobotsTxtGeneratorTool } from "./robots-txt-generator-tool"
 
@@ -572,11 +572,13 @@ export default function RobotsTxtGeneratorPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: A robots.txt file provides cooperative guidance for automated crawlers adhering
-          to the Robots Exclusion Protocol (RFC 9309). It is not an access-control or security barrier. Never rely
-          on robots.txt to protect sensitive personal records, financial data, or administrative passwords.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            A robots.txt file provides cooperative guidance for automated crawlers adhering
+            to the Robots Exclusion Protocol (RFC 9309). It is not an access-control or security barrier. Never rely
+            on robots.txt to protect sensitive personal records, financial data, or administrative passwords.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

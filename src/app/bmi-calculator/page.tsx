@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { BmiTool } from "./bmi-tool"
 
@@ -498,15 +498,14 @@ export default function BmiCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Medical Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This BMI calculator is for informational and educational purposes only. BMI is a
-              screening tool, not a diagnosis of disease, body fat, or individual health. Speak with
-              a qualified healthcare professional for personalized medical advice, especially for
-              children, pregnancy, eating concerns, chronic disease, or major weight changes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="medical">
+          <p>
+            This BMI calculator is for informational and educational purposes only. BMI is a
+            screening tool, not a diagnosis of disease, body fat, or individual health. Speak with
+            a qualified healthcare professional for personalized medical advice, especially for
+            children, pregnancy, eating concerns, chronic disease, or major weight changes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

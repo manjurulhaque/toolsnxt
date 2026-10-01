@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { MarkdownPreviewerTool } from "./markdown-previewer-tool"
 
@@ -71,7 +71,11 @@ export default function MarkdownPreviewerPage() {
 
         <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://spec.commonmark.org/0.31.2/" className="font-semibold underline" rel="noopener noreferrer" target="_blank">CommonMark Specification 0.31.2</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Element.innerHTML</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Clipboard.writeText()</a></li></ul></ToolPanel>
 
-        <InfoBox>Educational disclaimer: This page renders Markdown using its implemented custom parser and outputs generated HTML for supported syntax only. It is intended for writing, documentation, learning, and development workflows. It is not a complete Markdown compatibility checker or a substitute for a security review of untrusted content.</InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This page renders Markdown using its implemented custom parser and outputs generated HTML for supported syntax only. It is intended for writing, documentation, learning, and development workflows. It is not a complete Markdown compatibility checker or a substitute for a security review of untrusted content.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

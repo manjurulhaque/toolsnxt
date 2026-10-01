@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { JwtDecoderTool } from "./jwt-decoder-tool"
 
@@ -196,7 +196,11 @@ export default function JwtDecoderPage() {
 
         <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://www.rfc-editor.org/rfc/rfc7519.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">RFC 7519: JSON Web Token</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc7515.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">RFC 7515: JSON Web Signature</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc8725.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">RFC 8725: JSON Web Token Best Current Practices</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/atob" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Window.atob()</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/TextDecoder" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: TextDecoder</a></li></ul></ToolPanel>
 
-        <InfoBox>Security disclaimer: This tool decodes JWT header and payload text using its implemented Base64URL and JSON parsing logic. It does not verify signatures, keys, algorithms, issuers, audiences, or application claims, and it does not decrypt JWE tokens. Do not use decoded output alone to make authentication, authorization, or trust decisions.</InfoBox>
+                <EducationalDisclaimerCard type="security">
+          <p>
+            This tool decodes JWT header and payload text using its implemented Base64URL and JSON parsing logic. It does not verify signatures, keys, algorithms, issuers, audiences, or application claims, and it does not decrypt JWE tokens. Do not use decoded output alone to make authentication, authorization, or trust decisions.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

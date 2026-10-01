@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { JsonToTypeScriptTool } from "./json-to-typescript-tool"
 
@@ -586,14 +586,16 @@ export default function JsonToTypeScriptPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This tool generates TypeScript according to its implemented JSON
-          parsing and type-generation rules. Generated declarations are based on the provided JSON
-          sample and may not represent every possible API response or business rule. Different
-          tools may generate different valid TypeScript. Review and adapt generated types to your
-          application&apos;s actual data contract, and remember that TypeScript declarations do not
-          perform runtime validation of JSON data by themselves.
-        </InfoBox>
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This tool generates TypeScript according to its implemented JSON
+            parsing and type-generation rules. Generated declarations are based on the provided JSON
+            sample and may not represent every possible API response or business rule. Different
+            tools may generate different valid TypeScript. Review and adapt generated types to your
+            application&apos;s actual data contract, and remember that TypeScript declarations do not
+            perform runtime validation of JSON data by themselves.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

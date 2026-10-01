@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { JsonFormatterTool } from "./json-formatter-tool"
 
@@ -510,14 +510,16 @@ export default function JsonFormatterPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This tool formats JSON according to its implemented parsing,
-          optional sorting, and serialization methods. Formatting primarily changes whitespace,
-          indentation, and presentation for typical valid input. Parsing and serialization can
-          normalize the text, especially when duplicate object names are present. It does not
-          validate JSON Schema or business rules. Verify important JSON data and
-          application-specific requirements before using formatted output in production.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool formats JSON according to its implemented parsing,
+            optional sorting, and serialization methods. Formatting primarily changes whitespace,
+            indentation, and presentation for typical valid input. Parsing and serialization can
+            normalize the text, especially when duplicate object names are present. It does not
+            validate JSON Schema or business rules. Verify important JSON data and
+            application-specific requirements before using formatted output in production.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

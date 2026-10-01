@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { LoanTool } from "./loan-tool"
 
@@ -510,16 +510,15 @@ export default function LoanCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Financial Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This loan calculator provides estimates for informational and educational purposes
-              only. It does not constitute financial, legal, tax, investment, or lending advice.
-              Actual loan terms, payments, fees, interest charges, approval decisions, and payoff
-              amounts may vary by lender and borrower profile. Consult qualified financial
-              professionals before making borrowing decisions.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="financial">
+          <p>
+            This loan calculator provides estimates for informational and educational purposes
+            only. It does not constitute financial, legal, tax, investment, or lending advice.
+            Actual loan terms, payments, fees, interest charges, approval decisions, and payoff
+            amounts may vary by lender and borrower profile. Consult qualified financial
+            professionals before making borrowing decisions.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

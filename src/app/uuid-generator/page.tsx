@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { UuidGeneratorTool } from "./uuid-generator-tool"
 
@@ -459,13 +459,15 @@ export default function UuidGeneratorPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This tool generates UUID v4 identifiers according to its
-          implemented browser-based generation and formatting methods. UUID uniqueness is not an
-          absolute mathematical guarantee, and UUIDs should not automatically be treated as
-          passwords, authentication credentials, API keys, or secrets. Review generated identifiers
-          against the requirements of the application using them.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool generates UUID v4 identifiers according to its
+            implemented browser-based generation and formatting methods. UUID uniqueness is not an
+            absolute mathematical guarantee, and UUIDs should not automatically be treated as
+            passwords, authentication credentials, API keys, or secrets. Review generated identifiers
+            against the requirements of the application using them.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

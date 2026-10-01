@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ColorConverterTool } from "./color-converter-tool"
 
@@ -517,14 +517,16 @@ export default function ColorConverterPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This Color Converter converts values according to its implemented
-          formulas, parsing rules, rounding, and supported formats. Results are intended for general
-          web development, design, educational, and color-formatting use. Different tools may produce
-          slightly different numbers, and screen appearance can vary across displays, browsers, and
-          color-managed environments. This page is not a calibrated color-management or professional
-          color-measurement system.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This Color Converter converts values according to its implemented
+            formulas, parsing rules, rounding, and supported formats. Results are intended for general
+            web development, design, educational, and color-formatting use. Different tools may produce
+            slightly different numbers, and screen appearance can vary across displays, browsers, and
+            color-managed environments. This page is not a calibrated color-management or professional
+            color-measurement system.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

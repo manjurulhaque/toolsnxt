@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { SleepTimeTool } from "./sleep-time-tool"
 
@@ -481,15 +481,14 @@ export default function SleepTimeCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Medical Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This sleep time calculator provides general timing estimates for informational and
-              educational purposes only. It does not diagnose, treat, or evaluate sleep disorders.
-              Persistent insomnia, loud snoring, breathing pauses, excessive daytime sleepiness, or
-              ongoing sleep problems should be discussed with a qualified healthcare professional.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="medical">
+          <p>
+            This sleep time calculator provides general timing estimates for informational and
+            educational purposes only. It does not diagnose, treat, or evaluate sleep disorders.
+            Persistent insomnia, loud snoring, breathing pauses, excessive daytime sleepiness, or
+            ongoing sleep problems should be discussed with a qualified healthcare professional.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

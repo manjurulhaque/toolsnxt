@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { ImageConverterTool } from "./image-converter-tool"
 
@@ -582,16 +582,15 @@ export default function ImageConverterPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Educational Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This Image Converter converts supported browser-readable images using the implemented
-              canvas-based conversion process. Results are intended for educational, informational,
-              and general productivity use. Some output formats may introduce compression,
-              transparency, metadata, or compatibility limitations. Verify converted images before
-              using them in production, printing, publishing, e-commerce, or archival workflows.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This Image Converter converts supported browser-readable images using the implemented
+            canvas-based conversion process. Results are intended for educational, informational,
+            and general productivity use. Some output formats may introduce compression,
+            transparency, metadata, or compatibility limitations. Verify converted images before
+            using them in production, printing, publishing, e-commerce, or archival workflows.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

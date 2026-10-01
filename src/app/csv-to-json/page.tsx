@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { CsvToJsonTool } from "./csv-to-json-tool"
 
@@ -581,14 +581,16 @@ Bob,25,Paris`}
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This tool converts CSV data according to its implemented parsing
-          and JSON serialization methods. Results depend on the input structure, comma delimiter,
-          headers, quoting, trim setting, and output mode. Different CSV parsers can interpret edge
-          cases differently, and valid JSON does not guarantee that the data matches a specific
-          application schema. Verify generated JSON before using it in production or important data
-          workflows.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool converts CSV data according to its implemented parsing
+            and JSON serialization methods. Results depend on the input structure, comma delimiter,
+            headers, quoting, trim setting, and output mode. Different CSV parsers can interpret edge
+            cases differently, and valid JSON does not guarantee that the data matches a specific
+            application schema. Verify generated JSON before using it in production or important data
+            workflows.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

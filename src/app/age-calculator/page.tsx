@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { AgeTool } from "./age-tool"
 
@@ -464,15 +464,14 @@ export default function AgeCalculatorPage() {
             </ul>
           </ToolPanel>
 
-          <ToolPanel>
-            <PanelHeader eyebrow="Disclaimer" title="Disclaimer" />
-            <p className="mt-6 text-sm leading-7 text-[var(--ink-700)]">
-              This age calculator is for informational and educational use. Results are based on the
-              dates entered and standard calendar calculations. It should not replace official age
-              verification for legal, financial, employment, education, insurance, medical, or
-              government purposes.
-            </p>
-          </ToolPanel>
+                  <EducationalDisclaimerCard type="educational">
+          <p>
+            This age calculator is for informational and educational use. Results are based on the
+            dates entered and standard calendar calculations. It should not replace official age
+            verification for legal, financial, employment, education, insurance, medical, or
+            government purposes.
+          </p>
+        </EducationalDisclaimerCard>
         </section>
       </main>
     </>

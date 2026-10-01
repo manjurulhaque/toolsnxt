@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { LoremIpsumGeneratorTool } from "./lorem-ipsum-generator-tool"
 
@@ -77,7 +77,11 @@ export default function LoremIpsumGeneratorPage() {
 
         <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: &lt;textarea&gt;</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Clipboard.writeText()</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: URL.createObjectURL()</a></li></ul></ToolPanel>
 
-        <InfoBox>Educational disclaimer: This tool generates placeholder text from its implemented word sets and generation rules. Output is intended for design, testing, prototyping, and general productivity use. It is not a source of factual content, professional writing, legal text, accessibility copy, or publish-ready material.</InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool generates placeholder text from its implemented word sets and generation rules. Output is intended for design, testing, prototyping, and general productivity use. It is not a source of factual content, professional writing, legal text, accessibility copy, or publish-ready material.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
 import { TypingSpeedTestTool } from "./typing-speed-test-tool"
 
@@ -537,11 +537,13 @@ export default function TypingSpeedTestPage() {
           </ul>
         </ToolPanel>
 
-        <InfoBox>
-          Educational disclaimer: This Typing Speed Test is intended for personal skill benchmarking and practice.
-          Results reflect typing performance on general prose passages using your current browser and keyboard hardware.
-          Do not continue typing if you experience wrist or hand pain; practice healthy workstation ergonomics.
-        </InfoBox>
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This Typing Speed Test is intended for personal skill benchmarking and practice.
+            Results reflect typing performance on general prose passages using your current browser and keyboard hardware.
+            Do not continue typing if you experience wrist or hand pain; practice healthy workstation ergonomics.
+          </p>
+        </EducationalDisclaimerCard>
       </section>
     </main>
   )
