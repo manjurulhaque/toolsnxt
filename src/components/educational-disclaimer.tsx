@@ -94,7 +94,7 @@ export function EducationalDisclaimerCard({
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--ink-900)]/8 pt-4 text-xs text-[var(--ink-700)]/80">
         <p>
-          Calculations and transformations execute locally on your machine. Always verify critical results.
+          Calculations and transformations execute locally on your machine with full offline support. Always verify critical results.
         </p>
         <Link
           href="/disclaimer"

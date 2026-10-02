@@ -109,9 +109,15 @@ export function ToolSearchDirectory({
             ) : null}
           </div>
 
-          <div className="text-sm text-[var(--ink-700)]">
-            Showing <strong className="text-[var(--ink-900)]">{filteredTools.length}</strong> of{" "}
-            {allTools.length} tools
+          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--ink-700)]">
+            <div>
+              Showing <strong className="text-[var(--ink-900)]">{filteredTools.length}</strong> of{" "}
+              {allTools.length} tools
+            </div>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+              <span>100% Offline Ready</span>
+            </div>
           </div>
         </div>
 

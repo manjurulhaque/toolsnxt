@@ -75,8 +75,8 @@ export default function HomePage() {
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <HeroIntro eyebrow="Tool directory" title="Browser tools for everyday work.">
-                Pick a utility below. All 52 tools process files and text locally in your browser,
-                meaning zero server uploads, total privacy, and instant responsiveness.
+                Pick a utility below. All 52 tools process files and text locally in your browser with full offline PWA support—meaning
+                zero server uploads, complete privacy, and instant responsiveness even without an internet connection.
               </HeroIntro>
             </div>
 
@@ -92,8 +92,8 @@ export default function HomePage() {
                 icon={<LayersIcon className="h-4 w-4" />}
               />
               <SummaryTile
-                label="Local Execution"
-                value="100%"
+                label="Offline Support"
+                value="100% PWA"
                 icon={<ShieldCheckIcon className="h-4 w-4" />}
               />
             </div>
@@ -143,11 +143,11 @@ export default function HomePage() {
                 <SmartphoneIcon className="h-5 w-5" />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
-                Progressive Web App Ready
+                100% Offline PWA Ready
               </h3>
               <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
                 Install {SITE_NAME} to your desktop or mobile home screen as a standalone application.
-                Star your favorite utilities for instant one-click access directly from the top navigation.
+                Our background Service Worker caches all 52 utilities, enabling full offline productivity on airplanes, during travel, or with zero internet connection.
               </p>
             </div>
           </div>
@@ -243,7 +243,24 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--ink-900)]/10 pt-6">
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-emerald-600/20 bg-emerald-50/50 p-4 sm:p-5">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700">
+                  <ShieldCheckIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-950">True Offline Architecture</h4>
+                  <p className="text-xs leading-5 text-emerald-800/90">
+                    Every calculator, converter, and PDF tool runs via client-side Web Workers, WebAssembly, and Canvas. No backend API calls are made, allowing complete productivity with zero internet.
+                  </p>
+                </div>
+              </div>
+              <Link href="/about" className="shrink-0 text-xs font-semibold text-emerald-900 underline hover:text-emerald-700">
+                Read architecture &rarr;
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--ink-900)]/10 pt-6">
               <p className="text-xs text-[var(--ink-700)]">
                 Have questions or need technical support? Visit our{" "}
                 <Link href="/contact" className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]">

@@ -123,12 +123,14 @@ export default function PrivacyPage() {
 
           <div className="rounded-2xl border border-[var(--accent-rust)]/20 bg-[var(--accent-rust)]/5 p-4 sm:p-5">
             <h3 className="text-sm font-semibold text-[var(--ink-900)]">
-              Zero-Server Architecture Guarantee
+              Zero-Server & Offline Architecture Guarantee
             </h3>
             <p className="mt-1 text-xs leading-6 text-[var(--ink-700)]">
               You can verify this yourself: open your browser&apos;s Developer Tools (Press F12 &rarr; Network tab),
               drag a PDF into the PDF Compressor or paste text into the Minifier, and observe that zero network
-              requests are initiated when processing your inputs.
+              requests are initiated when processing your inputs. In fact, because our platform operates as a full offline
+              Progressive Web App (PWA), you can disconnect from Wi-Fi or enable Airplane Mode and all 52 tools will continue
+              functioning with zero network access.
             </p>
           </div>
         </section>

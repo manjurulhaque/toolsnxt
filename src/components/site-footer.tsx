@@ -17,9 +17,15 @@ export function SiteFooter() {
             <p className="mt-3 max-w-md text-sm leading-6 text-[var(--ink-700)]">
               A compact set of practical calculators, converters, and generators.
             </p>
-            <div className="mt-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-3 py-1 text-xs font-medium text-emerald-800">
-              <ShieldCheckIcon className="h-3.5 w-3.5 text-emerald-600" />
-              <span>100% In-Browser Execution &bull; Zero Server Data Storage</span>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-3 py-1 text-xs font-medium text-emerald-800">
+                <ShieldCheckIcon className="h-3.5 w-3.5 text-emerald-600" />
+                <span>100% In-Browser Execution &bull; Zero Server Storage</span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-3 py-1 text-xs font-medium text-[var(--ink-700)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span>Full Offline PWA Support</span>
+              </div>
             </div>
           </div>
 

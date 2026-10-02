@@ -28,6 +28,11 @@ const STATS: LegalStat[] = [
     description: "Every tool executes in your browser's private memory sandbox.",
   },
   {
+    label: "Offline Support",
+    value: "100% PWA",
+    description: "Background Service Worker caches all 52 tools for full offline usage.",
+  },
+  {
     label: "Pricing",
     value: "100% Free",
     description: "No accounts, no paywalls, no subscriptions, and no trial limits.",
@@ -144,6 +149,11 @@ export default function AboutPage() {
             <li>
               <strong>Edge CDN Delivery:</strong> The site is prerendered into immutable static assets served from edge
               data centers globally, resulting in sub-50ms page load times across North America, Europe, Asia, and worldwide.
+            </li>
+            <li>
+              <strong>Full Offline PWA Service Worker:</strong> Our background Service Worker caches all 52 utility tools,
+              application scripts, and stylesheets locally. Once visited, the entire platform remains 100% functional without an
+              internet connection, making it ideal for travel, offline fieldwork, or airplane productivity.
             </li>
           </ul>
         </section>
