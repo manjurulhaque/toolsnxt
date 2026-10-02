@@ -103,11 +103,17 @@ export function ToolIntro({ eyebrow, title, children }: ToolIntroProps) {
         <span className="text-[var(--ink-700)]/40">/</span>
         <span className="font-semibold text-[var(--ink-900)] truncate max-w-[200px]">{title}</span>
       </nav>
-      <div className="flex items-center gap-2">
-        <CategoryIcon category={category} className="h-3.5 w-3.5 text-[var(--accent-rust)]" />
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-          {eyebrow}
-        </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <CategoryIcon category={category} className="h-3.5 w-3.5 text-[var(--accent-rust)]" />
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
+            {eyebrow}
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-2.5 py-0.5 text-[11px] font-medium text-emerald-800">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span>100% In-Browser</span>
+        </span>
       </div>
       <h1 className="mt-3 text-3xl font-semibold sm:text-4xl">{title}</h1>
       <p className="mt-4 text-sm leading-7 text-[var(--ink-700)]">{children}</p>

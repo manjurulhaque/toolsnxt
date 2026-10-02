@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { FilePicker } from "@/components/form-controls"
 
 type SourceImage = {
   file: File
@@ -144,13 +145,16 @@ export function ImageToFaviconTool() {
             the image to this tool.
           </ToolIntro>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose image</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              PNG, JPG, WebP, SVG, and other browser-readable images
-            </span>
-            <input type="file" accept="image/*" className="sr-only" onChange={handleFile} />
-          </label>
+          <FilePicker
+            className="mt-6"
+            label="Choose image"
+            description="Select or drag & drop PNG, JPG, WebP, SVG, or other images"
+            accept="image/*"
+            onChange={handleFile}
+            selectedFileName={sourceImage?.file.name}
+            selectedFileSize={sourceImage?.file.size}
+            onClear={clearAll}
+          />
 
           <div className="mt-6 space-y-3">
             <label htmlFor="padding" className="block text-sm font-medium">

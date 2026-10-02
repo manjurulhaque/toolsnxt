@@ -3,6 +3,7 @@
 import { PDFDocument, ParseSpeeds } from "pdf-lib"
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { FilePicker } from "@/components/form-controls"
 import { SITE_NAME } from "@/lib/site"
 
 type LoadedPdf = {
@@ -140,18 +141,16 @@ export function PdfCompressTool() {
             The file is processed in your browser and is not uploaded anywhere.
           </ToolIntro>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose PDF</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              Select one document to compress
-            </span>
-            <input
-              type="file"
-              accept="application/pdf,.pdf"
-              className="sr-only"
-              onChange={handleFile}
-            />
-          </label>
+          <FilePicker
+            className="mt-6"
+            label="Choose PDF"
+            description="Select or drag & drop one document to compress"
+            accept="application/pdf,.pdf"
+            onChange={handleFile}
+            selectedFileName={pdfFile?.file.name}
+            selectedFileSize={pdfFile?.file.size}
+            onClear={clearFile}
+          />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <button

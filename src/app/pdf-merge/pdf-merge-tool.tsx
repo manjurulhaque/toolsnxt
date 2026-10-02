@@ -3,6 +3,7 @@
 import { PDFDocument } from "pdf-lib"
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { FilePicker } from "@/components/form-controls"
 
 type PdfItem = {
   id: string
@@ -139,19 +140,14 @@ export function PdfMergeTool() {
             intentionally uploaded by this tool.
           </ToolIntro>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose PDFs</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              Add files in any order, then rearrange before merging
-            </span>
-            <input
-              type="file"
-              accept="application/pdf,.pdf"
-              multiple
-              className="sr-only"
-              onChange={handleFiles}
-            />
-          </label>
+          <FilePicker
+            className="mt-6"
+            label="Choose PDFs"
+            description="Select or drag & drop multiple PDF files to combine"
+            accept="application/pdf,.pdf"
+            multiple
+            onChange={handleFiles}
+          />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <button

@@ -1,6 +1,6 @@
 "use client"
 
-import { NumberField } from "@/components/form-controls"
+import { FilePicker, NumberField } from "@/components/form-controls"
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
 
@@ -207,13 +207,14 @@ export function ImageResizerTool() {
             format controls.
           </ToolIntro>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose images</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              JPG, PNG, WebP, GIF, BMP, and other browser-readable images
-            </span>
-            <input type="file" accept="image/*" multiple className="sr-only" onChange={handleFiles} />
-          </label>
+          <FilePicker
+            className="mt-6"
+            label="Choose images"
+            description="Select or drag & drop JPG, PNG, WebP, GIF, or BMP images"
+            accept="image/*"
+            multiple
+            onChange={handleFiles}
+          />
 
           <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {presets.map((preset) => (

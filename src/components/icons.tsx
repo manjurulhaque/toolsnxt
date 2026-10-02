@@ -1309,3 +1309,67 @@ export function CategoryIcon({
   }
 }
 
+export function MaximizeIcon({ className = "h-4 w-4", ...props }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" x2="14" y1="3" y2="10" />
+      <line x1="3" x2="10" y1="21" y2="14" />
+    </svg>
+  )
+}
+
+export function MinimizeIcon({ className = "h-4 w-4", ...props }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <polyline points="4 14 10 14 10 20" />
+      <polyline points="20 10 14 10 14 4" />
+      <line x1="14" x2="21" y1="10" y2="3" />
+      <line x1="3" x2="10" y1="21" y2="14" />
+    </svg>
+  )
+}
+
+export function KeyboardIcon({ className = "h-4 w-4", ...props }: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+      {...props}
+    >
+      <rect width="20" height="16" x="2" y="4" rx="2" />
+      <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M6 12h.001M18 12h.001M8 16h8" />
+    </svg>
+  )
+}
+

@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { PwaManager } from "@/components/pwa-manager";
 import { ToastContainer } from "@/components/toast";
+import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -70,6 +71,7 @@ export default function RootLayout({
         </div>
         <PwaManager />
         <ToastContainer />
+        <KeyboardShortcutsDialog />
         <Analytics />
       </body>
     </html>

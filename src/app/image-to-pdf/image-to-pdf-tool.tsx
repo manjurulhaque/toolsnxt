@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useMemo, useState } from "react"
 import { ToolIntro, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { FilePicker } from "@/components/form-controls"
 
 type ImageItem = {
   id: string
@@ -120,19 +121,14 @@ export function ImageToPdfTool() {
             and are not uploaded anywhere.
           </ToolIntro>
 
-          <label className="mt-6 flex cursor-pointer flex-col items-center justify-center rounded-[1.4rem] border border-dashed border-[var(--ink-900)]/20 bg-[var(--page-cream)] px-5 py-8 text-center transition hover:border-[var(--accent-rust)]/60 hover:bg-white">
-            <span className="text-sm font-semibold">Choose images</span>
-            <span className="mt-2 text-xs text-[var(--ink-700)]/75">
-              JPG, PNG, WebP, and GIF files are supported
-            </span>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="sr-only"
-              onChange={handleFiles}
-            />
-          </label>
+          <FilePicker
+            className="mt-6"
+            label="Choose images"
+            description="Select or drag & drop JPG, PNG, WebP, or GIF files"
+            accept="image/*"
+            multiple
+            onChange={handleFiles}
+          />
 
           <div className="mt-6 space-y-3">
             <label htmlFor="quality" className="block text-sm font-medium">

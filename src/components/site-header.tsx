@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SiteBrand } from "@/components/site-brand"
 import { ToolSearchDialog } from "@/components/tool-search-dialog"
-import { GridIcon, SearchIcon, StarIcon } from "@/components/icons"
+import { GridIcon, KeyboardIcon, SearchIcon, StarIcon } from "@/components/icons"
+import { openShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { useToolPreferences } from "@/lib/user-preferences"
 import { tools } from "@/lib/tools"
 
@@ -114,6 +115,16 @@ export function SiteHeader() {
               <kbd className="hidden rounded bg-[var(--page-cream)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--ink-700)] sm:inline">
                 ⌘K
               </kbd>
+            </button>
+
+            <button
+              type="button"
+              onClick={openShortcutsDialog}
+              aria-label="Keyboard shortcuts"
+              title="Keyboard shortcuts (?)"
+              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-full border border-[var(--ink-900)]/10 bg-white text-[var(--ink-700)] shadow-xs transition hover:border-[var(--ink-900)]/30 hover:bg-[var(--page-cream)]/50 hover:text-[var(--ink-900)]"
+            >
+              <KeyboardIcon className="h-4 w-4" />
             </button>
 
             {compact ? (
