@@ -13,6 +13,8 @@ const PRECACHE_CORE = [
   '/offline',
   '/manifest.webmanifest',
   '/favicon.ico',
+  '/icon.svg',
+  '/apple-icon.png',
   '/pdf.worker.min.mjs',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
