@@ -1,293 +1,82 @@
-"use client"
-
-import { useMemo, useState } from "react"
-import { TextAreaField } from "@/components/form-controls"
-import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard, getTextStats } from "@/lib/browser-actions"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
 import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { MarkdownPreviewerTool } from "./markdown-previewer-tool"
 
-const sampleMarkdown = `# Launch Notes
+const pagePath = "/markdown-previewer"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Markdown Previewer | Preview Markdown as HTML Online"
+const pageDescription =
+  "Preview supported Markdown as HTML online. Write headings, lists, blockquotes, code, links, images, and emphasis, then copy the Markdown source or generated HTML in your browser."
 
-Write Markdown on the left and preview it on the right.
+const faqs = [
+  { question: "What is a Markdown Previewer?", answer: "A Markdown Previewer converts supported Markdown source into HTML so you can inspect its rendered structure while editing." },
+  { question: "Which Markdown features does this tool support?", answer: "It supports ATX headings, paragraphs, unordered and ordered lists, blockquotes, fenced and inline code, links, images, bold text, emphasis, and horizontal rules." },
+  { question: "Does this tool support full CommonMark?", answer: "No. The previewer uses a custom renderer with a limited supported syntax set and is not a CommonMark or GitHub Flavored Markdown compliance checker." },
+  { question: "Does it support tables?", answer: "No. Pipe tables are not implemented by this renderer." },
+  { question: "Does it support nested lists?", answer: "No. The list parser creates flat ordered or unordered lists and does not implement nested list structure." },
+  { question: "Can I use raw HTML in the preview?", answer: "No. Raw HTML is escaped before the preview is rendered, so HTML tags are shown as text instead of being executed as markup." },
+  { question: "How are Markdown links handled?", answer: "The renderer supports inline links with http or https URLs and opens rendered links in a new tab with noreferrer." },
+  { question: "How are Markdown images handled?", answer: "The renderer supports inline images with http or https URLs and places the Markdown alt text in the generated img alt attribute." },
+  { question: "Can I copy the Markdown source?", answer: "Yes. Copy MD writes the current Markdown source to the clipboard when browser permissions allow it." },
+  { question: "Can I copy the generated HTML?", answer: "Yes. Copy HTML writes the current generated HTML string to the clipboard when it is available." },
+  { question: "Can I download Markdown or HTML?", answer: "No. This implementation provides source and HTML copy controls, clear, and a sample loader, but no download feature." },
+  { question: "Why does the preview differ from another Markdown app?", answer: "Markdown parsers differ in syntax coverage and parsing rules. This page only renders its documented, custom subset." },
+  { question: "Does it preserve single line breaks?", answer: "Not as visible line breaks in a paragraph. The renderer joins nonblank paragraph lines with spaces; blank lines start a new paragraph." },
+  { question: "Does it work on mobile?", answer: "Yes. It uses standard browser text areas, buttons, and a scrollable preview region." },
+  { question: "Is my Markdown uploaded to a server?", answer: "The previewer runs in your browser and does not intentionally upload entered Markdown." },
+  { question: "Is the Markdown Previewer free?", answer: "Yes. This is a free browser-based Markdown preview tool." },
+]
 
-## Highlights
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: pageTitle, description: pageDescription, url: pageUrl, isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL }, about: ["Markdown Previewer", "Markdown to HTML", "Markdown Renderer"] },
+  { "@context": "https://schema.org", "@type": "WebApplication", name: "Markdown Previewer", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, featureList: ["Markdown source input", "Rendered HTML preview", "Generated HTML output", "Headings, lists, blockquotes, code, links, images, and emphasis", "Raw HTML escaping", "Source statistics", "Copy Markdown", "Copy HTML", "Clear and sample controls"] },
+  { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Markdown Previewer", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Markdown Previewer", item: pageUrl }] },
+  { "@context": "https://schema.org", "@type": "HowTo", name: "How to preview Markdown", description: "Enter supported Markdown source, inspect the rendered preview and generated HTML, then copy the needed output.", step: [{ "@type": "HowToStep", name: "Write Markdown", text: "Enter or paste Markdown into the input area." }, { "@type": "HowToStep", name: "Inspect preview", text: "Review the generated rendered preview and HTML output." }, { "@type": "HowToStep", name: "Copy output", text: "Copy the Markdown source or generated HTML for your workflow." }] },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
+]
 
-- Supports headings, lists, quotes, code, links, and images.
-- Escapes raw HTML before rendering the preview.
-- Copies either the Markdown source or generated HTML.
-
-> Small tools should stay fast, local, and easy to trust.
-
-\`\`\`ts
-const tool = "Markdown Previewer"
-console.log(tool)
-\`\`\`
-
-Visit [${SITE_NAME}](${SITE_URL}) for a sample link.`
+export const metadata: Metadata = { title: pageTitle, description: pageDescription, alternates: { canonical: pagePath }, openGraph: { title: pageTitle, description: pageDescription, url: pageUrl, siteName: SITE_NAME, type: "website" }, twitter: { card: "summary", title: pageTitle, description: pageDescription } }
 
 export default function MarkdownPreviewerPage() {
-  const [markdown, setMarkdown] = useState(sampleMarkdown)
-  const [message, setMessage] = useState("Edit Markdown to preview it as formatted HTML.")
-
-  const html = useMemo(() => markdownToHtml(markdown), [markdown])
-  const stats = useMemo(() => getMarkdownStats(markdown), [markdown])
-
-  async function copyMarkdown() {
-    if (!markdown.trim()) {
-      setMessage("Add Markdown before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(markdown)
-      setMessage("Markdown copied.")
-    } catch {
-      setMessage("Copy failed. Select the Markdown and copy it manually.")
-    }
-  }
-
-  async function copyHtml() {
-    if (!html.trim()) {
-      setMessage("Add Markdown before copying HTML.")
-      return
-    }
-
-    try {
-      await copyToClipboard(html)
-      setMessage("HTML copied.")
-    } catch {
-      setMessage("Copy failed. Select the HTML and copy it manually.")
-    }
-  }
-
-  function clearAll() {
-    setMarkdown("")
-    setMessage("Workspace cleared.")
-  }
-
-  function loadSample() {
-    setMarkdown(sampleMarkdown)
-    setMessage("Sample Markdown loaded.")
-  }
-
   return (
-    <ToolPage columns="equal">
-      <ToolPanel>
-        <ToolIntro eyebrow="Text tool" title="Markdown Previewer">
-            Draft Markdown and inspect the rendered HTML instantly, with source stats and quick
-            copy actions for notes, docs, and README snippets.
-        </ToolIntro>
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12"><MarkdownPreviewerTool /></section>
 
-          <div className="mt-6">
-            <TextAreaField
-              id="markdown-input"
-              label="Markdown input"
-              value={markdown}
-              onChange={(value) => {
-                setMarkdown(value)
-                setMessage("Markdown updated.")
-              }}
-              rows={18}
-              placeholder="# Heading&#10;&#10;Write Markdown here..."
-            />
-          </div>
+      <section className="mx-auto max-w-6xl space-y-6 px-5 pb-14 sm:px-8">
+        <ToolPanel><PanelHeader eyebrow="Overview" title="What Is a Markdown Previewer?" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>Markdown is a plain-text format for writing structured documents. A Markdown Previewer helps writers, developers, students, and documentation teams see how supported Markdown will become HTML while they edit notes, README files, technical documentation, and snippets.</p><p>This page renders a small, documented Markdown subset locally and exposes the generated HTML. It is designed for quick source-and-preview work rather than full standards conformance, document publishing, sanitization of arbitrary third-party HTML, or a rich text editor.</p></div></ToolPanel>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <SummaryTile label="Characters" value={stats.characters} />
-            <SummaryTile label="Words" value={stats.words} />
-            <SummaryTile label="Lines" value={stats.lines} />
-          </div>
+        <ToolPanel><PanelHeader eyebrow="Features" title="Markdown Previewer Features" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Markdown input", "Enter or paste source in a labelled text area."], ["Rendered preview", "Inspect generated HTML in a scrollable preview panel."], ["Generated HTML", "Read the current HTML source in a separate read-only text area."], ["Supported blocks", "Render ATX headings, paragraphs, flat lists, blockquotes, fenced code, and horizontal rules."], ["Supported inline syntax", "Render inline code, strong text, emphasis, http/https links, and http/https images."], ["Raw HTML escaping", "Escapes raw input HTML before generating the preview."], ["Source statistics", "Shows character, word, line, and blank-line-separated block counts."], ["Copy and sample controls", "Copy Markdown or generated HTML, clear the source, or reload the sample." ]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <ActionButton onClick={clearAll} variant="secondary">
-              Clear
-            </ActionButton>
-            <ActionButton onClick={loadSample} variant="secondary">
-              Load Sample
-            </ActionButton>
-          </div>
-      </ToolPanel>
+        <ToolPanel><PanelHeader eyebrow="Syntax" title="Supported Markdown Syntax" /><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[720px] border-collapse text-left text-sm"><thead><tr className="border-b border-[var(--ink-900)]/10"><th className="py-3 pr-4 font-semibold">Syntax</th><th className="py-3 pr-4 font-semibold">Example</th><th className="py-3 font-semibold">Preview result</th></tr></thead><tbody className="text-[var(--ink-700)]">{[["Heading", "# Heading", "h1 through h6 for one to six number signs"], ["Unordered list", "- Item", "Flat ul list"], ["Ordered list", "1. Item", "Flat ol list"], ["Blockquote", "> Quote", "blockquote with paragraphs"], ["Fenced code", "``` code ```", "pre and code; fence language is ignored"], ["Inline code", "`code`", "code"], ["Strong", "**strong** or __strong__", "strong"], ["Emphasis", "*em* or _em_", "em"], ["Link", "[label](https://example.com)", "New-tab http/https link"], ["Image", "![alt](https://example.com/image.png)", "img with alt text"], ["Horizontal rule", "---", "hr"]].map(([syntax, example, result]) => <tr key={syntax} className="border-b border-[var(--ink-900)]/8"><td className="py-3 pr-4 font-semibold text-[var(--ink-900)]">{syntax}</td><td className="py-3 pr-4 font-mono">{example}</td><td className="py-3">{result}</td></tr>)}</tbody></table></div></ToolPanel>
 
-      <ToolPanel>
-          <PanelHeader eyebrow="Preview" title="Rendered Output" badge={`${stats.blocks} blocks`} />
+        <ToolPanel><PanelHeader eyebrow="Method" title="How Markdown Preview Works" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>The previewer normalizes Windows line endings, processes the source line by line, and groups supported block structures. It escapes ampersands, angle brackets, quotation marks, and apostrophes before applying its implemented inline transformations, then produces the HTML shown in the preview and Generated HTML panel.</p><p>Raw HTML is not rendered as markup. Paragraph lines without a blank line are joined with spaces, and unclosed fenced code is rendered as a code block through the end of the input. The tool does not implement tables, task lists, nested lists, reference links, front matter, HTML blocks, source maps, or a Markdown validation mode.</p></div></ToolPanel>
 
-          <div
-            className="mt-6 min-h-[30rem] overflow-auto rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-5 py-4 text-sm leading-7 text-[var(--ink-800)] [&_a]:font-semibold [&_a]:text-[var(--accent-rust)] [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--accent-rust)]/45 [&_blockquote]:pl-4 [&_blockquote]:text-[var(--ink-700)] [&_code]:rounded-md [&_code]:bg-white [&_code]:px-1.5 [&_code]:py-0.5 [&_h1]:mb-4 [&_h1]:text-3xl [&_h1]:font-semibold [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-2xl [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4 [&_h3]:text-xl [&_h3]:font-semibold [&_hr]:my-5 [&_hr]:border-[var(--ink-900)]/10 [&_li]:ml-5 [&_ol]:list-decimal [&_p]:mb-4 [&_pre]:mb-4 [&_pre]:overflow-auto [&_pre]:rounded-[1rem] [&_pre]:bg-white [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_ul]:list-disc"
-            dangerouslySetInnerHTML={{ __html: html || "<p>Preview will appear here...</p>" }}
-          />
+        <ToolPanel><PanelHeader eyebrow="Workflow" title="How to Use the Markdown Previewer" /><ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Enter or paste Markdown into the input area.</li><li>Review source statistics and the rendered output as it updates.</li><li>Inspect the Generated HTML panel when HTML output is needed.</li><li>Copy the Markdown source or generated HTML.</li><li>Use Clear or Load Sample to begin another example.</li></ol></ToolPanel>
 
-          <div className="mt-6">
-            <TextAreaField
-              id="html-output"
-              label="Generated HTML"
-              value={html}
-              readOnly
-              rows={7}
-              placeholder="Generated HTML will appear here..."
-            />
-          </div>
+        <ToolPanel><PanelHeader eyebrow="Examples" title="Common Uses" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["README drafting", "Preview headings, lists, links, code snippets, and blockquotes before adding a short README section."], ["Documentation notes", "Check a concise Markdown note while preparing documentation or release notes."], ["HTML inspection", "Copy the generated HTML for a supported Markdown snippet during development."], ["Writing workflow", "Use the source count and preview together to inspect the structure of a small article outline."], ["Teaching", "Demonstrate the relationship between a supported Markdown construct and its generated HTML."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto_auto]">
-            <InfoBox className="leading-normal">
-              {message}
-            </InfoBox>
-            <ActionButton onClick={copyMarkdown} variant="secondary">
-              Copy MD
-            </ActionButton>
-            <ActionButton onClick={copyHtml}>
-              Copy HTML
-            </ActionButton>
-          </div>
-      </ToolPanel>
-    </ToolPage>
+        <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Advantages" title="Benefits" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Offers immediate feedback for the implemented Markdown syntax.</li><li>Shows both a rendered result and the generated HTML text.</li><li>Keeps source, preview, and copy controls in one browser-based workflow.</li><li>Escapes raw HTML before preview generation.</li><li>Uses no external parsing dependency.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Boundaries" title="Limitations" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>This is not a full CommonMark or GitHub Flavored Markdown renderer.</li><li>Tables, nested lists, task lists, reference links, raw HTML blocks, and front matter are not implemented.</li><li>Rendered links and images accept only http and https URL syntax.</li><li>Paragraph line breaks are joined as spaces unless a blank line starts another paragraph.</li><li>The generated HTML should be reviewed and tested in the destination environment.</li></ul></ToolPanel></div>
+
+        <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Guidance" title="Tips for Best Results" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Use a space after heading number signs for the supported heading pattern.</li><li>Separate paragraphs with blank lines when you want distinct blocks.</li><li>Use http or https URLs for links and images in this implementation.</li><li>Use a closing triple-backtick line to end a fenced code block deliberately.</li><li>Test copied HTML in the destination project before publishing.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Avoid" title="Common Mistakes" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Assuming the preview matches every Markdown application.</li><li>Expecting raw HTML tags to render instead of appearing as escaped text.</li><li>Using tables or nested list syntax and expecting structured output.</li><li>Using relative, mailto, or non-HTTP URLs for links and images.</li><li>Using the preview as a security or HTML-sanitization guarantee for untrusted content.</li></ul></ToolPanel></div>
+
+        <ToolPanel><PanelHeader eyebrow="Questions" title="FAQ" /><div className="mt-6 grid gap-4">{faqs.map((faq) => <details key={faq.question} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><summary className="cursor-pointer font-semibold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{faq.answer}</p></details>)}</div></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="More Tools" title="Related Tools" /><nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">{[["HTML to Markdown", "/html-to-markdown"], ["HTML, CSS & JavaScript Minifier", "/html-css-js-minifier"], ["JSON Formatter", "/json-formatter"], ["Case Converter", "/case-converter"], ["Word & Character Counter", "/word-character-counter"], ["Lorem Ipsum Generator", "/lorem-ipsum-generator"]].map(([label, href]) => <Link key={href} href={href} className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40">{label}</Link>)}</nav></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="Terms" title="Glossary" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Markdown", "A plain-text format for writing structured documents."], ["Preview", "The rendered representation of the current Markdown input."], ["HTML", "HyperText Markup Language, the generated markup used by the preview."], ["Heading", "A title line marked here with one through six number signs."], ["Paragraph", "A text block separated from another by a blank line."], ["Blockquote", "A quoted block marked here with a greater-than sign."], ["Fenced Code Block", "A code block between opening and closing triple-backtick lines."], ["Inline Code", "A code span enclosed in a single pair of backticks."], ["Link", "A labelled http or https URL in supported inline Markdown syntax."], ["Image", "A labelled http or https image URL in supported inline Markdown syntax."], ["Escaping", "Converting special characters to HTML entities so they are displayed as text."], ["CommonMark", "A specification that defines Markdown parsing behavior; this tool is not a full implementation."]].map(([term, definition]) => <div key={term}><h3 className="font-semibold">{term}</h3><p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p></div>)}</div></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://spec.commonmark.org/0.31.2/" className="font-semibold underline" rel="noopener noreferrer" target="_blank">CommonMark Specification 0.31.2</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Element.innerHTML</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Clipboard.writeText()</a></li></ul></ToolPanel>
+
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This page renders Markdown using its implemented custom parser and outputs generated HTML for supported syntax only. It is intended for writing, documentation, learning, and development workflows. It is not a complete Markdown compatibility checker or a substitute for a security review of untrusted content.
+          </p>
+        </EducationalDisclaimerCard>
+      </section>
+    </main>
   )
-}
-
-function markdownToHtml(value: string) {
-  const lines = value.replace(/\r\n/g, "\n").split("\n")
-  const htmlBlocks: string[] = []
-  let paragraphLines: string[] = []
-  let listItems: string[] = []
-  let listType: "ul" | "ol" | null = null
-  let quoteLines: string[] = []
-  let codeLines: string[] = []
-  let inCodeBlock = false
-
-  function flushParagraph() {
-    if (paragraphLines.length > 0) {
-      htmlBlocks.push(`<p>${parseInline(paragraphLines.join(" "))}</p>`)
-      paragraphLines = []
-    }
-  }
-
-  function flushList() {
-    if (listItems.length > 0 && listType) {
-      htmlBlocks.push(`<${listType}>${listItems.map((item) => `<li>${parseInline(item)}</li>`).join("")}</${listType}>`)
-      listItems = []
-      listType = null
-    }
-  }
-
-  function flushQuote() {
-    if (quoteLines.length > 0) {
-      htmlBlocks.push(`<blockquote>${quoteLines.map((line) => `<p>${parseInline(line)}</p>`).join("")}</blockquote>`)
-      quoteLines = []
-    }
-  }
-
-  lines.forEach((line) => {
-    if (line.trim().startsWith("```")) {
-      if (inCodeBlock) {
-        htmlBlocks.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`)
-        codeLines = []
-        inCodeBlock = false
-      } else {
-        flushParagraph()
-        flushList()
-        flushQuote()
-        inCodeBlock = true
-      }
-      return
-    }
-
-    if (inCodeBlock) {
-      codeLines.push(line)
-      return
-    }
-
-    const trimmedLine = line.trim()
-
-    if (!trimmedLine) {
-      flushParagraph()
-      flushList()
-      flushQuote()
-      return
-    }
-
-    const headingMatch = trimmedLine.match(/^(#{1,6})\s+(.+)$/)
-    if (headingMatch) {
-      flushParagraph()
-      flushList()
-      flushQuote()
-      htmlBlocks.push(`<h${headingMatch[1].length}>${parseInline(headingMatch[2])}</h${headingMatch[1].length}>`)
-      return
-    }
-
-    if (/^[-*_]{3,}$/.test(trimmedLine)) {
-      flushParagraph()
-      flushList()
-      flushQuote()
-      htmlBlocks.push("<hr>")
-      return
-    }
-
-    const quoteMatch = trimmedLine.match(/^>\s?(.*)$/)
-    if (quoteMatch) {
-      flushParagraph()
-      flushList()
-      quoteLines.push(quoteMatch[1])
-      return
-    }
-
-    const unorderedMatch = trimmedLine.match(/^[-*]\s+(.+)$/)
-    const orderedMatch = trimmedLine.match(/^\d+\.\s+(.+)$/)
-    if (unorderedMatch || orderedMatch) {
-      const nextType = unorderedMatch ? "ul" : "ol"
-      flushParagraph()
-      flushQuote()
-
-      if (listType && listType !== nextType) {
-        flushList()
-      }
-
-      listType = nextType
-      listItems.push(unorderedMatch?.[1] ?? orderedMatch?.[1] ?? "")
-      return
-    }
-
-    flushList()
-    flushQuote()
-    paragraphLines.push(trimmedLine)
-  })
-
-  if (inCodeBlock) {
-    htmlBlocks.push(`<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`)
-  }
-
-  flushParagraph()
-  flushList()
-  flushQuote()
-
-  return htmlBlocks.join("\n")
-}
-
-function parseInline(value: string) {
-  return escapeHtml(value)
-    .replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1">')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>')
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/__([^_]+)__/g, "<strong>$1</strong>")
-    .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/_([^_]+)_/g, "<em>$1</em>")
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;")
-}
-
-function getMarkdownStats(value: string) {
-  const trimmedValue = value.trim()
-  const textStats = getTextStats(value)
-
-  return {
-    ...textStats,
-    words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
-    blocks: trimmedValue ? trimmedValue.split(/\n\s*\n/).length : 0,
-  }
 }

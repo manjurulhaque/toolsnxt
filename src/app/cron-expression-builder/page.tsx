@@ -1,439 +1,492 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { EducationalDisclaimerCard, InfoBox, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { CronExpressionBuilderTool } from "./cron-expression-builder-tool"
 
-import { useMemo, useState } from "react"
-import { InfoBox, PanelHeader, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard } from "@/lib/browser-actions"
+const pagePath = "/cron-expression-builder"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Cron Expression Builder | Create Five-Field Cron Schedules"
+const pageDescription =
+  "Build numeric five-field cron expressions online. Choose common schedules, enter custom cron fields, validate supported syntax, preview simple next runs, and copy the expression."
 
-type ScheduleMode = "every-minute" | "hourly" | "daily" | "weekly" | "monthly" | "custom"
-type Weekday = "0" | "1" | "2" | "3" | "4" | "5" | "6"
-
-const weekdays: Array<{ value: Weekday; label: string }> = [
-  { value: "0", label: "Sun" },
-  { value: "1", label: "Mon" },
-  { value: "2", label: "Tue" },
-  { value: "3", label: "Wed" },
-  { value: "4", label: "Thu" },
-  { value: "5", label: "Fri" },
-  { value: "6", label: "Sat" },
+const faqs = [
+  {
+    question: "What is a cron expression?",
+    answer:
+      "A cron expression is a text schedule that a cron-compatible scheduler can use to decide when to run a job.",
+  },
+  {
+    question: "What is a Cron Expression Builder?",
+    answer:
+      "It helps create cron schedule text from controls or a supported custom expression. This page does not execute jobs.",
+  },
+  {
+    question: "Which cron format does this builder support?",
+    answer:
+      "This implementation supports a numeric five-field format: minute hour day-of-month month day-of-week.",
+  },
+  {
+    question: "Does this builder support seconds or years?",
+    answer:
+      "No. Seconds and year fields are not implemented.",
+  },
+  {
+    question: "What do the five cron fields mean?",
+    answer:
+      "The fields represent minute, hour, day of month, month, and day of week in that order.",
+  },
+  {
+    question: "What does * mean in cron?",
+    answer:
+      "In this builder, * matches every allowed value for that field.",
+  },
+  {
+    question: "What does / mean in cron?",
+    answer:
+      "A slash defines a step value, such as */15 for every 15 units within that field.",
+  },
+  {
+    question: "What does - mean in cron?",
+    answer:
+      "A hyphen defines an inclusive numeric range, such as 9-17 in the hour field.",
+  },
+  {
+    question: "What does , mean in cron?",
+    answer:
+      "A comma separates multiple numeric values or ranges in one field.",
+  },
+  {
+    question: "Does the builder support month or weekday names?",
+    answer:
+      "No. Custom expressions are validated with numeric fields only. The weekly preset uses a weekday select that outputs numbers.",
+  },
+  {
+    question: "Does the builder support Quartz cron?",
+    answer:
+      "No. Quartz-specific seconds, years, ?, L, W, and # syntax are not implemented.",
+  },
+  {
+    question: "Can I validate a cron expression?",
+    answer:
+      "Yes. Custom input is checked for five fields, numeric ranges, wildcards, lists, ranges, and steps supported by this tool.",
+  },
+  {
+    question: "Can I preview next run times?",
+    answer:
+      "Yes, but only for valid simple expressions that do not contain lists, ranges, or steps.",
+  },
+  {
+    question: "Does the builder support time zones?",
+    answer:
+      "No time-zone selector is implemented. The simple next-run preview uses the browser's local date and time formatting.",
+  },
+  {
+    question: "How are day-of-month and day-of-week handled?",
+    answer:
+      "The preview logic requires both fields to match. Some Unix cron schedulers use different OR-style behavior when both are restricted, so test in your target scheduler.",
+  },
+  {
+    question: "Can I copy the generated expression?",
+    answer:
+      "Yes. Use Copy Cron to copy a valid generated expression.",
+  },
+  {
+    question: "Is the Cron Expression Builder free?",
+    answer: "Yes. This is a free browser-based cron expression builder.",
+  },
 ]
 
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+    about: ["Cron Expression Builder", "Cron Expression Generator", "Cron Schedule Builder"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "Cron Expression Builder",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    featureList: [
+      "Five-field cron expression generation",
+      "Common schedule presets",
+      "Custom expression input",
+      "Numeric field validation",
+      "Wildcard, list, range, and step validation",
+      "Human-readable schedule description",
+      "Simple next-run preview",
+      "Copy cron expression",
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Cron Expression Builder",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Any",
+    url: pageUrl,
+    description: pageDescription,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Cron Expression Builder", item: pageUrl },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to build a cron expression",
+    description: "Create a supported five-field cron expression with presets or custom input.",
+    step: [
+      { "@type": "HowToStep", name: "Choose a schedule", text: "Select every minute, hourly, daily, weekly, monthly, or custom." },
+      { "@type": "HowToStep", name: "Set fields", text: "Enter the available minute, hour, day, or weekday values for the selected preset." },
+      { "@type": "HowToStep", name: "Review output", text: "Check the generated expression, validation message, and supported next-run preview." },
+      { "@type": "HowToStep", name: "Copy cron", text: "Use Copy Cron to copy a valid expression." },
+    ],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  },
+]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: { canonical: pagePath },
+  openGraph: {
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    siteName: SITE_NAME,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: pageTitle,
+    description: pageDescription,
+  },
+}
+
 export default function CronExpressionBuilderPage() {
-  const [mode, setMode] = useState<ScheduleMode>("daily")
-  const [minute, setMinute] = useState("30")
-  const [hour, setHour] = useState("9")
-  const [dayOfMonth, setDayOfMonth] = useState("1")
-  const [weekday, setWeekday] = useState<Weekday>("1")
-  const [customExpression, setCustomExpression] = useState("*/15 9-17 * * 1-5")
-  const [message, setMessage] = useState("Build a cron expression from common schedule controls.")
-
-  const cron = useMemo(
-    () => buildCron({ mode, minute, hour, dayOfMonth, weekday, customExpression }),
-    [customExpression, dayOfMonth, hour, minute, mode, weekday],
-  )
-  const description = useMemo(() => describeCron(cron), [cron])
-  const nextRuns = useMemo(() => getNextRuns(cron, 5), [cron])
-
-  async function copyCron() {
-    if (!cron.isValid) {
-      setMessage("Fix the cron expression before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(cron.expression)
-      setMessage("Cron expression copied.")
-    } catch {
-      setMessage("Copy failed. Select the expression and copy it manually.")
-    }
-  }
-
-  function loadSample() {
-    setMode("daily")
-    setMinute("30")
-    setHour("9")
-    setDayOfMonth("1")
-    setWeekday("1")
-    setCustomExpression("*/15 9-17 * * 1-5")
-    setMessage("Sample schedule loaded.")
-  }
-
   return (
-    <ToolPage>
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
+      />
+
+      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:py-12">
+        <CronExpressionBuilderTool />
+      </section>
+
+      <section className="mx-auto max-w-6xl space-y-6 px-5 pb-14 sm:px-8">
         <ToolPanel>
-          <ToolIntro eyebrow="Developer tool" title="Cron Expression Builder">
-            Create standard five-field cron expressions for jobs, automations, and scheduled
-            scripts, then preview the next matching run times.
-          </ToolIntro>
-
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {(["every-minute", "hourly", "daily", "weekly", "monthly", "custom"] as ScheduleMode[]).map(
-              (option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => {
-                    setMode(option)
-                    setMessage(`${formatMode(option)} selected.`)
-                  }}
-                  className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                    mode === option
-                      ? "bg-[var(--ink-900)] text-white"
-                      : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                  }`}
-                >
-                  {formatMode(option)}
-                </button>
-              ),
-            )}
-          </div>
-
-          {mode === "custom" ? (
-            <label htmlFor="custom-cron" className="mt-6 block">
-              <span className="text-sm font-medium">Custom expression</span>
-              <input
-                id="custom-cron"
-                value={customExpression}
-                onChange={(event) => {
-                  setCustomExpression(event.target.value)
-                  setMessage("Custom expression updated.")
-                }}
-                spellCheck={false}
-                className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm outline-none transition focus:border-[var(--accent-rust)]"
-                placeholder="*/15 9-17 * * 1-5"
-              />
-            </label>
-          ) : (
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {mode !== "every-minute" ? (
-                <NumberInput
-                  id="cron-minute"
-                  label="Minute"
-                  min="0"
-                  max="59"
-                  value={minute}
-                  onChange={setMinute}
-                />
-              ) : null}
-              {mode === "daily" || mode === "weekly" || mode === "monthly" ? (
-                <NumberInput id="cron-hour" label="Hour" min="0" max="23" value={hour} onChange={setHour} />
-              ) : null}
-              {mode === "monthly" ? (
-                <NumberInput
-                  id="cron-day"
-                  label="Day of month"
-                  min="1"
-                  max="31"
-                  value={dayOfMonth}
-                  onChange={setDayOfMonth}
-                />
-              ) : null}
-              {mode === "weekly" ? (
-                <label htmlFor="cron-weekday" className="block">
-                  <span className="text-sm font-medium">Weekday</span>
-                  <select
-                    id="cron-weekday"
-                    value={weekday}
-                    onChange={(event) => {
-                      setWeekday(event.target.value as Weekday)
-                      setMessage("Weekday updated.")
-                    }}
-                    className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-                  >
-                    {weekdays.map((day) => (
-                      <option key={day.value} value={day.value}>
-                        {day.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-            </div>
-          )}
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <button
-              type="button"
-              onClick={loadSample}
-              className="rounded-full border border-[var(--ink-900)]/10 bg-white px-5 py-3 text-sm font-semibold text-[var(--ink-800)] transition hover:border-[var(--ink-900)]/25"
-            >
-              Load Sample
-            </button>
-            <button
-              type="button"
-              onClick={copyCron}
-              className="rounded-full bg-[var(--ink-900)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
-            >
-              Copy Cron
-            </button>
+          <PanelHeader eyebrow="Overview" title="What Is a Cron Expression Builder?" />
+          <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+            <p>
+              A Cron Expression Builder helps create schedule text for recurring jobs. This page
+              generates a numeric five-field expression in the order minute, hour, day of month,
+              month, and day of week. Developers and system administrators can use it for scripts,
+              reports, backups, monitoring jobs, API calls, and recurring automation planning.
+            </p>
+            <p>
+              The builder creates expressions and previews some simple next run times, but it does
+              not execute jobs. A cron scheduler, platform, container, or cloud service must
+              interpret the expression and run the associated command or task.
+            </p>
           </div>
         </ToolPanel>
 
         <ToolPanel>
-          <PanelHeader
-            eyebrow="Schedule"
-            title="Generated Expression"
-            badge={cron.isValid ? "Valid cron" : "Check fields"}
-            badgeClassName={cron.isValid ? "" : "bg-red-50 text-red-700"}
-          />
-
-          <div className="mt-6 rounded-[1.3rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-5">
-            <code className="block break-all font-mono text-3xl font-semibold">{cron.expression}</code>
-            <p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{description}</p>
+          <PanelHeader eyebrow="Format" title="Cron Expression Format" />
+          <pre className="mt-5 overflow-x-auto rounded-[1.1rem] bg-[var(--page-cream)] p-4 text-sm leading-7">
+{`minute hour day-of-month month day-of-week
+*      *    *            *     *`}
+          </pre>
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {[
+              ["Minute", "0-59"],
+              ["Hour", "0-23"],
+              ["Day of month", "1-31"],
+              ["Month", "1-12"],
+              ["Day of week", "0-7, where 0 and 7 can represent Sunday"],
+            ].map(([field, range]) => (
+              <div key={field} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
+                <h3 className="font-semibold">{field}</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">Supported numeric range: {range}.</p>
+              </div>
+            ))}
           </div>
+        </ToolPanel>
 
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--ink-700)]">
-              Next Runs
-            </h3>
-            <div className="mt-3 grid gap-2">
-              {nextRuns.map((run) => (
-                <div
-                  key={run}
-                  className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm text-[var(--ink-800)]"
-                >
-                  {run}
-                </div>
-              ))}
-              {nextRuns.length === 0 ? (
-                <div className="rounded-[1.1rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-5 text-sm text-[var(--ink-700)]">
-                  Upcoming run preview appears for supported simple expressions.
-                </div>
-              ) : null}
-            </div>
+        <ToolPanel>
+          <PanelHeader eyebrow="Syntax" title="Cron Operators Explained" />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              ["*", "Wildcard. Matches every allowed value in the field."],
+              [",", "List. Allows multiple values or ranges in a field."],
+              ["-", "Range. Matches an inclusive numeric range."],
+              ["/", "Step. Applies a numeric interval to a wildcard or range."],
+            ].map(([operator, text]) => (
+              <div key={operator} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
+                <h3 className="font-mono text-lg font-semibold">{operator}</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p>
+              </div>
+            ))}
           </div>
-
           <InfoBox className="mt-5">
-            {cron.error ?? message}
+            This custom validator supports numeric values, wildcards, comma lists, hyphen ranges,
+            and slash steps. It does not support names, macros, seconds, years, ?, L, W, #, or
+            Quartz-specific syntax.
           </InfoBox>
         </ToolPanel>
-    </ToolPage>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Behavior" title="Validation, Descriptions, and Next Runs" />
+          <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+            <p>
+              Validation requires exactly five whitespace-separated fields. Each field is checked
+              against the implemented numeric range and the supported operators. The human-readable
+              description is specific for every minute, hourly, daily, weekly, and monthly patterns;
+              complex valid expressions receive a generic field-based description.
+            </p>
+            <p>
+              The next-run preview uses the browser&apos;s current local Date and displays up to five
+              matches for valid simple expressions that contain only numbers or wildcards. It does
+              not preview expressions containing lists, ranges, or steps, and it does not provide a
+              time-zone selector.
+            </p>
+          </div>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Dialects" title="Cron Dialect Differences" />
+          <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]">
+            <p>
+              Cron syntax varies. Traditional user crontabs commonly use five time fields before a
+              command, while Quartz and some cloud schedulers use additional fields or special
+              operators. This builder intentionally targets its own numeric five-field subset and
+              should not be treated as a universal cron validator.
+            </p>
+            <p>
+              Day-of-month and day-of-week semantics are especially important. This page&apos;s simple
+              preview requires both fields to match. Some Unix cron implementations run when either
+              restricted day field matches, so always check the target scheduler&apos;s documentation.
+            </p>
+          </div>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Workflow" title="How to Build a Cron Expression" />
+          <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+            <li>Select a preset: Every Minute, Hourly, Daily, Weekly, Monthly, or Custom.</li>
+            <li>Enter the displayed minute, hour, day-of-month, or weekday values where available.</li>
+            <li>Use Custom for supported five-field numeric expressions such as */15 9-17 * * 1-5.</li>
+            <li>Review the generated expression, validation badge, and description.</li>
+            <li>Check the next-run preview when the expression is simple enough to be previewed.</li>
+            <li>Copy the expression and test it in the scheduler that will execute the job.</li>
+          </ol>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Examples" title="Common Cron Examples" />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              ["Every minute", "* * * * *"],
+              ["Every 15 minutes during work hours on weekdays", "*/15 9-17 * * 1-5"],
+              ["Hourly at minute 30", "30 * * * *"],
+              ["Daily at 09:30", "30 9 * * *"],
+              ["Every Monday at 09:30", "30 9 * * 1"],
+              ["Monthly on day 1 at 09:30", "30 9 1 * *"],
+            ].map(([label, expression]) => (
+              <div key={label} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
+                <h3 className="font-semibold">{label}</h3>
+                <code className="mt-2 block break-all font-mono text-sm text-[var(--ink-800)]">{expression}</code>
+              </div>
+            ))}
+          </div>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Use Cases" title="Common Uses" />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              ["Backups", "Prepare a recurring schedule for database or file backups."],
+              ["Reports", "Schedule report generation or email summaries."],
+              ["Maintenance", "Plan cleanup jobs, log rotation, or server maintenance tasks."],
+              ["Monitoring", "Run periodic checks or data synchronization jobs."],
+              ["Development", "Draft schedules for CI/CD, batch jobs, and automation testing."],
+            ].map(([title, text]) => (
+              <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
+                <h3 className="font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p>
+              </div>
+            ))}
+          </div>
+        </ToolPanel>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ToolPanel>
+            <PanelHeader eyebrow="Advantages" title="Benefits" />
+            <ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Creates common numeric five-field cron expressions quickly.</li>
+              <li>Supports presets plus custom expressions for simple scheduling work.</li>
+              <li>Validates the supported field count, ranges, lists, ranges, and steps.</li>
+              <li>Provides a description and simple next-run preview where implemented.</li>
+              <li>Lets you copy a valid expression for testing in your target scheduler.</li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Boundaries" title="Limitations" />
+            <ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Only a numeric five-field subset is supported.</li>
+              <li>Month and weekday names, macros, seconds, years, and Quartz operators are not supported.</li>
+              <li>Next-run previews are only shown for simple numeric or wildcard fields.</li>
+              <li>Generated expressions do not execute jobs by themselves.</li>
+              <li>Time-zone and daylight-saving behavior depends on the scheduler that runs the job.</li>
+            </ul>
+          </ToolPanel>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ToolPanel>
+            <PanelHeader eyebrow="Guidance" title="Tips for Best Results" />
+            <ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Confirm which cron dialect your target system supports.</li>
+              <li>Test copied expressions in the scheduler that will execute them.</li>
+              <li>Be careful with day-of-month and day-of-week combinations.</li>
+              <li>Consider time-zone and daylight-saving rules in the runtime environment.</li>
+              <li>Document production schedules alongside the command or job they trigger.</li>
+            </ul>
+          </ToolPanel>
+
+          <ToolPanel>
+            <PanelHeader eyebrow="Avoid" title="Common Mistakes" />
+            <ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+              <li>Assuming all cron implementations use the same fields or operators.</li>
+              <li>Using Quartz syntax in a five-field Unix-style scheduler.</li>
+              <li>Confusing a cron expression with the scheduler that executes a job.</li>
+              <li>Assuming */5 and 5 mean the same thing.</li>
+              <li>Copying an expression without checking the target environment.</li>
+            </ul>
+          </ToolPanel>
+        </div>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Questions" title="FAQ" />
+          <div className="mt-6 grid gap-4">
+            {faqs.map((faq) => (
+              <details key={faq.question} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4">
+                <summary className="cursor-pointer font-semibold">{faq.question}</summary>
+                <p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="More Tools" title="Related Tools" />
+          <nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">
+            {[
+              ["Time Zone Converter", "/timezone-converter"],
+              ["Countdown Timer", "/countdown-timer"],
+              ["Stopwatch", "/stopwatch"],
+              ["JSON Formatter", "/json-formatter"],
+              ["Regex Tester", "/regex-tester"],
+              ["URL Encoder / Decoder", "/url-encoder-decoder"],
+            ].map(([label, href]) => (
+              <Link
+                key={href}
+                href={href}
+                className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Terms" title="Glossary" />
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              ["Cron", "A scheduling system concept used to run recurring jobs."],
+              ["Cron Expression", "Text fields that describe a recurring schedule."],
+              ["Cron Scheduler", "Software that interprets a cron expression and runs a command or job."],
+              ["Cron Field", "One position in a cron expression, such as minute or hour."],
+              ["Wildcard", "The * operator, which matches every allowed value in a field."],
+              ["List", "Comma-separated values or ranges in one field."],
+              ["Range", "An inclusive numeric span written with a hyphen."],
+              ["Step", "A slash interval such as */15."],
+              ["Day of Month", "The calendar day field in this five-field format."],
+              ["Day of Week", "The weekday field, where this implementation accepts numeric values 0-7."],
+              ["Next Run", "A previewed future time calculated by this page for simple expressions."],
+              ["Cron Dialect", "A specific cron syntax supported by a scheduler or tool."],
+            ].map(([term, definition]) => (
+              <div key={term}>
+                <h3 className="font-semibold">{term}</h3>
+                <p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p>
+              </div>
+            ))}
+          </div>
+        </ToolPanel>
+
+        <ToolPanel>
+          <PanelHeader eyebrow="Sources" title="References" />
+          <ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]">
+            <li>
+              <a href="https://man7.org/linux/man-pages/man5/crontab.5.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">
+                Linux man-pages: crontab(5)
+              </a>
+            </li>
+            <li>
+              <a href="https://manpages.debian.org/trixie/cron/crontab.5.en.html" className="font-semibold underline" rel="noopener noreferrer" target="_blank">
+                Debian manpages: crontab(5)
+              </a>
+            </li>
+            <li>
+              <a href="https://man.openbsd.org/crontab.5" className="font-semibold underline" rel="noopener noreferrer" target="_blank">
+                OpenBSD manual: crontab(5)
+              </a>
+            </li>
+            <li>
+              <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/" className="font-semibold underline" rel="noopener noreferrer" target="_blank">
+                Kubernetes CronJob documentation
+              </a>
+            </li>
+          </ul>
+        </ToolPanel>
+
+                <EducationalDisclaimerCard type="technical">
+          <p>
+            This builder generates expressions according to the numeric
+            five-field syntax supported by this page. Cron syntax varies between schedulers, and a
+            generated expression should be checked in the environment that will execute it. Time-zone
+            and daylight-saving behavior depends on the scheduler and runtime configuration. This
+            tool builds schedule expressions; it does not execute cron jobs.
+          </p>
+        </EducationalDisclaimerCard>
+      </section>
+    </main>
   )
-}
-
-function NumberInput({
-  id,
-  label,
-  min,
-  max,
-  value,
-  onChange,
-}: {
-  id: string
-  label: string
-  min: string
-  max: string
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
-      <input
-        id={id}
-        type="number"
-        min={min}
-        max={max}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 text-sm outline-none transition focus:border-[var(--accent-rust)]"
-      />
-    </label>
-  )
-}
-
-function buildCron({
-  mode,
-  minute,
-  hour,
-  dayOfMonth,
-  weekday,
-  customExpression,
-}: {
-  mode: ScheduleMode
-  minute: string
-  hour: string
-  dayOfMonth: string
-  weekday: Weekday
-  customExpression: string
-}) {
-  const safeMinute = clampField(minute, 0, 59)
-  const safeHour = clampField(hour, 0, 23)
-  const safeDay = clampField(dayOfMonth, 1, 31)
-  const expression =
-    mode === "every-minute"
-      ? "* * * * *"
-      : mode === "hourly"
-        ? `${safeMinute} * * * *`
-        : mode === "daily"
-          ? `${safeMinute} ${safeHour} * * *`
-          : mode === "weekly"
-            ? `${safeMinute} ${safeHour} * * ${weekday}`
-            : mode === "monthly"
-              ? `${safeMinute} ${safeHour} ${safeDay} * *`
-              : customExpression.trim()
-  const error = validateCron(expression)
-
-  return {
-    expression,
-    isValid: !error,
-    error,
-  }
-}
-
-function validateCron(expression: string) {
-  const parts = expression.trim().split(/\s+/)
-
-  if (parts.length !== 5) {
-    return "Use a standard five-field cron expression."
-  }
-
-  const ranges = [
-    [0, 59],
-    [0, 23],
-    [1, 31],
-    [1, 12],
-    [0, 7],
-  ]
-
-  for (let index = 0; index < parts.length; index += 1) {
-    if (!isValidCronField(parts[index], ranges[index][0], ranges[index][1])) {
-      return `Field ${index + 1} is out of range or unsupported.`
-    }
-  }
-
-  return null
-}
-
-function isValidCronField(field: string, min: number, max: number): boolean {
-  return field.split(",").every((part) => {
-    if (part === "*") {
-      return true
-    }
-
-    const [rangePart, stepPart] = part.split("/")
-    if (stepPart && !isInRange(stepPart, 1, max)) {
-      return false
-    }
-
-    if (rangePart === "*") {
-      return true
-    }
-
-    if (rangePart.includes("-")) {
-      const [start, end] = rangePart.split("-")
-      return isInRange(start, min, max) && isInRange(end, min, max) && Number(start) <= Number(end)
-    }
-
-    return isInRange(rangePart, min, max)
-  })
-}
-
-function isInRange(value: string, min: number, max: number) {
-  const numberValue = Number(value)
-  return Number.isInteger(numberValue) && numberValue >= min && numberValue <= max
-}
-
-function describeCron(cron: { expression: string; isValid: boolean; error: string | null }) {
-  if (!cron.isValid) {
-    return cron.error ?? "Invalid cron expression."
-  }
-
-  const [minute, hour, day, month, weekday] = cron.expression.split(/\s+/)
-  const time = hour === "*" ? `minute ${minute}` : `${pad(hour)}:${pad(minute)}`
-
-  if (cron.expression === "* * * * *") {
-    return "Runs every minute."
-  }
-
-  if (hour === "*" && day === "*" && month === "*" && weekday === "*") {
-    return `Runs hourly at minute ${minute}.`
-  }
-
-  if (day === "*" && month === "*" && weekday === "*") {
-    return `Runs every day at ${time}.`
-  }
-
-  if (day === "*" && month === "*") {
-    return `Runs every ${weekdayLabel(weekday)} at ${time}.`
-  }
-
-  if (month === "*" && weekday === "*") {
-    return `Runs every month on day ${day} at ${time}.`
-  }
-
-  return "Runs on the schedule described by the cron fields."
-}
-
-function getNextRuns(cron: { expression: string; isValid: boolean }, count: number) {
-  if (!cron.isValid) {
-    return []
-  }
-
-  const [minute, hour, day, month, weekday] = cron.expression.split(/\s+/)
-  if ([minute, hour, day, month, weekday].some((field) => /[,/\-]/.test(field))) {
-    return []
-  }
-
-  const runs: string[] = []
-  const cursor = new Date()
-  cursor.setSeconds(0, 0)
-  cursor.setMinutes(cursor.getMinutes() + 1)
-
-  for (let attempts = 0; attempts < 525600 && runs.length < count; attempts += 1) {
-    if (matchesField(cursor.getMinutes(), minute) && matchesField(cursor.getHours(), hour)) {
-      const cronWeekday = cursor.getDay()
-      const cronDay = cursor.getDate()
-      const cronMonth = cursor.getMonth() + 1
-
-      if (matchesField(cronDay, day) && matchesField(cronMonth, month) && matchesField(cronWeekday, weekday)) {
-        runs.push(
-          new Intl.DateTimeFormat(undefined, {
-            dateStyle: "medium",
-            timeStyle: "short",
-          }).format(cursor),
-        )
-      }
-    }
-
-    cursor.setMinutes(cursor.getMinutes() + 1)
-  }
-
-  return runs
-}
-
-function matchesField(value: number, field: string) {
-  if (field === "*") {
-    return true
-  }
-
-  if (field === "7" && value === 0) {
-    return true
-  }
-
-  return Number(field) === value
-}
-
-function clampField(value: string, min: number, max: number) {
-  const numberValue = Number(value)
-
-  if (!Number.isFinite(numberValue)) {
-    return min
-  }
-
-  return Math.min(Math.max(Math.floor(numberValue), min), max)
-}
-
-function pad(value: string) {
-  return value.padStart(2, "0")
-}
-
-function weekdayLabel(value: string) {
-  return weekdays.find((day) => day.value === value)?.label ?? `weekday ${value}`
-}
-
-function formatMode(value: ScheduleMode) {
-  return value
-    .split("-")
-    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
-    .join(" ")
 }

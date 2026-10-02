@@ -1,76 +1,286 @@
+import type { Metadata } from "next"
 import Link from "next/link"
-import { HeroIntro, PanelHeader, SummaryTile, ToolPanel } from "@/components/tool-page"
+import {
+  ArrowRightIcon,
+  CodeIcon,
+  FilePdfIcon,
+  GlobeSearchIcon,
+  HeartPulseIcon,
+  ImageIcon,
+  LayersIcon,
+  ShieldCheckIcon,
+  ShieldLockIcon,
+  SmartphoneIcon,
+  WrenchIcon,
+  ZapIcon,
+} from "@/components/icons"
+import { HeroIntro, SummaryTile, ToolPanel } from "@/components/tool-page"
+import { ToolSearchDirectory } from "@/components/tool-search-directory"
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL } from "@/lib/site"
 import { toolCategories, tools, toolsByCategory } from "@/lib/tools"
 
+export const metadata: Metadata = {
+  title: `${SITE_NAME} | ${SITE_TAGLINE} - 52 Free In-Browser Tools`,
+  description: SITE_DESCRIPTION,
+  alternates: {
+    canonical: SITE_URL,
+  },
+  openGraph: {
+    title: `${SITE_NAME} | 52 Free In-Browser Utilities`,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    type: "website",
+  },
+}
+
 export default function HomePage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}#website`,
+        url: SITE_URL,
+        name: SITE_NAME,
+        description: SITE_DESCRIPTION,
+        publisher: {
+          "@type": "Organization",
+          name: SITE_NAME,
+          url: SITE_URL,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: SITE_URL,
+          },
+        ],
+      },
+    ],
+  }
+
   return (
     <div className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
         <ToolPanel className="sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
+            <div className="max-w-2xl min-w-0">
               <HeroIntro eyebrow="Tool directory" title="Browser tools for everyday work.">
-                Pick a utility below. Most tools process files and text locally in your browser, so
-                quick jobs stay quick.
+                Pick a utility below. All 52 tools process files and text locally in your browser with full offline PWA support—meaning
+                zero server uploads, complete privacy, and instant responsiveness even without an internet connection.
               </HeroIntro>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-80">
-              <SummaryTile label="Tools" value={tools.length} />
-              <SummaryTile label="Groups" value={toolCategories.length} />
-              <SummaryTile label="Local" value="Most" />
+            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:w-auto lg:min-w-[420px] lg:shrink-0">
+              <SummaryTile
+                label="Tools"
+                value={tools.length}
+                icon={<WrenchIcon className="h-4 w-4 shrink-0" />}
+              />
+              <SummaryTile
+                label="Categories"
+                value={toolCategories.length}
+                icon={<LayersIcon className="h-4 w-4 shrink-0" />}
+              />
+              <SummaryTile
+                label="Offline"
+                value="100% PWA"
+                icon={<ShieldCheckIcon className="h-4 w-4 shrink-0" />}
+                className="col-span-2 sm:col-span-1"
+              />
             </div>
           </div>
         </ToolPanel>
 
-        <section className="mt-6">
-          <PanelHeader
-            eyebrow="All tools"
-            title="Browse by Category"
-            badge={`${tools.length} available`}
-            badgeClassName="border border-[var(--ink-900)]/10 bg-white text-sm normal-case tracking-normal"
-            className="mb-4"
-            titleClassName="sm:text-3xl"
-          />
+        {/* Interactive Tool Search & Filter Directory */}
+        <ToolSearchDirectory
+          allTools={tools}
+          categories={toolCategories}
+          toolsByCategory={toolsByCategory}
+        />
 
-          <div className="space-y-8">
-            {toolsByCategory.map(({ category, tools }) => (
-              <section key={category} aria-labelledby={`${category.toLowerCase()}-tools`}>
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--ink-900)]/10 pb-3">
-                  <h3
-                    id={`${category.toLowerCase()}-tools`}
-                    className="text-xl font-semibold text-[var(--ink-900)]"
-                  >
-                    {category}
-                  </h3>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--ink-700)] shadow-[0_10px_24px_rgba(33,37,41,0.05)]">
-                    {tools.length} {tools.length === 1 ? "tool" : "tools"}
-                  </span>
-                </div>
+        {/* Editorial Architecture & Trust Section */}
+        <section className="mt-16 space-y-12 border-t border-[var(--ink-900)]/10 pt-12">
+          {/* Core Philosophy Grid */}
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <ShieldLockIcon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
+                Zero Server Data Storage
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
+                Your documents, source code, images, and calculations never leave your machine.
+                Everything executes locally in your browser runtime via HTML5 Canvas, Web Workers,
+                and WebAssembly.
+              </p>
+            </div>
 
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  {tools.map((tool) => (
-                    <Link
-                      key={tool.href}
-                      href={tool.href}
-                      className="group rounded-[1.4rem] border border-[var(--ink-900)]/8 bg-white p-5 shadow-[0_14px_36px_rgba(33,37,41,0.06)] transition duration-300 hover:-translate-y-1 hover:border-[var(--accent-rust)]/30 hover:shadow-[0_24px_48px_rgba(33,37,41,0.12)]"
-                    >
-                      <div className="flex min-h-full flex-col">
-                        <span className="w-fit rounded-full bg-[var(--page-cream)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--accent-rust)]">
-                          {tool.category}
-                        </span>
-                        <h4 className="mt-4 text-xl font-semibold text-[var(--ink-900)]">
-                          {tool.title}
-                        </h4>
-                        <p className="mt-3 flex-1 text-sm leading-7 text-[var(--ink-700)]/78">
-                          {tool.description}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+            <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <ZapIcon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
+                Zero Cloud Upload Latency
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
+                Skip remote server queues. Large PDFs and high-resolution images process instantly
+                using your device&apos;s physical hardware, delivering instant results without upload bottlenecks.
+              </p>
+            </div>
+
+            <div className="rounded-[1.5rem] border border-[var(--ink-900)]/8 bg-white p-6 shadow-xs">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--accent-rust)]/10 text-[var(--accent-rust)]">
+                <SmartphoneIcon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 text-lg font-semibold text-[var(--ink-900)]">
+                100% Offline PWA Ready
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">
+                Install {SITE_NAME} to your desktop or mobile home screen as a standalone application.
+                Our background Service Worker caches all 52 utilities, enabling full offline productivity on airplanes, during travel, or with zero internet connection.
+              </p>
+            </div>
+          </div>
+
+          {/* Detailed Domain Overview */}
+          <div className="rounded-[2rem] border border-[var(--ink-900)]/10 bg-white p-8 sm:p-10 shadow-[0_18px_50px_rgba(33,37,41,0.06)]">
+            <h2 className="font-serif text-2xl font-bold text-[var(--ink-900)] sm:text-3xl">
+              Comprehensive Browser Utilities Across 7 Disciplines
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[var(--ink-700)]">
+              {SITE_NAME} unifies everyday productivity tasks into a distraction-free, privacy-preserving workspace.
+              Whether you are a software developer, web designer, student, health researcher, or digital marketer,
+              our utilities provide authoritative mathematical calculations and file transformations:
+            </p>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <FilePdfIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    PDF & Document Tools
+                  </h4>
                 </div>
-              </section>
-            ))}
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  In-browser PDF compression, document merging, page splitting, and PDF-to-image extraction
+                  powered by client-side Web Workers.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <ImageIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Image & Media Utilities
+                  </h4>
+                </div>
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  Convert between PNG, JPG, and WebP, generate multi-size favicon packages, resize banners,
+                  and render creative ASCII art directly on HTML5 Canvas.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <CodeIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Code Minifiers & Converters
+                  </h4>
+                </div>
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  Compress HTML, CSS, and JavaScript using Terser and CSSO; optimize vector SVGs, convert YAML
+                  to JSON, and generate TypeScript interfaces from raw payloads.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <HeartPulseIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Calculators & Health Formulas
+                  </h4>
+                </div>
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  Scientific calculations, loan amortization schedules, BMI, Ideal Body Weight,
+                  Cockcroft-Gault Creatinine Clearance, and optimal sleep cycle estimators.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <ShieldLockIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    Security & Cryptography
+                  </h4>
+                </div>
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  Cryptographically secure password generation using browser CSPRNG, v4 UUIDs, SHA-256/512 hashes,
+                  and client-side JWT token structure inspection.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <GlobeSearchIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
+                  <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
+                    SEO & Webmaster Tools
+                  </h4>
+                </div>
+                <p className="text-xs leading-6 text-[var(--ink-700)]">
+                  Generate compliant robots.txt directives, XML sitemaps, OpenGraph social meta tags, and test
+                  web accessibility with our screen reader simulator.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-emerald-600/20 bg-emerald-50/50 p-4 sm:p-5">
+              <div className="flex items-start sm:items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700">
+                  <ShieldCheckIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-emerald-950">True Offline Architecture</h4>
+                  <p className="text-xs leading-5 text-emerald-800/90">
+                    Every calculator, converter, and PDF tool runs via client-side Web Workers, WebAssembly, and Canvas. No backend API calls are made, allowing complete productivity with zero internet.
+                  </p>
+                </div>
+              </div>
+              <Link href="/about" className="shrink-0 text-xs font-semibold text-emerald-900 underline hover:text-emerald-700">
+                Read architecture &rarr;
+              </Link>
+            </div>
+
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--ink-900)]/10 pt-6">
+              <p className="text-xs text-[var(--ink-700)]">
+                Have questions or need technical support? Visit our{" "}
+                <Link href="/contact" className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]">
+                  Contact & Support
+                </Link>{" "}
+                center or review our{" "}
+                <Link href="/privacy" className="font-semibold text-[var(--accent-rust)] underline hover:text-[var(--ink-900)]">
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-2 text-xs font-semibold text-[var(--ink-900)] transition hover:border-[var(--accent-rust)]/30 hover:bg-white"
+              >
+                <span>Learn more about {SITE_NAME}</span>
+                <ArrowRightIcon className="h-3 w-3" />
+              </Link>
+            </div>
           </div>
         </section>
       </main>

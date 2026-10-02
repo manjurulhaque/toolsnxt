@@ -1,274 +1,66 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { RegexTesterTool } from "./regex-tester-tool"
 
-import { useMemo, useState } from "react"
-import { TextAreaField } from "@/components/form-controls"
-import { ActionButton, InfoBox, PanelHeader, SummaryTile, ToolIntro, ToolPage, ToolPanel } from "@/components/tool-page"
-import { copyToClipboard, getTextStats as getBasicTextStats } from "@/lib/browser-actions"
+const pagePath = "/regex-tester"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Regex Tester | Test JavaScript Regular Expressions Online"
+const pageDescription = "Test JavaScript regular expressions online. Toggle g, i, m, s, u, and y flags, inspect highlighted matches and capture groups, then copy match results."
 
-type RegexFlag = "g" | "i" | "m" | "s" | "u" | "y"
-
-const samplePattern = "\\b[A-Z][a-z]+\\b"
-const sampleText = `Ada Lovelace wrote notes on the Analytical Engine.
-Grace Hopper helped popularize the term debugging.
-Katherine Johnson calculated orbital mechanics for NASA.`
-const regexFlags: Array<{ key: RegexFlag; label: string }> = [
-  { key: "g", label: "Global" },
-  { key: "i", label: "Ignore case" },
-  { key: "m", label: "Multiline" },
-  { key: "s", label: "Dot all" },
-  { key: "u", label: "Unicode" },
-  { key: "y", label: "Sticky" },
+const faqs = [
+  ["What is a regex tester?", "A regex tester applies a regular-expression pattern to supplied text and shows matching text, positions, and available capture groups."],
+  ["Which regular-expression flavor does this tool use?", "It uses the JavaScript RegExp constructor in the browser, so pattern syntax and errors follow the JavaScript engine available in that browser."],
+  ["Which flags can I choose?", "The interface provides global (g), ignore case (i), multiline (m), dotAll (s), Unicode (u), and sticky (y) flags."],
+  ["Why does the tool show all matches when Global is off?", "The tester adds g internally when needed so it can iterate through and display every match. The selected flags shown beside the pattern remain the ones you chose."],
+  ["What does the Global flag do here?", "The g flag is selected by default and makes the displayed pattern include global matching. The result loop also ensures global iteration for its match list."],
+  ["What does Ignore case do?", "The i flag makes the JavaScript regular expression attempt matching without case sensitivity according to the engine's rules."],
+  ["What does Multiline do?", "The m flag changes how start and end anchors behave around line terminators. It does not make a dot match newline characters."],
+  ["What does Dot all do?", "The s flag makes a dot match line terminators as well as other characters."],
+  ["What does Unicode do?", "The u flag enables JavaScript Unicode-aware regular-expression features. Exact behavior still depends on the pattern and browser implementation."],
+  ["What does Sticky do?", "The y flag requires a match at the current lastIndex position. Because this tester starts at the beginning and iterates, a sticky pattern stops when it cannot match exactly at the next position."],
+  ["Are capture groups displayed?", "Yes. Parenthesized captures returned by the JavaScript match result appear as numbered group values below each match. Named group labels are not displayed by this interface."],
+  ["Can I replace text with this tool?", "No. The implementation tests and highlights matches, lists capture groups, and copies matched values. It does not include a replacement field or replacement output."],
+  ["What happens when my pattern is invalid?", "The browser's RegExp construction error is displayed in the results panel and no matches are listed."],
+  ["Does it work on mobile devices?", "Yes. The tester uses standard browser inputs, text areas, buttons, and scrollable result details."],
+  ["Is my pattern or text uploaded to a server?", "The tester runs in the browser and does not intentionally upload your entered pattern or test text."],
+  ["Is the Regex Tester free?", "Yes. It is a free browser-based JavaScript regular-expression testing tool."],
 ]
 
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: pageTitle, description: pageDescription, url: pageUrl, isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL }, about: ["Regular expressions", "JavaScript RegExp", "Pattern matching"] },
+  { "@context": "https://schema.org", "@type": "WebApplication", name: "Regex Tester", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, featureList: ["JavaScript RegExp testing", "g, i, m, s, u, and y flag controls", "Highlighted matches", "Match indices", "Numbered capture-group details", "Copy matches", "Text statistics", "Clear and sample controls"] },
+  { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Regex Tester", applicationCategory: "DeveloperApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Regex Tester", item: pageUrl }] },
+  { "@context": "https://schema.org", "@type": "HowTo", name: "How to test a JavaScript regular expression", description: "Enter a JavaScript pattern and text, choose flags, inspect matches and groups, then copy the match values if needed.", step: [{ "@type": "HowToStep", name: "Enter a pattern", text: "Write or paste a JavaScript regular-expression pattern without enclosing slashes." }, { "@type": "HowToStep", name: "Choose flags", text: "Toggle the available flag controls to test the desired matching mode." }, { "@type": "HowToStep", name: "Inspect results", text: "Review highlighted text, match indices, and numbered capture groups." }, { "@type": "HowToStep", name: "Copy values", text: "Copy the listed match values when they are needed elsewhere." }] },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map(([question, answer]) => ({ "@type": "Question", name: question, acceptedAnswer: { "@type": "Answer", text: answer } })) },
+]
+
+export const metadata: Metadata = { title: pageTitle, description: pageDescription, alternates: { canonical: pagePath }, openGraph: { title: pageTitle, description: pageDescription, url: pageUrl, siteName: SITE_NAME, type: "website" }, twitter: { card: "summary", title: pageTitle, description: pageDescription } }
+
 export default function RegexTesterPage() {
-  const [pattern, setPattern] = useState(samplePattern)
-  const [testText, setTestText] = useState(sampleText)
-  const [selectedFlags, setSelectedFlags] = useState<RegexFlag[]>(["g"])
-  const [message, setMessage] = useState("Enter a pattern to test it against your text.")
-
-  const flags = selectedFlags.join("")
-  const result = useMemo(() => testRegex(pattern, flags, testText), [flags, pattern, testText])
-  const stats = useMemo(() => getTextStats(testText), [testText])
-
-  async function copyMatches() {
-    if (result.matches.length === 0) {
-      setMessage("No matches to copy.")
-      return
-    }
-
-    try {
-      await copyToClipboard(result.matches.map((match) => match.value).join("\n"))
-      setMessage("Matches copied.")
-    } catch {
-      setMessage("Copy failed. Select the matches and copy them manually.")
-    }
-  }
-
-  function toggleFlag(flag: RegexFlag) {
-    setSelectedFlags((currentFlags) =>
-      currentFlags.includes(flag)
-        ? currentFlags.filter((currentFlag) => currentFlag !== flag)
-        : [...currentFlags, flag].sort(),
-    )
-    setMessage("Flags updated.")
-  }
-
-  function clearAll() {
-    setPattern("")
-    setTestText("")
-    setMessage("Workspace cleared.")
-  }
-
-  function loadSample() {
-    setPattern(samplePattern)
-    setTestText(sampleText)
-    setSelectedFlags(["g"])
-    setMessage("Sample regex loaded.")
-  }
-
-  return (
-    <ToolPage>
-      <ToolPanel>
-        <ToolIntro eyebrow="Developer tool" title="Regex Tester">
-            Test JavaScript regular expressions against sample text, inspect capture groups, and
-            copy every match without sending your text anywhere.
-        </ToolIntro>
-
-          <label htmlFor="regex-pattern" className="mt-6 block text-sm font-medium">
-            Pattern
-          </label>
-          <div className="mt-2 flex rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm transition-within:border-[var(--accent-rust)]">
-            <span className="text-[var(--ink-700)]">/</span>
-            <input
-              id="regex-pattern"
-              value={pattern}
-              onChange={(event) => {
-                setPattern(event.target.value)
-                setMessage("Pattern updated.")
-              }}
-              spellCheck={false}
-              className="min-w-0 flex-1 bg-transparent px-1 outline-none"
-              placeholder="\\w+"
-            />
-            <span className="text-[var(--ink-700)]">/{flags}</span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {regexFlags.map((flag) => (
-              <button
-                key={flag.key}
-                type="button"
-                onClick={() => toggleFlag(flag.key)}
-                className={`rounded-full px-3 py-2 text-xs font-semibold transition sm:text-sm ${
-                  selectedFlags.includes(flag.key)
-                    ? "bg-[var(--ink-900)] text-white"
-                    : "border border-[var(--ink-900)]/10 bg-[var(--page-cream)] text-[var(--ink-700)] hover:bg-white"
-                }`}
-              >
-                {flag.key}: {flag.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-6">
-            <TextAreaField
-              id="regex-text"
-              label="Test text"
-              value={testText}
-              onChange={(value) => {
-                setTestText(value)
-                setMessage("Text updated.")
-              }}
-              rows={13}
-              placeholder="Paste text to test..."
-            />
-          </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <SummaryTile label="Characters" value={stats.characters} />
-            <SummaryTile label="Words" value={stats.words} />
-            <SummaryTile label="Lines" value={stats.lines} />
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <ActionButton onClick={clearAll} variant="secondary">
-              Clear
-            </ActionButton>
-            <ActionButton onClick={loadSample} variant="secondary">
-              Load Sample
-            </ActionButton>
-          </div>
-      </ToolPanel>
-
-      <ToolPanel>
-          <PanelHeader
-            eyebrow="Matches"
-            title="Results"
-            badge={result.error ? "Invalid regex" : `${result.matches.length} matches`}
-          />
-
-          <div className="mt-6 min-h-[13rem] whitespace-pre-wrap break-words rounded-[1.2rem] border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-4 py-3 font-mono text-sm leading-7 text-[var(--ink-800)]">
-            {result.error ? (
-              <span className="text-red-700">{result.error}</span>
-            ) : result.segments.length > 0 ? (
-              result.segments.map((segment, index) =>
-                segment.isMatch ? (
-                  <mark
-                    key={`${segment.value}-${index}`}
-                    className="rounded-md bg-[var(--accent-gold)]/70 px-1 py-0.5 text-[var(--ink-900)]"
-                  >
-                    {segment.value}
-                  </mark>
-                ) : (
-                  <span key={`${segment.value}-${index}`}>{segment.value}</span>
-                ),
-              )
-            ) : (
-              <span className="text-[var(--ink-700)]">Highlighted matches will appear here...</span>
-            )}
-          </div>
-
-          <div className="mt-6">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--ink-700)]">
-              Match Details
-            </h3>
-            <div className="mt-3 grid max-h-[21rem] gap-2 overflow-auto pr-1">
-              {result.matches.map((match, index) => (
-                <div
-                  key={`${match.index}-${match.value}-${index}`}
-                  className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 text-sm"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <code className="break-all font-mono font-semibold">{match.value}</code>
-                    <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-700)]">
-                      index {match.index}
-                    </span>
-                  </div>
-                  {match.groups.length > 0 ? (
-                    <div className="mt-3 grid gap-2">
-                      {match.groups.map((group, groupIndex) => (
-                        <div
-                          key={`${group}-${groupIndex}`}
-                          className="rounded-lg bg-white px-3 py-2 font-mono text-xs text-[var(--ink-700)]"
-                        >
-                          ${groupIndex + 1}: {group || "(empty)"}
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-              {!result.error && result.matches.length === 0 ? (
-                <div className="rounded-[1.1rem] border border-dashed border-[var(--ink-900)]/12 bg-[var(--page-cream)] p-5 text-sm text-[var(--ink-700)]">
-                  No matches found.
-                </div>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <InfoBox className="leading-normal">
-              {message}
-            </InfoBox>
-            <ActionButton onClick={copyMatches}>
-              Copy Matches
-            </ActionButton>
-          </div>
-      </ToolPanel>
-    </ToolPage>
-  )
-}
-
-function testRegex(pattern: string, flags: string, text: string) {
-  if (!pattern.trim() || !text) {
-    return { error: null, matches: [], segments: [] }
-  }
-
-  try {
-    const safeFlags = flags.includes("g") ? flags : `${flags}g`
-    const regex = new RegExp(pattern, safeFlags)
-    const matches: Array<{ value: string; index: number; groups: string[] }> = []
-    const segments: Array<{ value: string; isMatch: boolean }> = []
-    let lastIndex = 0
-    let match: RegExpExecArray | null
-
-    while ((match = regex.exec(text)) !== null) {
-      const value = match[0]
-      const index = match.index
-
-      if (index > lastIndex) {
-        segments.push({ value: text.slice(lastIndex, index), isMatch: false })
-      }
-
-      segments.push({ value, isMatch: true })
-      matches.push({ value, index, groups: match.slice(1) })
-      lastIndex = index + value.length
-
-      if (value.length === 0) {
-        regex.lastIndex += 1
-      }
-    }
-
-    if (lastIndex < text.length) {
-      segments.push({ value: text.slice(lastIndex), isMatch: false })
-    }
-
-    return { error: null, matches, segments }
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "Invalid regular expression.",
-      matches: [],
-      segments: [],
-    }
-  }
-}
-
-function getTextStats(value: string) {
-  const trimmedValue = value.trim()
-  const basicStats = getBasicTextStats(value)
-
-  return {
-    ...basicStats,
-    words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
-  }
+  return <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+    <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-2 lg:py-12"><RegexTesterTool /></section>
+    <section className="mx-auto max-w-6xl space-y-6 px-5 pb-14 sm:px-8">
+      <ToolPanel><PanelHeader eyebrow="Overview" title="What Is a Regex Tester?" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>A regular-expression tester lets developers, students, data analysts, writers, and technical teams check how a pattern matches a piece of text. Enter a JavaScript pattern, select flags, and use the highlighted result, match indices, and capture groups to understand the output before using the expression in code.</p><p>This page is a practical JavaScript RegExp workspace, not a universal regex flavor converter. Regular-expression syntax can differ across languages and tools, so test patterns again in the same runtime where they will be deployed.</p></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Features" title="Regex Tester Features" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Pattern input", "Enter a JavaScript pattern without surrounding slash delimiters."], ["Available flags", "Toggle g, i, m, s, u, and y from the provided controls."], ["Every match", "The tester iterates with a global RegExp internally to show all matches."], ["Highlighted text", "See matched text highlighted within the entered test text."], ["Match details", "Inspect each matched value and its zero-based index."], ["Capture groups", "Review numbered parenthesized capture values for each result."], ["Text statistics", "See character, word, and line counts for the test text."], ["Copy and sample controls", "Copy match values, clear the workspace, or restore the provided sample."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Flags" title="Supported JavaScript Regex Flags" /><div className="mt-6 overflow-x-auto"><table className="w-full min-w-[720px] border-collapse text-left text-sm"><thead><tr className="border-b border-[var(--ink-900)]/10"><th className="py-3 pr-4 font-semibold">Flag</th><th className="py-3 pr-4 font-semibold">Control label</th><th className="py-3 font-semibold">Behavior relevant to this tester</th></tr></thead><tbody className="text-[var(--ink-700)]">{[["g", "Global", "Included in the displayed flags; the result loop uses global iteration whether or not it is selected."], ["i", "Ignore case", "Makes matching case-insensitive."], ["m", "Multiline", "Changes start and end anchor behavior around line terminators."], ["s", "Dot all", "Makes dot match line terminators."], ["u", "Unicode", "Enables JavaScript Unicode-aware regex features."], ["y", "Sticky", "Requires a match at the current lastIndex position during iteration."]].map(([flag, label, behavior]) => <tr key={flag} className="border-b border-[var(--ink-900)]/8"><td className="py-3 pr-4 font-mono font-semibold text-[var(--ink-900)]">{flag}</td><td className="py-3 pr-4">{label}</td><td className="py-3">{behavior}</td></tr>)}</tbody></table></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Method" title="How the Regex Tester Works" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>When both a nonblank pattern and test text are present, the tool creates <code>new RegExp(pattern, flags)</code>. It adds the global flag internally when it is not selected, then calls <code>exec()</code> repeatedly to build highlighted segments, values, indices, and capture-group arrays. For zero-length matches, it increments <code>lastIndex</code> by one to avoid an endless loop.</p><p>The visible pattern suffix reflects only your selected controls. Empty inputs display no matches, and construction errors are reported in the result panel. The interface does not expose replacement, named-group labels, match indices from the <code>d</code> flag, the <code>v</code> flag, saved expressions, file input, or server-side testing.</p></div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Workflow" title="How to Use the Regex Tester" /><ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Enter a JavaScript regex pattern without outer slash characters.</li><li>Toggle any supported flags needed for the test.</li><li>Paste or type the text to search.</li><li>Review highlighted matches, zero-based indices, and numbered capture groups.</li><li>Copy the matched values, or Clear and Load Sample to begin again.</li><li>Test the final expression in the target JavaScript runtime before deployment.</li></ol></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Examples" title="Common Uses" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Input checking", "Inspect an email-like, identifier-like, or reference-number pattern before adding application-specific validation."], ["Text extraction", "Use parentheses to see captured portions of a structured log line or paragraph."], ["Content cleanup planning", "Find repeated spacing, markers, or formatting fragments before handling them elsewhere."], ["Learning JavaScript regex", "Compare the effect of multiline, dotAll, or sticky mode against a short sample."], ["Debugging", "Confirm the match position and captures of a pattern that behaves unexpectedly in a JavaScript project."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
+      <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Advantages" title="Benefits" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Provides immediate visual feedback for JavaScript regular expressions.</li><li>Shows each value, position, and numbered capture group in one workspace.</li><li>Keeps input text and matching in the browser.</li><li>Offers common JavaScript flag controls without extra dependencies.</li><li>Makes match values easy to copy for another workflow.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Boundaries" title="Limitations" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Patterns follow the browser JavaScript engine, not PCRE, Python, .NET, Java, or another regex flavor.</li><li>Every-match display adds global iteration internally, even when g is not selected.</li><li>Sticky matching can stop at the first position that does not match.</li><li>Named capture-group labels, replacement output, files, and saved expressions are not implemented.</li><li>Regex alone is not a security, sanitization, or complete data-validation strategy.</li></ul></ToolPanel></div>
+      <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Guidance" title="Tips for Better Regex Tests" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Start with a small representative example, then add edge cases.</li><li>Use parentheses when you need to inspect capture groups.</li><li>Test start and end anchors with and without multiline mode.</li><li>Use dotAll only when a dot should span line terminators.</li><li>Check the final expression in the exact JavaScript environment that will run it.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Avoid" title="Common Mistakes" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Pasting outer slash delimiters into the pattern field.</li><li>Assuming a pattern from another programming language follows JavaScript syntax.</li><li>Expecting the visible g control to limit results to one match when the tester lists all matches.</li><li>Confusing multiline anchors with dotAll behavior.</li><li>Using a regex tester as proof that input is secure or fully validated.</li></ul></ToolPanel></div>
+      <ToolPanel><PanelHeader eyebrow="Questions" title="FAQ" /><div className="mt-6 grid gap-4">{faqs.map(([question, answer]) => <details key={question} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><summary className="cursor-pointer font-semibold">{question}</summary><p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{answer}</p></details>)}</div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="More Tools" title="Related Tools" /><nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">{[["JSON Formatter", "/json-formatter"], ["HTML, CSS & JavaScript Minifier", "/html-css-js-minifier"], ["Case Converter", "/case-converter"], ["Word & Character Counter", "/word-character-counter"], ["Text Diff Checker", "/text-diff-checker"], ["URL Encoder / Decoder", "/url-encoder-decoder"]].map(([label, href]) => <Link key={href} href={href} className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40">{label}</Link>)}</nav></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Terms" title="Glossary" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Regular expression", "A pattern used to match text."], ["Pattern", "The regular-expression source entered into this tool."], ["Match", "The portion of text returned by a successful pattern search."], ["Capture group", "A parenthesized part of a pattern whose matched text is returned separately."], ["Index", "The zero-based character position at which a match begins."], ["Flag", "A modifier that changes matching behavior."], ["Global", "A flag used for repeated matching across text."], ["Multiline", "A flag that changes the behavior of start and end anchors at line boundaries."], ["DotAll", "A flag that lets a dot match line terminators."], ["Unicode", "A JavaScript regex mode that enables Unicode-aware features."], ["Sticky", "A mode that requires matching exactly at lastIndex."], ["lastIndex", "The RegExp position used as the starting point for a subsequent global or sticky match."]].map(([term, definition]) => <div key={term}><h3 className="font-semibold">{term}</h3><p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p></div>)}</div></ToolPanel>
+      <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: RegExp</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp/exec" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: RegExp.prototype.exec()</a></li><li><a href="https://tc39.es/ecma262/multipage/text-processing.html#sec-regexp-regular-expression-objects" className="font-semibold underline" rel="noopener noreferrer" target="_blank">ECMAScript Language Specification: RegExp Objects</a></li></ul></ToolPanel>
+              <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool evaluates patterns with the browser&apos;s JavaScript RegExp implementation and shows its implemented match details. Results can differ across regex flavors and browser versions. It is intended for development, learning, debugging, and text-analysis workflows, not as a substitute for security review or complete application validation.
+          </p>
+        </EducationalDisclaimerCard>
+    </section>
+  </main>
 }

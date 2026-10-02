@@ -1,328 +1,88 @@
-"use client"
+import type { Metadata } from "next"
+import Link from "next/link"
+import { EducationalDisclaimerCard, PanelHeader, ToolPanel } from "@/components/tool-page"
+import { SITE_NAME, SITE_URL } from "@/lib/site"
+import { LoremIpsumGeneratorTool } from "./lorem-ipsum-generator-tool"
 
-import { useMemo, useState } from "react"
-import { NumberField, SegmentedControl, SelectField, TextAreaField } from "@/components/form-controls"
-import {
-  ActionButton,
-  CheckboxOption,
-  InfoBox,
-  PanelHeader,
-  SummaryTile,
-  ToolIntro,
-  ToolPage,
-  ToolPanel,
-} from "@/components/tool-page"
-import { copyToClipboard, downloadTextFile, getTextStats as getBasicTextStats } from "@/lib/browser-actions"
+const pagePath = "/lorem-ipsum-generator"
+const pageUrl = `${SITE_URL}${pagePath}`
+const pageTitle = "Lorem Ipsum Generator | Placeholder Text Online"
+const pageDescription =
+  "Generate Lorem Ipsum placeholder words, sentences, or paragraphs online. Choose classic, product UI, or editorial word sets, set quantity, copy the text, or download a UTF-8 text file."
 
-type OutputMode = "paragraphs" | "sentences" | "words"
-type WordSet = "classic" | "product" | "editorial"
+const faqs = [
+  { question: "What is a Lorem Ipsum Generator?", answer: "A Lorem Ipsum Generator creates placeholder text for layouts, mockups, prototypes, content tests, and design reviews." },
+  { question: "Which output modes are available?", answer: "This tool generates paragraphs, sentences, or words." },
+  { question: "How many paragraphs or sentences can I generate?", answer: "The quantity is clamped to whole numbers from 1 to 50 for paragraph and sentence modes." },
+  { question: "How many words can I generate?", answer: "Word mode supports whole-number quantities from 1 to 500." },
+  { question: "Which word sets are available?", answer: "The available sets are Classic lorem, Product UI, and Editorial. Each uses the tool's built-in word list." },
+  { question: "What does Start with lorem ipsum do?", answer: "For the Classic lorem word set, it places lorem ipsum at the beginning when the generated text has at least two words. It does not change the Product UI or Editorial lists." },
+  { question: "Are the generated sentences grammatically meaningful?", answer: "No. The tool assembles placeholder words into sentence-like output for layout testing; it does not create researched, factual, or grammar-aware copy." },
+  { question: "Does the generator create the same text every time?", answer: "Word output follows the implemented word-order rule for the selected quantity. Sentence and paragraph output use a random sentence length from 8 to 15 words, so it can differ between updates." },
+  { question: "How many sentences are in a generated paragraph?", answer: "Paragraph mode creates three, four, or five sentences per paragraph in a repeating pattern." },
+  { question: "Can I copy the generated text?", answer: "Yes. Use Copy Text to place the current output on the clipboard when browser permissions allow it." },
+  { question: "Can I download the generated text?", answer: "Yes. Download saves the current output as lorem-ipsum.txt using a UTF-8 plain-text Blob." },
+  { question: "What statistics does the tool show?", answer: "It displays word count, character count, sentence count, and paragraph count for the current output." },
+  { question: "Does it include custom word lists?", answer: "No. The current implementation supports only its three built-in word sets." },
+  { question: "Does it work on mobile?", answer: "Yes. It uses standard browser inputs, a select field, a checkbox, buttons, and a read-only text area." },
+  { question: "Is the Lorem Ipsum Generator free?", answer: "Yes. This is a free browser-based placeholder text generator." },
+  { question: "Is generated text uploaded to a server?", answer: "The generator runs in your browser and does not intentionally upload generated text." },
+]
 
-const wordSets: Record<WordSet, string[]> = {
-  classic: [
-    "lorem",
-    "ipsum",
-    "dolor",
-    "sit",
-    "amet",
-    "consectetur",
-    "adipiscing",
-    "elit",
-    "sed",
-    "do",
-    "eiusmod",
-    "tempor",
-    "incididunt",
-    "labore",
-    "dolore",
-    "magna",
-    "aliqua",
-    "ut",
-    "enim",
-    "minim",
-    "veniam",
-    "quis",
-    "nostrud",
-    "exercitation",
-    "ullamco",
-    "laboris",
-    "nisi",
-    "aliquip",
-    "commodo",
-    "consequat",
-  ],
-  product: [
-    "dashboard",
-    "workflow",
-    "insight",
-    "metric",
-    "customer",
-    "pipeline",
-    "report",
-    "automation",
-    "workspace",
-    "integration",
-    "launch",
-    "conversion",
-    "segment",
-    "journey",
-    "feature",
-    "platform",
-    "strategy",
-    "growth",
-    "signal",
-    "profile",
-    "campaign",
-    "team",
-    "review",
-    "release",
-  ],
-  editorial: [
-    "story",
-    "archive",
-    "culture",
-    "essay",
-    "chapter",
-    "voice",
-    "journal",
-    "context",
-    "dispatch",
-    "reader",
-    "column",
-    "notebook",
-    "portrait",
-    "season",
-    "memory",
-    "scene",
-    "detail",
-    "letter",
-    "record",
-    "volume",
-    "edition",
-    "passage",
-    "feature",
-    "review",
-  ],
+const jsonLd = [
+  { "@context": "https://schema.org", "@type": "WebPage", name: pageTitle, description: pageDescription, url: pageUrl, isPartOf: { "@type": "WebSite", name: SITE_NAME, url: SITE_URL }, about: ["Lorem Ipsum Generator", "Placeholder Text", "Content Mockup" ] },
+  { "@context": "https://schema.org", "@type": "WebApplication", name: "Lorem Ipsum Generator", applicationCategory: "UtilitiesApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" }, featureList: ["Paragraph, sentence, and word output", "Classic lorem word set", "Product UI word set", "Editorial word set", "Quantity controls", "Optional classic opening phrase", "Output statistics", "Copy text", "UTF-8 text download"] },
+  { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Lorem Ipsum Generator", applicationCategory: "UtilitiesApplication", operatingSystem: "Any", url: pageUrl, description: pageDescription, offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } },
+  { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: "Home", item: SITE_URL }, { "@type": "ListItem", position: 2, name: "Lorem Ipsum Generator", item: pageUrl }] },
+  { "@context": "https://schema.org", "@type": "HowTo", name: "How to generate placeholder text", description: "Choose an output mode, word set, quantity, and opening phrase option, then copy or download the generated text.", step: [{ "@type": "HowToStep", name: "Choose output", text: "Select Paragraphs, Sentences, or Words." }, { "@type": "HowToStep", name: "Choose words", text: "Select Classic lorem, Product UI, or Editorial." }, { "@type": "HowToStep", name: "Set quantity", text: "Enter a supported whole-number quantity." }, { "@type": "HowToStep", name: "Export", text: "Review the generated output, then copy or download it." }] },
+  { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) },
+]
+
+export const metadata: Metadata = {
+  title: pageTitle,
+  description: pageDescription,
+  alternates: { canonical: pagePath },
+  openGraph: { title: pageTitle, description: pageDescription, url: pageUrl, siteName: SITE_NAME, type: "website" },
+  twitter: { card: "summary", title: pageTitle, description: pageDescription },
 }
-
-const modeOptions: Array<{ key: OutputMode; label: string }> = [
-  { key: "paragraphs", label: "Paragraphs" },
-  { key: "sentences", label: "Sentences" },
-  { key: "words", label: "Words" },
-]
-
-const wordSetOptions: Array<{ value: WordSet; label: string }> = [
-  { value: "classic", label: "Classic lorem" },
-  { value: "product", label: "Product UI" },
-  { value: "editorial", label: "Editorial" },
-]
 
 export default function LoremIpsumGeneratorPage() {
-  const [mode, setMode] = useState<OutputMode>("paragraphs")
-  const [wordSet, setWordSet] = useState<WordSet>("classic")
-  const [count, setCount] = useState("4")
-  const [startWithLorem, setStartWithLorem] = useState(true)
-  const [message, setMessage] = useState("Generate placeholder copy for layouts and mockups.")
-
-  const output = useMemo(
-    () => generateLorem({ mode, wordSet, count: clampCount(count, mode), startWithLorem }),
-    [count, mode, startWithLorem, wordSet],
-  )
-  const stats = useMemo(() => getTextStats(output), [output])
-
-  async function copyOutput() {
-    if (!output.trim()) {
-      setMessage("Generate text before copying.")
-      return
-    }
-
-    try {
-      await copyToClipboard(output)
-      setMessage("Placeholder text copied.")
-    } catch {
-      setMessage("Copy failed. Select the text and copy it manually.")
-    }
-  }
-
-  function downloadOutput() {
-    if (!output.trim()) {
-      setMessage("Generate text before downloading.")
-      return
-    }
-
-    downloadTextFile(output, "lorem-ipsum.txt")
-    setMessage("lorem-ipsum.txt downloaded.")
-  }
-
   return (
-    <ToolPage columns="wide-output">
-      <ToolPanel>
-        <ToolIntro eyebrow="Text tool" title="Lorem Ipsum Generator">
-            Create placeholder words, sentences, or paragraphs for UI mockups, content tests, and
-            design reviews.
-        </ToolIntro>
+    <main className="bg-[var(--page-cream)] text-[var(--ink-900)]">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
+      <section className="mx-auto grid max-w-6xl gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[0.85fr_1.15fr] lg:py-12"><LoremIpsumGeneratorTool /></section>
 
-          <div className="mt-6">
-            <SegmentedControl
-              value={mode}
-              options={modeOptions}
-              onChange={(nextMode) => {
-                setMode(nextMode)
-                setMessage(`${capitalize(nextMode)} mode selected.`)
-              }}
-              columns="grid-cols-3"
-            />
-          </div>
+      <section className="mx-auto max-w-6xl space-y-6 px-5 pb-14 sm:px-8">
+        <ToolPanel><PanelHeader eyebrow="Overview" title="What Is a Lorem Ipsum Generator?" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>A Lorem Ipsum Generator creates filler copy that helps teams evaluate visual hierarchy, spacing, component states, and text flow before final content is ready. It is useful for wireframes, prototypes, presentation mockups, interface demos, and editorial layout checks.</p><p>This page produces placeholder words, sentences, or paragraphs from one of three built-in word sets. It includes an optional classic opening phrase, current-output statistics, copy functionality, and a downloadable plain-text file.</p></div></ToolPanel>
 
-          <div className="mt-6">
-            <NumberField
-              id="lorem-count"
-              label="Quantity"
-              min="1"
-              max={mode === "words" ? "500" : "50"}
-              value={count}
-              onChange={(value) => {
-                setCount(value)
-                setMessage("Quantity updated.")
-              }}
-            />
-          </div>
+        <ToolPanel><PanelHeader eyebrow="Features" title="Lorem Ipsum Generator Features" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Three output modes", "Generate paragraphs, sentences, or individual words."], ["Three word sets", "Select Classic lorem, Product UI, or Editorial placeholder vocabulary."], ["Quantity limits", "Use 1–50 paragraphs or sentences, or 1–500 words."], ["Classic opening phrase", "Start Classic lorem output with lorem ipsum when eligible."], ["Generated text panel", "Read the current text in a labelled, read-only text area."], ["Output statistics", "Review current word, character, sentence, and paragraph counts."], ["Copy Text", "Copy the current placeholder output through the browser clipboard API."], ["Download", "Save the current output as a UTF-8 plain-text file named lorem-ipsum.txt."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
 
-          <div className="mt-5">
-            <SelectField
-              id="word-set"
-              label="Word set"
-              value={wordSet}
-              options={wordSetOptions}
-              onChange={(value) => {
-                setWordSet(value)
-              setMessage("Word set updated.")
-              }}
-            />
-          </div>
+        <ToolPanel><PanelHeader eyebrow="Modes" title="Available Output Modes and Word Sets" /><div className="mt-6 grid gap-5 md:grid-cols-3 text-sm leading-7 text-[var(--ink-700)]"><div><h3 className="font-semibold text-[var(--ink-900)]">Paragraphs</h3><p className="mt-2">Creates the selected number of paragraphs. Each paragraph contains three, four, or five generated sentences in a repeating pattern.</p></div><div><h3 className="font-semibold text-[var(--ink-900)]">Sentences</h3><p className="mt-2">Creates the selected number of generated sentences. Each sentence uses a random length from eight through fifteen words.</p></div><div><h3 className="font-semibold text-[var(--ink-900)]">Words</h3><p className="mt-2">Creates the selected number of words in a single space-separated output. Word mode is capped at 500 words.</p></div></div><div className="mt-6 grid gap-4 md:grid-cols-3 text-sm leading-7 text-[var(--ink-700)]"><div><h3 className="font-semibold text-[var(--ink-900)]">Classic lorem</h3><p className="mt-2">Uses the page&apos;s built-in traditional lorem-style vocabulary and can begin with lorem ipsum.</p></div><div><h3 className="font-semibold text-[var(--ink-900)]">Product UI</h3><p className="mt-2">Uses product-oriented placeholder terms such as dashboard, workflow, metric, and customer.</p></div><div><h3 className="font-semibold text-[var(--ink-900)]">Editorial</h3><p className="mt-2">Uses editorial placeholder terms such as story, archive, chapter, journal, and passage.</p></div></div></ToolPanel>
 
-          <div className="mt-5">
-            <CheckboxOption
-              label="Start with lorem ipsum"
-              checked={startWithLorem}
-              onChange={(checked) => {
-                setStartWithLorem(checked)
-                setMessage("Opening phrase updated.")
-              }}
-            />
-          </div>
+        <ToolPanel><PanelHeader eyebrow="Method" title="How the Generator Works" /><div className="mt-5 space-y-4 text-sm leading-7 text-[var(--ink-700)]"><p>The page uses the selected built-in word list and quantity to assemble the current output. In sentence and paragraph modes, the sentence length is selected from the implementation&apos;s eight-to-fifteen-word range. Paragraphs are separated by blank lines.</p><p>The tool is designed for placeholder content, not factual copy, translation, proofreading, spelling correction, accessibility copy, or final publishing. Review and replace placeholder text before sending, publishing, or presenting a finished product.</p></div></ToolPanel>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <ActionButton onClick={copyOutput} variant="secondary">
-              Copy Text
-            </ActionButton>
-            <ActionButton onClick={downloadOutput}>
-              Download
-            </ActionButton>
-          </div>
-      </ToolPanel>
+        <ToolPanel><PanelHeader eyebrow="Workflow" title="How to Use the Lorem Ipsum Generator" /><ol className="mt-5 list-decimal space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Select Paragraphs, Sentences, or Words.</li><li>Enter a quantity within the limit for that output mode.</li><li>Select a word set and choose whether eligible Classic lorem output begins with lorem ipsum.</li><li>Review the generated text and its statistics.</li><li>Copy the text or download it as lorem-ipsum.txt.</li></ol></ToolPanel>
 
-      <ToolPanel>
-          <PanelHeader eyebrow="Output" title="Generated Text" badge={`${stats.words} words`} />
+        <ToolPanel><PanelHeader eyebrow="Examples" title="Common Uses" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Wireframes", "Fill content areas while testing layout, hierarchy, and component dimensions."], ["Product mockups", "Use Product UI words to create neutral example copy for dashboards and interface states."], ["Editorial layouts", "Use Editorial words while testing article cards, pull quotes, or publication templates."], ["Design review", "Populate a prototype with non-final copy so feedback can focus on the structure and flow."], ["Development fixtures", "Create temporary text for visual regression work or a component demonstration."]].map(([title, text]) => <div key={title} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><h3 className="font-semibold">{title}</h3><p className="mt-2 text-sm leading-6 text-[var(--ink-700)]">{text}</p></div>)}</div></ToolPanel>
 
-          <div className="mt-6">
-            <TextAreaField
-              id="lorem-output"
-              label="Generated text"
-              value={output}
-              readOnly
-              rows={20}
-              mono={false}
-              placeholder="Generated placeholder text will appear here..."
-            />
-          </div>
+        <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Advantages" title="Benefits" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Creates layout-ready placeholder content quickly.</li><li>Supports compact word output and longer sentence or paragraph output.</li><li>Offers word sets suited to general, product, and editorial contexts.</li><li>Shows basic current-output statistics for sizing and review.</li><li>Copies or downloads the exact current text without extra dependencies.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Boundaries" title="Limitations" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Text is placeholder content and is not intended to be factual, meaningful, or publish-ready.</li><li>Only the three built-in word sets are available; custom lists and templates are not supported.</li><li>Sentence and paragraph mode can vary because sentence lengths use randomness.</li><li>Quantity limits are 50 for paragraphs/sentences and 500 for words.</li><li>Clipboard access can be unavailable where browser permissions or secure-context requirements prevent it.</li></ul></ToolPanel></div>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <SummaryTile label="Characters" value={stats.characters} />
-            <SummaryTile label="Sentences" value={stats.sentences} />
-            <SummaryTile label="Paragraphs" value={stats.paragraphs} />
-          </div>
+        <div className="grid gap-6 lg:grid-cols-2"><ToolPanel><PanelHeader eyebrow="Guidance" title="Tips for Best Results" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Choose the output mode that matches the component or layout you are testing.</li><li>Use Product UI or Editorial vocabulary when a generic Latin-like list makes the mockup harder to assess.</li><li>Use realistic text lengths when testing truncation, wrapping, and responsive layouts.</li><li>Replace all placeholder content before publishing or shipping a product.</li><li>Keep a copy of the downloaded text when a review requires a stable sample.</li></ul></ToolPanel><ToolPanel><PanelHeader eyebrow="Avoid" title="Common Mistakes" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li>Using placeholder text as final customer-facing content.</li><li>Assuming sentence output will be identical after every mode or setting change.</li><li>Expecting the opening-phrase option to alter Product UI or Editorial output.</li><li>Using a text count as a guarantee of visual fit across fonts and screen sizes.</li><li>Ignoring browser clipboard permissions when Copy Text is unavailable.</li></ul></ToolPanel></div>
 
-          <InfoBox className="mt-5 leading-normal">
-            {message}
-          </InfoBox>
-      </ToolPanel>
-    </ToolPage>
+        <ToolPanel><PanelHeader eyebrow="Questions" title="FAQ" /><div className="mt-6 grid gap-4">{faqs.map((faq) => <details key={faq.question} className="rounded-[1.1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4"><summary className="cursor-pointer font-semibold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-[var(--ink-700)]">{faq.answer}</p></details>)}</div></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="More Tools" title="Related Tools" /><nav aria-label="Related tools" className="mt-6 grid gap-3 text-sm font-semibold md:grid-cols-3">{[["Word & Character Counter", "/word-character-counter"], ["Case Converter", "/case-converter"], ["Markdown Previewer", "/markdown-previewer"], ["HTML to Markdown", "/html-to-markdown"], ["JSON Formatter", "/json-formatter"], ["QR Code Generator", "/qr-code-generator"]].map(([label, href]) => <Link key={href} href={href} className="rounded-[1rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] px-4 py-3 transition hover:border-[var(--accent-rust)]/40">{label}</Link>)}</nav></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="Terms" title="Glossary" /><div className="mt-6 grid gap-4 md:grid-cols-2">{[["Placeholder Text", "Temporary copy used to test a layout before final content is available."], ["Lorem Ipsum", "A conventional label for filler text used in design and typesetting workflows."], ["Paragraph", "A block of one or more sentences separated here by blank lines."], ["Sentence", "A generated group of words ending with a period in this implementation."], ["Word Set", "One of the page's fixed lists of available placeholder words."], ["Quantity", "The requested number of paragraphs, sentences, or words."], ["Character Count", "The current output string length reported by the tool."], ["Copy", "Writing the current output to the system clipboard through the browser."], ["Download", "Saving the current output as a plain-text file in the browser."], ["Mockup", "A visual representation of a design or interface before final production content."]].map(([term, definition]) => <div key={term}><h3 className="font-semibold">{term}</h3><p className="mt-1 text-sm leading-6 text-[var(--ink-700)]">{definition}</p></div>)}</div></ToolPanel>
+
+        <ToolPanel><PanelHeader eyebrow="Sources" title="References" /><ul className="mt-5 list-disc space-y-3 pl-5 text-sm leading-7 text-[var(--ink-700)]"><li><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/textarea" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: &lt;textarea&gt;</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: Clipboard.writeText()</a></li><li><a href="https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL_static" className="font-semibold underline" rel="noopener noreferrer" target="_blank">MDN: URL.createObjectURL()</a></li></ul></ToolPanel>
+
+                <EducationalDisclaimerCard type="educational">
+          <p>
+            This tool generates placeholder text from its implemented word sets and generation rules. Output is intended for design, testing, prototyping, and general productivity use. It is not a source of factual content, professional writing, legal text, accessibility copy, or publish-ready material.
+          </p>
+        </EducationalDisclaimerCard>
+      </section>
+    </main>
   )
-}
-
-function generateLorem({
-  mode,
-  wordSet,
-  count,
-  startWithLorem,
-}: {
-  mode: OutputMode
-  wordSet: WordSet
-  count: number
-  startWithLorem: boolean
-}) {
-  const words = wordSets[wordSet]
-
-  if (mode === "words") {
-    return buildWords(words, count, startWithLorem).join(" ")
-  }
-
-  if (mode === "sentences") {
-    return Array.from({ length: count }, (_, index) =>
-      buildSentence(words, index === 0 && startWithLorem),
-    ).join(" ")
-  }
-
-  return Array.from({ length: count }, (_, paragraphIndex) => {
-    const sentenceCount = 3 + (paragraphIndex % 3)
-    return Array.from({ length: sentenceCount }, (_, sentenceIndex) =>
-      buildSentence(words, paragraphIndex === 0 && sentenceIndex === 0 && startWithLorem),
-    ).join(" ")
-  }).join("\n\n")
-}
-
-function buildSentence(words: string[], startWithLorem: boolean) {
-  const count = 8 + Math.floor(Math.random() * 8)
-  const sentenceWords = buildWords(words, count, startWithLorem)
-  sentenceWords[0] = capitalize(sentenceWords[0])
-
-  return `${sentenceWords.join(" ")}.`
-}
-
-function buildWords(words: string[], count: number, startWithLorem: boolean) {
-  const output = Array.from({ length: count }, (_, index) => words[(index * 7 + count * 3) % words.length])
-
-  if (startWithLorem && words === wordSets.classic && count >= 2) {
-    output[0] = "lorem"
-    output[1] = "ipsum"
-  }
-
-  return output
-}
-
-function clampCount(value: string, mode: OutputMode) {
-  const numberValue = Number(value)
-  const max = mode === "words" ? 500 : 50
-
-  if (!Number.isFinite(numberValue)) {
-    return 1
-  }
-
-  return Math.min(Math.max(Math.floor(numberValue), 1), max)
-}
-
-function getTextStats(value: string) {
-  const trimmedValue = value.trim()
-  const basicStats = getBasicTextStats(value)
-
-  return {
-    ...basicStats,
-    words: trimmedValue ? trimmedValue.split(/\s+/).length : 0,
-    sentences: (value.match(/[.!?]/g) ?? []).length,
-    paragraphs: trimmedValue ? trimmedValue.split(/\n\s*\n/).length : 0,
-  }
-}
-
-function capitalize(value: string) {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`
 }

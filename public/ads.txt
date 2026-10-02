@@ -1,0 +1,4 @@
+# Google AdSense Authorized Digital Sellers (ads.txt)
+# Replace pub-0000000000000000 with your actual Google AdSense Publisher ID
+# Format: <Field #1: Domain>, <Field #2: Publisher ID>, <Field #3: Relationship>, <Field #4: Certification Authority ID>
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
