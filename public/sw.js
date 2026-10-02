@@ -1,5 +1,5 @@
 /**
- * ToolsNxt Offline Service Worker
+ * Manjurul Web Tools Offline Service Worker
  * 100% In-Browser PWA Offline Engine
  */
 
