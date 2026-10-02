@@ -239,13 +239,29 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
         {/* Results List */}
         <div ref={listRef} className="flex-1 overflow-y-auto p-2 sm:p-3">
           {filteredTools.length === 0 ? (
-            <div className="py-12 text-center">
-              <SearchIcon className="mx-auto h-8 w-8 text-[var(--ink-700)]/30 mb-2" />
+            <div className="py-10 text-center">
+              <SearchIcon className="mx-auto mb-2 h-8 w-8 text-[var(--ink-700)]/30" />
               <p className="text-sm font-semibold text-[var(--ink-900)]">No tools found</p>
               <p className="mt-1 text-xs text-[var(--ink-700)]">
                 No matching tools for &ldquo;{query}&rdquo;
                 {activeCategory !== "All" ? ` in category "${activeCategory}"` : ""}.
               </p>
+              <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+                {["pdf", "json", "image", "calculator", "minifier", "converter"].map((keyword) => (
+                  <button
+                    key={keyword}
+                    type="button"
+                    onClick={() => {
+                      handleQueryChange(keyword)
+                      handleCategoryChange("All")
+                      inputRef.current?.focus()
+                    }}
+                    className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-800)] transition hover:border-[var(--accent-rust)] hover:bg-white"
+                  >
+                    {keyword}
+                  </button>
+                ))}
+              </div>
               <button
                 type="button"
                 onClick={() => {

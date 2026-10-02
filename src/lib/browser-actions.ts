@@ -1,5 +1,12 @@
-export async function copyToClipboard(value: string) {
-  await navigator.clipboard.writeText(value)
+import { showToast } from "@/components/toast"
+
+export async function copyToClipboard(value: string, feedbackMessage = "Copied to clipboard!") {
+  try {
+    await navigator.clipboard.writeText(value)
+    showToast(feedbackMessage, "success")
+  } catch {
+    showToast("Failed to copy to clipboard", "error")
+  }
 }
 
 export function downloadBlob(blob: Blob, fileName: string) {
@@ -9,6 +16,7 @@ export function downloadBlob(blob: Blob, fileName: string) {
   link.download = fileName
   link.click()
   URL.revokeObjectURL(downloadUrl)
+  showToast(`Downloaded ${fileName}`, "success")
 }
 
 export function downloadTextFile(value: string, fileName: string, type = "text/plain;charset=utf-8") {

@@ -1,4 +1,4 @@
-import type { ChangeEvent, ReactNode } from "react"
+import type { ChangeEvent, KeyboardEvent, ReactNode } from "react"
 import { UploadCloudIcon } from "@/components/icons"
 
 type NumberFieldProps = {
@@ -104,10 +104,13 @@ type TextAreaFieldProps = {
   label: string
   value: string
   onChange?: (value: string) => void
+  onSubmit?: () => void
+  onKeyDown?: (event: KeyboardEvent<HTMLTextAreaElement>) => void
   placeholder?: string
   rows?: number
   readOnly?: boolean
   mono?: boolean
+  hint?: string
 }
 
 export function TextAreaField({
@@ -115,18 +118,40 @@ export function TextAreaField({
   label,
   value,
   onChange,
+  onSubmit,
+  onKeyDown,
   placeholder,
   rows = 12,
   readOnly = false,
   mono = true,
+  hint,
 }: TextAreaFieldProps) {
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (onSubmit && (event.metaKey || event.ctrlKey) && event.key === "Enter") {
+      event.preventDefault()
+      onSubmit()
+      return
+    }
+    onKeyDown?.(event)
+  }
+
   return (
     <label htmlFor={id} className="block">
-      <span className="text-sm font-medium">{label}</span>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium">{label}</span>
+        {onSubmit ? (
+          <span className="rounded bg-[var(--ink-900)]/5 px-1.5 py-0.5 font-mono text-[10px] font-medium text-[var(--ink-700)]/70">
+            Ctrl + Enter to run
+          </span>
+        ) : hint ? (
+          <span className="text-[11px] text-[var(--ink-700)]/60">{hint}</span>
+        ) : null}
+      </div>
       <textarea
         id={id}
         value={value}
         onChange={(event) => onChange?.(event.target.value)}
+        onKeyDown={handleKeyDown}
         readOnly={readOnly}
         rows={rows}
         spellCheck={false}

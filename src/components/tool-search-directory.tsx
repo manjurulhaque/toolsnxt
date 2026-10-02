@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import type { Tool } from "@/lib/tools"
 import { PanelHeader } from "@/components/tool-page"
@@ -10,12 +10,39 @@ import {
   CategoryIcon,
   ClockHistoryIcon,
   GridIcon,
+  ListIcon,
   RotateCcwIcon,
   SearchIcon,
   StarIcon,
   TrashIcon,
   XIcon,
 } from "@/components/icons"
+
+const VIEW_STORAGE_KEY = "webtools_directory_view"
+const VIEW_EVENT = "webtools_view_change"
+
+function subscribeViewMode(callback: () => void) {
+  window.addEventListener("storage", callback)
+  window.addEventListener(VIEW_EVENT, callback)
+  return () => {
+    window.removeEventListener("storage", callback)
+    window.removeEventListener(VIEW_EVENT, callback)
+  }
+}
+
+function getViewModeSnapshot(): "grid" | "list" {
+  if (typeof window === "undefined") return "grid"
+  try {
+    const saved = localStorage.getItem(VIEW_STORAGE_KEY)
+    return saved === "list" ? "list" : "grid"
+  } catch {
+    return "grid"
+  }
+}
+
+function getServerViewModeSnapshot(): "grid" | "list" {
+  return "grid"
+}
 
 type ToolSearchDirectoryProps = {
   allTools: Tool[]
@@ -30,7 +57,17 @@ export function ToolSearchDirectory({
 }: ToolSearchDirectoryProps) {
   const [search, setSearch] = useState("")
   const [activeCategory, setActiveCategory] = useState<string>("All")
+  const viewMode = useSyncExternalStore(subscribeViewMode, getViewModeSnapshot, getServerViewModeSnapshot)
   const { favorites, recents, isFavorite, toggleFavorite, clearRecents } = useToolPreferences()
+
+  function handleViewModeChange(mode: "grid" | "list") {
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, mode)
+      window.dispatchEvent(new Event(VIEW_EVENT))
+    } catch {
+      // Ignore
+    }
+  }
 
   const normalizedQuery = search.trim().toLowerCase()
 
@@ -109,14 +146,49 @@ export function ToolSearchDirectory({
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-[var(--ink-700)]">
-            <div>
-              Showing <strong className="text-[var(--ink-900)]">{filteredTools.length}</strong> of{" "}
-              {allTools.length} tools
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[var(--ink-700)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span>
+                Showing <strong className="text-[var(--ink-900)]">{filteredTools.length}</strong> of{" "}
+                {allTools.length} tools
+              </span>
+              <span className="hidden sm:inline text-[var(--ink-900)]/20">&bull;</span>
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                <span>100% Offline Ready</span>
+              </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-600/20 bg-emerald-50/80 px-2.5 py-0.5 text-xs font-medium text-emerald-800">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              <span>100% Offline Ready</span>
+
+            {/* View Mode Toggle (Cards vs Compact List) */}
+            <div className="flex items-center rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("grid")}
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition ${
+                  viewMode === "grid"
+                    ? "bg-white text-[var(--ink-900)] shadow-xs"
+                    : "text-[var(--ink-700)] hover:text-[var(--ink-900)]"
+                }`}
+                aria-label="Grid cards view"
+                title="Grid cards view"
+              >
+                <GridIcon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Cards</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleViewModeChange("list")}
+                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-semibold transition ${
+                  viewMode === "list"
+                    ? "bg-white text-[var(--ink-900)] shadow-xs"
+                    : "text-[var(--ink-700)] hover:text-[var(--ink-900)]"
+                }`}
+                aria-label="Compact list view"
+                title="Compact list view"
+              >
+                <ListIcon className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Compact</span>
+              </button>
             </div>
           </div>
         </div>
@@ -273,16 +345,29 @@ export function ToolSearchDirectory({
                 </span>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                {tools.map((tool) => (
-                  <ToolCard
-                    key={tool.href}
-                    tool={tool}
-                    isFavorite={isFavorite(tool.href)}
-                    onToggleFavorite={() => toggleFavorite(tool.href)}
-                  />
-                ))}
-              </div>
+              {viewMode === "grid" ? (
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {tools.map((tool) => (
+                    <ToolCard
+                      key={tool.href}
+                      tool={tool}
+                      isFavorite={isFavorite(tool.href)}
+                      onToggleFavorite={() => toggleFavorite(tool.href)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-2.5 sm:grid-cols-2">
+                  {tools.map((tool) => (
+                    <ToolRow
+                      key={tool.href}
+                      tool={tool}
+                      isFavorite={isFavorite(tool.href)}
+                      onToggleFavorite={() => toggleFavorite(tool.href)}
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           ))}
         </div>
@@ -308,31 +393,57 @@ export function ToolSearchDirectory({
           </div>
 
           {filteredTools.length === 0 ? (
-            <div className="rounded-[1.75rem] border border-dashed border-[var(--ink-900)]/15 bg-white p-12 text-center">
-              <SearchIcon className="mx-auto h-10 w-10 text-[var(--ink-700)]/30 mb-3" />
+            <div className="rounded-[1.75rem] border border-dashed border-[var(--ink-900)]/15 bg-white p-10 text-center sm:p-12">
+              <SearchIcon className="mx-auto mb-3 h-10 w-10 text-[var(--ink-700)]/30" />
               <p className="text-lg font-semibold text-[var(--ink-900)]">
                 {activeCategory === "Favorites"
                   ? "No favorite tools yet"
                   : "No matching tools found"}
               </p>
-              <p className="mt-2 text-sm text-[var(--ink-700)]">
+              <p className="mx-auto mt-2 max-w-md text-sm text-[var(--ink-700)]">
                 {activeCategory === "Favorites"
                   ? "Click the star icon (★) on any tool card or in the tool header to save it for quick access."
-                  : 'Try searching for another keyword like "pdf", "json", "image", or "calculator".'}
+                  : `We couldn't find any utilities matching "${search}". Try searching by category or task.`}
               </p>
+              {activeCategory !== "Favorites" ? (
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <span className="text-xs text-[var(--ink-700)]/70">Popular searches:</span>
+                  {["pdf", "json", "image", "calculator", "minifier", "converter"].map((keyword) => (
+                    <button
+                      key={keyword}
+                      type="button"
+                      onClick={() => setSearch(keyword)}
+                      className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-0.5 text-xs font-medium text-[var(--ink-800)] transition hover:border-[var(--accent-rust)] hover:bg-white"
+                    >
+                      {keyword}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={resetFilters}
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--ink-900)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
+                className="mt-6 inline-flex items-center gap-2 rounded-full bg-[var(--ink-900)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--ink-800)]"
               >
                 <GridIcon className="h-4 w-4" />
                 <span>Show all {allTools.length} tools</span>
               </button>
             </div>
-          ) : (
+          ) : viewMode === "grid" ? (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {filteredTools.map((tool) => (
                 <ToolCard
+                  key={tool.href}
+                  tool={tool}
+                  isFavorite={isFavorite(tool.href)}
+                  onToggleFavorite={() => toggleFavorite(tool.href)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-2.5 sm:grid-cols-2">
+              {filteredTools.map((tool) => (
+                <ToolRow
                   key={tool.href}
                   tool={tool}
                   isFavorite={isFavorite(tool.href)}
@@ -395,6 +506,61 @@ function ToolCard({
       <div className="mt-4 flex items-center justify-between border-t border-[var(--ink-900)]/6 pt-3 text-xs font-semibold text-[var(--ink-700)] transition-colors group-hover:text-[var(--accent-rust)]">
         <span className="opacity-0 transition-opacity duration-200 group-hover:opacity-100">Launch tool</span>
         <ArrowRightIcon className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+      </div>
+    </div>
+  )
+}
+
+function ToolRow({
+  tool,
+  isFavorite,
+  onToggleFavorite,
+}: {
+  tool: Tool
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
+}) {
+  return (
+    <div className="group flex items-center justify-between gap-3 rounded-2xl border border-[var(--ink-900)]/8 bg-white p-3.5 shadow-xs transition hover:border-[var(--accent-rust)]/30 hover:bg-[var(--page-cream)]/30 sm:p-4">
+      <Link href={tool.href} className="flex min-w-0 flex-1 items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--page-cream)] text-[var(--accent-rust)] transition-colors group-hover:bg-[var(--accent-rust)]/10">
+          <CategoryIcon category={tool.category} className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="truncate text-sm font-semibold text-[var(--ink-900)] transition-colors group-hover:text-[var(--accent-rust)]">
+              {tool.title}
+            </h4>
+            <span className="hidden rounded-full bg-[var(--ink-900)]/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-700)] sm:inline-block">
+              {tool.category}
+            </span>
+          </div>
+          <p className="line-clamp-1 text-xs text-[var(--ink-700)]">{tool.description}</p>
+        </div>
+      </Link>
+      <div className="flex shrink-0 items-center gap-1.5">
+        {onToggleFavorite ? (
+          <button
+            type="button"
+            onClick={onToggleFavorite}
+            aria-label={isFavorite ? `Remove ${tool.title} from favorites` : `Add ${tool.title} to favorites`}
+            title={isFavorite ? "Remove favorite" : "Pin favorite"}
+            className={`rounded-full p-2 transition ${
+              isFavorite
+                ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20"
+                : "text-[var(--ink-700)]/40 hover:bg-black/5 hover:text-amber-500"
+            }`}
+          >
+            <StarIcon className={`h-4 w-4 ${isFavorite ? "fill-amber-500 text-amber-500" : ""}`} />
+          </button>
+        ) : null}
+        <Link
+          href={tool.href}
+          className="hidden sm:inline-flex items-center gap-1 rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-3 py-1.5 text-xs font-semibold text-[var(--ink-900)] transition group-hover:border-[var(--accent-rust)] group-hover:bg-[var(--accent-rust)] group-hover:text-white"
+        >
+          <span>Open</span>
+          <ArrowRightIcon className="h-3 w-3" />
+        </Link>
       </div>
     </div>
   )

@@ -1,4 +1,7 @@
-import type { ReactNode } from "react"
+"use client"
+
+import { useState, type ReactNode } from "react"
+import Link from "next/link"
 import {
   CalculatorIcon,
   CategoryIcon,
@@ -91,6 +94,15 @@ export function ToolIntro({ eyebrow, title, children }: ToolIntroProps) {
 
   return (
     <>
+      <nav aria-label="Breadcrumbs" className="mb-4 flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--ink-700)]/70">
+        <Link href="/" className="transition hover:text-[var(--accent-rust)] hover:underline">
+          Home
+        </Link>
+        <span className="text-[var(--ink-700)]/40">/</span>
+        <span className="capitalize">{category}</span>
+        <span className="text-[var(--ink-700)]/40">/</span>
+        <span className="font-semibold text-[var(--ink-900)] truncate max-w-[200px]">{title}</span>
+      </nav>
       <div className="flex items-center gap-2">
         <CategoryIcon category={category} className="h-3.5 w-3.5 text-[var(--accent-rust)]" />
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
@@ -274,6 +286,9 @@ export function ActionButton({
   disabled = false,
   icon,
 }: ActionButtonProps) {
+  const [copiedRecently, setCopiedRecently] = useState(false)
+  const isCopy = typeof children === "string" && children.toLowerCase().includes("copy")
+
   const classes = {
     primary: "bg-[var(--ink-900)] text-white hover:bg-[var(--ink-800)] shadow-xs",
     secondary:
@@ -281,20 +296,35 @@ export function ActionButton({
     accent: "bg-[var(--accent-gold)] text-[var(--ink-900)] hover:bg-[var(--accent-sand)] shadow-xs",
   }
 
+  const handleClick = () => {
+    if (disabled) return
+    if (isCopy) {
+      setCopiedRecently(true)
+      setTimeout(() => setCopiedRecently(false), 1800)
+    }
+    onClick?.()
+  }
+
   let renderIcon: ReactNode = icon
-  if (renderIcon === undefined && typeof children === "string") {
+  if (copiedRecently && isCopy) {
+    renderIcon = <CheckIcon className="h-4 w-4 shrink-0 text-emerald-500 animate-in zoom-in-75 duration-150" />
+  } else if (renderIcon === undefined && typeof children === "string") {
     renderIcon = getAutoIcon(children)
   }
 
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={handleClick}
       disabled={disabled}
-      className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-45 ${classes[variant]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 ${
+        copiedRecently && isCopy
+          ? "border border-emerald-600/30 bg-emerald-50 text-emerald-900 shadow-sm"
+          : classes[variant]
+      } ${className}`}
     >
       {renderIcon ? <span className="shrink-0">{renderIcon}</span> : null}
-      <span>{children}</span>
+      <span>{copiedRecently && isCopy ? "Copied!" : children}</span>
     </button>
   )
 }

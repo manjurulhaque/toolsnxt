@@ -178,6 +178,7 @@ export function HtmlCssJsMinifierTool() {
                 setMessage("Input updated.")
               }}
               rows={16}
+              onSubmit={minifyInput}
               placeholder={`Paste ${getModeLabel(mode)} here...`}
             />
           </div>
