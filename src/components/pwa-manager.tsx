@@ -75,6 +75,28 @@ export function PwaManager() {
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
 
+    if (process.env.NODE_ENV !== "production") {
+      // In development, unregister any active service workers on localhost to avoid stale caching,
+      // dev server compile storms, and hydration mismatch errors
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            registration.unregister()
+          }
+        })
+      }
+      if ("caches" in window) {
+        caches.keys().then((keys) => {
+          for (const key of keys) {
+            caches.delete(key)
+          }
+        })
+      }
+      return () => {
+        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+      }
+    }
+
     if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {
       navigator.serviceWorker
         .register("/sw.js", { scope: "/" })

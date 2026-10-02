@@ -3,7 +3,7 @@
  * 100% In-Browser PWA Offline Engine
  */
 
-const CACHE_VERSION = 'v1.0.0';
+const CACHE_VERSION = 'v1.0.1';
 const STATIC_CACHE = `webtools-static-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `webtools-runtime-${CACHE_VERSION}`;
 
@@ -150,7 +150,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Bypass telemetry / analytics when offline or online
+  // 2. Bypass service worker completely on local development hosts (localhost / 127.0.0.1)
+  if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+    return;
+  }
+
+  // 3. Bypass telemetry / analytics when offline or online
   if (isAnalyticsOrTelemetry(url)) {
     event.respondWith(
       fetch(request).catch(() => new Response('', { status: 204, statusText: 'Offline No-Op' }))
@@ -158,7 +163,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Navigation Requests (HTML Documents: user visiting a page)
+  // 4. Navigation Requests (HTML Documents: user visiting a page)
   // Strategy: Network-First with Timeout -> Fallback to Cache -> Fallback to /offline
   if (request.mode === 'navigate') {
     event.respondWith(
