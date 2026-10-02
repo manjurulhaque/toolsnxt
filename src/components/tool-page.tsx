@@ -136,9 +136,12 @@ export function PanelHeader({
 export function HeroIntro({ eyebrow, title, children }: ToolIntroProps) {
   return (
     <>
-      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
-        {eyebrow}
-      </p>
+      <div className="flex items-center gap-2">
+        <SparklesIcon className="h-3.5 w-3.5 shrink-0 text-[var(--accent-rust)]" />
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--accent-rust)]">
+          {eyebrow}
+        </p>
+      </div>
       <h1 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">{title}</h1>
       <p className="mt-4 text-sm leading-7 text-[var(--ink-700)] sm:text-base">{children}</p>
     </>
@@ -181,12 +184,23 @@ export function SummaryTile({
   className?: string
 }) {
   return (
-    <div className={`rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-4 ${className}`}>
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--ink-700)]/72">{label}</p>
-        {icon ? <span className="text-[var(--accent-rust)]">{icon}</span> : null}
+    <div
+      className={`min-w-0 overflow-hidden rounded-[1.2rem] border border-[var(--ink-900)]/8 bg-[var(--page-cream)] p-3.5 sm:p-4 ${className}`}
+    >
+      <div className="flex items-center justify-between gap-1.5 min-w-0">
+        <p
+          className="min-w-0 truncate text-[11px] font-medium uppercase tracking-[0.14em] text-[var(--ink-700)]/75"
+          title={typeof label === "string" ? label : undefined}
+        >
+          {label}
+        </p>
+        {icon ? (
+          <span className="flex shrink-0 items-center justify-center text-[var(--accent-rust)]">
+            {icon}
+          </span>
+        ) : null}
       </div>
-      <p className="mt-2 text-2xl font-semibold tabular-nums">{value}</p>
+      <p className="mt-2 truncate text-xl font-semibold tabular-nums sm:text-2xl">{value}</p>
     </div>
   )
 }

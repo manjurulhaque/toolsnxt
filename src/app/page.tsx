@@ -73,28 +73,29 @@ export default function HomePage() {
       <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
         <ToolPanel className="sm:p-8">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-3xl">
+            <div className="max-w-2xl min-w-0">
               <HeroIntro eyebrow="Tool directory" title="Browser tools for everyday work.">
                 Pick a utility below. All 52 tools process files and text locally in your browser with full offline PWA support—meaning
                 zero server uploads, complete privacy, and instant responsiveness even without an internet connection.
               </HeroIntro>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:min-w-80">
+            <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:w-auto lg:min-w-[420px] lg:shrink-0">
               <SummaryTile
                 label="Tools"
                 value={tools.length}
-                icon={<WrenchIcon className="h-4 w-4" />}
+                icon={<WrenchIcon className="h-4 w-4 shrink-0" />}
               />
               <SummaryTile
                 label="Categories"
                 value={toolCategories.length}
-                icon={<LayersIcon className="h-4 w-4" />}
+                icon={<LayersIcon className="h-4 w-4 shrink-0" />}
               />
               <SummaryTile
-                label="Offline Support"
+                label="Offline"
                 value="100% PWA"
-                icon={<ShieldCheckIcon className="h-4 w-4" />}
+                icon={<ShieldCheckIcon className="h-4 w-4 shrink-0" />}
+                className="col-span-2 sm:col-span-1"
               />
             </div>
           </div>
@@ -166,7 +167,7 @@ export default function HomePage() {
             <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <FilePdfIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <FilePdfIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     PDF & Document Tools
                   </h4>
@@ -179,7 +180,7 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <ImageIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     Image & Media Utilities
                   </h4>
@@ -192,7 +193,7 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <CodeIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <CodeIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     Code Minifiers & Converters
                   </h4>
@@ -205,7 +206,7 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <HeartPulseIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <HeartPulseIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     Calculators & Health Formulas
                   </h4>
@@ -218,7 +219,7 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <ShieldLockIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <ShieldLockIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     Security & Cryptography
                   </h4>
@@ -231,7 +232,7 @@ export default function HomePage() {
 
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <GlobeSearchIcon className="h-4 w-4 text-[var(--accent-rust)]" />
+                  <GlobeSearchIcon className="h-4 w-4 shrink-0 text-[var(--accent-rust)]" />
                   <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--accent-rust)]">
                     SEO & Webmaster Tools
                   </h4>
