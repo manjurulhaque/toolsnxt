@@ -7,6 +7,7 @@ import { useToolPreferences } from "@/lib/user-preferences"
 import {
   ArrowRightIcon,
   CategoryIcon,
+  ClockHistoryIcon,
   CornerDownLeftIcon,
   GridIcon,
   RotateCcwIcon,
@@ -27,7 +28,13 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
-  const { favorites, isFavorite, toggleFavorite } = useToolPreferences()
+  const { favorites, recents, isFavorite, toggleFavorite } = useToolPreferences()
+
+  const recentTools = useMemo(() => {
+    return recents
+      .map((href) => tools.find((t) => t.href === href))
+      .filter((t): t is (typeof tools)[number] => Boolean(t))
+  }, [recents])
 
   // Focus search input on mount
   useEffect(() => {
@@ -235,6 +242,25 @@ function ToolSearchModal({ onClose }: { onClose: () => void }) {
             )
           })}
         </div>
+
+        {/* Recently Visited Quick Strip */}
+        {recentTools.length > 0 && !query ? (
+          <div className="flex items-center gap-1.5 overflow-x-auto border-b border-[var(--ink-900)]/8 bg-[var(--page-cream)]/50 px-4 py-2 text-xs">
+            <span className="flex shrink-0 items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--ink-700)]/70">
+              <ClockHistoryIcon className="h-3 w-3 text-[var(--accent-rust)]" /> Recent:
+            </span>
+            {recentTools.slice(0, 5).map((tool) => (
+              <button
+                key={tool.href}
+                type="button"
+                onClick={() => navigateToTool(tool.href)}
+                className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[var(--ink-900)]/10 bg-white px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-800)] shadow-2xs transition hover:border-[var(--accent-rust)] hover:text-[var(--accent-rust)]"
+              >
+                <span>{tool.title}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
 
         {/* Results List */}
         <div ref={listRef} className="flex-1 overflow-y-auto p-2 sm:p-3">

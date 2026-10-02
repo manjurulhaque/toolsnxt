@@ -59,6 +59,54 @@ export function PasswordTool() {
 
   const strength = useMemo(() => estimateStrength(generatedValue), [generatedValue])
 
+  function applyPreset(presetName: "standard" | "high-security" | "passphrase" | "pin") {
+    if (presetName === "standard") {
+      setMode("password")
+      setLength("16")
+      setUseLowercase(true)
+      setUseUppercase(true)
+      setUseNumbers(true)
+      setUseSymbols(true)
+      setAvoidAmbiguous(true)
+      const val = generatePassword(16, true, true, true, true, true)
+      setGeneratedValue(val)
+      setHistory((c) => [val, ...c.filter((i) => i !== val)].slice(0, 6))
+      setMessage("Standard (16 chars) preset applied.")
+    } else if (presetName === "high-security") {
+      setMode("password")
+      setLength("24")
+      setUseLowercase(true)
+      setUseUppercase(true)
+      setUseNumbers(true)
+      setUseSymbols(true)
+      setAvoidAmbiguous(false)
+      const val = generatePassword(24, true, true, true, true, false)
+      setGeneratedValue(val)
+      setHistory((c) => [val, ...c.filter((i) => i !== val)].slice(0, 6))
+      setMessage("High Security (24 chars) preset applied.")
+    } else if (presetName === "passphrase") {
+      setMode("passphrase")
+      setWordCount("4")
+      setSeparator("-")
+      const val = generatePassphrase(4, "-")
+      setGeneratedValue(val)
+      setHistory((c) => [val, ...c.filter((i) => i !== val)].slice(0, 6))
+      setMessage("4-Word Passphrase preset applied.")
+    } else if (presetName === "pin") {
+      setMode("password")
+      setLength("6")
+      setUseLowercase(false)
+      setUseUppercase(false)
+      setUseNumbers(true)
+      setUseSymbols(false)
+      setAvoidAmbiguous(false)
+      const val = generatePassword(6, false, false, true, false, false)
+      setGeneratedValue(val)
+      setHistory((c) => [val, ...c.filter((i) => i !== val)].slice(0, 6))
+      setMessage("6-Digit PIN preset applied.")
+    }
+  }
+
   function generateNext() {
     try {
       const nextValue =
@@ -127,6 +175,40 @@ export function PasswordTool() {
               {nextMode === "password" ? "Password" : "Passphrase"}
             </button>
           ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-700)]/60">
+            Presets:
+          </span>
+          <button
+            type="button"
+            onClick={() => applyPreset("standard")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            16 Chars
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("high-security")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            24 Chars (Max)
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("passphrase")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            4-Word Phrase
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("pin")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            6-Digit PIN
+          </button>
         </div>
 
         {mode === "password" ? (

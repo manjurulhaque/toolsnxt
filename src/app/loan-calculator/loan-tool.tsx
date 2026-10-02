@@ -27,6 +27,13 @@ export function LoanTool() {
     (row) => row.month <= 12 || row.month === result.schedule.length,
   )
 
+  function applyPreset(amount: string, rate: string, term: string, extra = "0") {
+    setLoanAmount(amount)
+    setAnnualRate(rate)
+    setLoanTermYears(term)
+    setExtraPayment(extra)
+  }
+
   return (
     <>
       <ToolPanel>
@@ -35,6 +42,40 @@ export function LoanTool() {
           monthly principal payments. Use it to compare personal loans, auto loans, fixed-rate
           repayment options, or other installment loans before you talk with a lender.
         </ToolIntro>
+
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-700)]/60">
+            Presets:
+          </span>
+          <button
+            type="button"
+            onClick={() => applyPreset("350000", "6.5", "30")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            30-Yr Home ($350k)
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("300000", "5.8", "15")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            15-Yr Home ($300k)
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("30000", "6.2", "5")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            5-Yr Auto ($30k)
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("10000", "9.5", "3")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            3-Yr Personal ($10k)
+          </button>
+        </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <NumberField

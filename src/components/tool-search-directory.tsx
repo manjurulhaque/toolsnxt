@@ -4,6 +4,7 @@ import { useMemo, useState, useSyncExternalStore } from "react"
 import Link from "next/link"
 import type { Tool } from "@/lib/tools"
 import { PanelHeader } from "@/components/tool-page"
+import { showToast } from "@/components/toast"
 import { useToolPreferences } from "@/lib/user-preferences"
 import {
   ArrowRightIcon,
@@ -67,6 +68,19 @@ export function ToolSearchDirectory({
     } catch {
       // Ignore
     }
+  }
+
+  function handleToggleFavorite(tool: Tool) {
+    const added = toggleFavorite(tool.href)
+    showToast(
+      added ? `Pinned "${tool.title}" to favorites` : `Removed "${tool.title}" from favorites`,
+      "info",
+    )
+  }
+
+  function handleClearRecents() {
+    clearRecents()
+    showToast("Recently visited history cleared", "info")
   }
 
   const normalizedQuery = search.trim().toLowerCase()
@@ -264,7 +278,7 @@ export function ToolSearchDirectory({
                     key={tool.href}
                     tool={tool}
                     isFavorite={true}
-                    onToggleFavorite={() => toggleFavorite(tool.href)}
+                    onToggleFavorite={() => handleToggleFavorite(tool)}
                   />
                 ))}
               </div>
@@ -280,7 +294,7 @@ export function ToolSearchDirectory({
                 </div>
                 <button
                   type="button"
-                  onClick={clearRecents}
+                  onClick={handleClearRecents}
                   className="inline-flex items-center gap-1.5 text-xs text-[var(--ink-700)] hover:text-[var(--accent-rust)] transition-colors"
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
@@ -352,7 +366,7 @@ export function ToolSearchDirectory({
                       key={tool.href}
                       tool={tool}
                       isFavorite={isFavorite(tool.href)}
-                      onToggleFavorite={() => toggleFavorite(tool.href)}
+                      onToggleFavorite={() => handleToggleFavorite(tool)}
                     />
                   ))}
                 </div>
@@ -363,7 +377,7 @@ export function ToolSearchDirectory({
                       key={tool.href}
                       tool={tool}
                       isFavorite={isFavorite(tool.href)}
-                      onToggleFavorite={() => toggleFavorite(tool.href)}
+                      onToggleFavorite={() => handleToggleFavorite(tool)}
                     />
                   ))}
                 </div>
@@ -436,7 +450,7 @@ export function ToolSearchDirectory({
                   key={tool.href}
                   tool={tool}
                   isFavorite={isFavorite(tool.href)}
-                  onToggleFavorite={() => toggleFavorite(tool.href)}
+                  onToggleFavorite={() => handleToggleFavorite(tool)}
                 />
               ))}
             </div>
@@ -447,7 +461,7 @@ export function ToolSearchDirectory({
                   key={tool.href}
                   tool={tool}
                   isFavorite={isFavorite(tool.href)}
-                  onToggleFavorite={() => toggleFavorite(tool.href)}
+                  onToggleFavorite={() => handleToggleFavorite(tool)}
                 />
               ))}
             </div>

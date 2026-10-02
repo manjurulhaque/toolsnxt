@@ -39,6 +39,13 @@ export function LoremIpsumGeneratorTool() {
   )
   const stats = useMemo(() => getTextStats(output), [output])
 
+  function applyPreset(nextMode: OutputMode, nextCount: string, nextWordSet: WordSet = "classic") {
+    setMode(nextMode)
+    setCount(nextCount)
+    setWordSet(nextWordSet)
+    setMessage(`Preset: ${nextCount} ${nextMode} (${nextWordSet}) loaded.`)
+  }
+
   async function copyOutput() {
     if (!output.trim()) {
       setMessage("Generate text before copying.")
@@ -81,6 +88,47 @@ export function LoremIpsumGeneratorTool() {
             }}
             columns="grid-cols-3"
           />
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--ink-700)]/60">
+            Presets:
+          </span>
+          <button
+            type="button"
+            onClick={() => applyPreset("paragraphs", "1")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            1 Paragraph
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("paragraphs", "3")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            3 Paragraphs
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("paragraphs", "5")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            5 Paragraphs
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("words", "50")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            50 Words
+          </button>
+          <button
+            type="button"
+            onClick={() => applyPreset("paragraphs", "3", "product")}
+            className="rounded-full border border-[var(--ink-900)]/10 bg-[var(--page-cream)] px-2.5 py-1 text-xs font-semibold text-[var(--ink-900)] shadow-2xs hover:border-[var(--accent-rust)] hover:bg-white transition"
+          >
+            Product UI
+          </button>
         </div>
 
         <div className="mt-6">

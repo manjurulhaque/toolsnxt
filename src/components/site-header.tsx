@@ -7,6 +7,7 @@ import { SiteBrand } from "@/components/site-brand"
 import { ToolSearchDialog } from "@/components/tool-search-dialog"
 import { GridIcon, KeyboardIcon, SearchIcon, StarIcon } from "@/components/icons"
 import { openShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
+import { showToast } from "@/components/toast"
 import { useToolPreferences } from "@/lib/user-preferences"
 import { tools } from "@/lib/tools"
 
@@ -79,7 +80,10 @@ export function SiteHeader() {
             {isToolPage ? (
               <button
                 type="button"
-                onClick={() => toggleFavorite(pathname)}
+                onClick={() => {
+                  const added = toggleFavorite(pathname)
+                  showToast(added ? "Pinned to favorites" : "Removed from favorites", "info")
+                }}
                 className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition sm:px-3.5 sm:py-2 ${
                   isFavorite(pathname)
                     ? "border-[var(--accent-gold)] bg-[var(--accent-gold)]/20 text-[var(--ink-900)] shadow-xs"
