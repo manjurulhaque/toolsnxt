@@ -5,6 +5,8 @@ import { tools } from "@/lib/tools"
 export const dynamic = "force-static"
 export const revalidate = 86400
 
+const legalLastModified = new Date("2026-07-02T00:00:00.000Z")
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date()
 
@@ -23,25 +25,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${SITE_URL}/privacy`,
-      lastModified: currentDate,
+      lastModified: legalLastModified,
       changeFrequency: "monthly",
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/terms`,
-      lastModified: currentDate,
+      lastModified: legalLastModified,
       changeFrequency: "monthly",
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/disclaimer`,
-      lastModified: currentDate,
+      lastModified: legalLastModified,
       changeFrequency: "monthly",
       priority: 0.3,
     },
     {
       url: `${SITE_URL}/cookies`,
-      lastModified: currentDate,
+      lastModified: legalLastModified,
       changeFrequency: "monthly",
       priority: 0.3,
     },
