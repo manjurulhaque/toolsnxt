@@ -5,6 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SiteBrand } from "@/components/site-brand"
 import { ToolSearchDialog } from "@/components/tool-search-dialog"
+import { TextSizeControl } from "@/components/text-size-control"
 import { GridIcon, KeyboardIcon, SearchIcon, StarIcon } from "@/components/icons"
 import { openShortcutsDialog } from "@/components/keyboard-shortcuts-dialog"
 import { showToast } from "@/components/toast"
@@ -120,6 +121,8 @@ export function SiteHeader() {
                 ⌘K
               </kbd>
             </button>
+
+            <TextSizeControl />
 
             <button
               type="button"
