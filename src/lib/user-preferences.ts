@@ -2,8 +2,11 @@
 
 import { useSyncExternalStore } from "react"
 
+export type TextSize = "normal" | "large" | "xlarge"
+
 const FAVORITES_KEY = "webtools_favorites"
 const RECENTS_KEY = "webtools_recents"
+const TEXT_SIZE_KEY = "webtools_text_size"
 const EVENT_NAME = "webtools_pref_change"
 
 function isClient() {
@@ -48,6 +51,19 @@ export function getStoredRecents(): string[] {
     return Array.isArray(parsed) ? parsed : []
   } catch {
     return []
+  }
+}
+
+export function getStoredTextSize(): TextSize {
+  const raw = safeGetItem(TEXT_SIZE_KEY)
+  if (raw === "large" || raw === "xlarge") return raw
+  return "normal"
+}
+
+export function setTextSize(size: TextSize): void {
+  safeSetItem(TEXT_SIZE_KEY, size)
+  if (isClient()) {
+    document.documentElement.setAttribute("data-text-size", size)
   }
 }
 
@@ -98,23 +114,34 @@ function emitChange() {
 let cachedSnapshot = {
   favorites: [] as string[],
   recents: [] as string[],
+  textSize: "normal" as TextSize,
   rawFavorites: "",
   rawRecents: "",
+  rawTextSize: "",
 }
 
 function getSnapshot() {
   const rawFav = safeGetItem(FAVORITES_KEY) || "[]"
   const rawRec = safeGetItem(RECENTS_KEY) || "[]"
+  const rawTextSize = safeGetItem(TEXT_SIZE_KEY) || "normal"
 
-  if (rawFav !== cachedSnapshot.rawFavorites || rawRec !== cachedSnapshot.rawRecents) {
+  if (
+    rawFav !== cachedSnapshot.rawFavorites ||
+    rawRec !== cachedSnapshot.rawRecents ||
+    rawTextSize !== cachedSnapshot.rawTextSize
+  ) {
     try {
       const fav = JSON.parse(rawFav)
       const rec = JSON.parse(rawRec)
+      const textSize: TextSize =
+        rawTextSize === "large" || rawTextSize === "xlarge" ? rawTextSize : "normal"
       cachedSnapshot = {
         favorites: Array.isArray(fav) ? fav : [],
         recents: Array.isArray(rec) ? rec : [],
+        textSize,
         rawFavorites: rawFav,
         rawRecents: rawRec,
+        rawTextSize,
       }
     } catch {
       // Keep existing snapshot on parse error
@@ -127,8 +154,10 @@ function getSnapshot() {
 const SERVER_SNAPSHOT = {
   favorites: [] as string[],
   recents: [] as string[],
+  textSize: "normal" as TextSize,
   rawFavorites: "",
   rawRecents: "",
+  rawTextSize: "",
 }
 
 function getServerSnapshot() {
@@ -141,9 +170,12 @@ export function useToolPreferences() {
   return {
     favorites: snapshot.favorites,
     recents: snapshot.recents,
+    textSize: snapshot.textSize,
     isFavorite: (href: string) => snapshot.favorites.includes(href),
     toggleFavorite,
     recordRecent: recordRecentTool,
     clearRecents: clearRecentTools,
+    setTextSize,
   }
 }
+

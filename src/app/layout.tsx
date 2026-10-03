@@ -25,6 +25,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -62,7 +63,14 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem("webtools_text_size");if(s)document.documentElement.setAttribute("data-text-size",s);if(window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone)document.documentElement.setAttribute("data-standalone","true");}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <div className="flex min-h-screen flex-col">
           <SiteHeader />

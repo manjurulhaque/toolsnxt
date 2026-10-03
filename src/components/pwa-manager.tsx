@@ -63,6 +63,17 @@ export function PwaManager() {
   const [isInstallable, setIsInstallable] = useState(false)
   const [dismissedInstall, setDismissedInstall] = useState(false)
 
+  // Sync standalone attribute on root element
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (isStandalone) {
+        document.documentElement.setAttribute("data-standalone", "true")
+      } else {
+        document.documentElement.removeAttribute("data-standalone")
+      }
+    }
+  }, [isStandalone])
+
   // Service Worker Registration and Install Prompt Listener
   useEffect(() => {
     if (typeof window === "undefined") return
