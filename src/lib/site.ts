@@ -13,3 +13,8 @@ export const SITE_DESCRIPTION =
   "A compact collection of practical calculators, converters, generators, and browser utilities."
 export const LEGAL_EFFECTIVE_DATE = "July 2, 2026"
 
+export const GA_MEASUREMENT_ID =
+  process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+  process.env.NEXT_PUBLIC_GA_ID ||
+  "G-BT5Z6NFW4C"
+

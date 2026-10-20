@@ -253,11 +253,11 @@ export default function PrivacyPage() {
           </p>
           <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[var(--ink-700)]">
             <li>
-              <strong>Zero Persistent Cookies:</strong> No tracking cookies, advertising IDs, or session cookies
-              are created or stored on your device.
+              <strong>Zero Persistent Cookies for Telemetry:</strong> Core telemetry requires no tracking cookies, advertising IDs, or session cookies
+              stored on your device.
             </li>
             <li>
-              <strong>IP Anonymization:</strong> IP addresses are truncated and hashed at the edge layer to determine
+              <strong>IP Anonymization:</strong> IP addresses are truncated and anonymized at the edge layer to determine
               only approximate geographic region (country/city level) and are never stored in raw form.
             </li>
             <li>
@@ -267,6 +267,11 @@ export default function PrivacyPage() {
             <li>
               <strong>Aggregate Metrics Only:</strong> Telemetry is strictly limited to aggregate counters: page
               URLs visited, referring domain, browser engine type, device form-factor, and HTTP response codes.
+            </li>
+            <li>
+              <strong>Google Analytics 4 (GA4):</strong> Where enabled, Google Analytics 4 is utilized to measure
+              aggregate usage patterns and popular tool features. GA4 automatically anonymizes IP addresses and does
+              not inspect, record, or transmit the contents of files or calculation inputs processed within our tools.
             </li>
           </ul>
         </section>
