@@ -6,8 +6,9 @@ import { SiteHeader } from "@/components/site-header";
 import { PwaManager } from "@/components/pwa-manager";
 import { ToastContainer } from "@/components/toast";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { GA_MEASUREMENT_ID, SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -81,6 +82,7 @@ export default function RootLayout({
         <ToastContainer />
         <KeyboardShortcutsDialog />
         <Analytics />
+        {GA_MEASUREMENT_ID ? <GoogleAnalytics gaId={GA_MEASUREMENT_ID} /> : null}
       </body>
     </html>
   );

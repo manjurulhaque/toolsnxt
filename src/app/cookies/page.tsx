@@ -428,6 +428,10 @@ export default function CookiePolicyPage() {
               <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
               <span>Visitor counts are aggregated using temporary cryptographic hashes that cycle daily to prevent cross-day profiling.</span>
             </div>
+            <div className="flex items-start gap-2.5 text-xs leading-6 text-[var(--ink-700)]">
+              <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-emerald-600" />
+              <span>If Google Analytics 4 (GA4) is enabled, standard measurement cookies (_ga) are utilized to measure overall site traffic trends with IP anonymization enabled.</span>
+            </div>
           </div>
         </section>
 
